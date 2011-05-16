@@ -1,0 +1,87 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: white;
+  font: helvetica, arial, freesans, clean, sans-serif;
+  font-size: 1em;
+  line-height: 2em;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  font-size: 1em;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+p {
+  margin: 1em;
+}
+
+#container {
+  width: 1000px;
+  margin: 0 auto;
+}
+
+#container .section {
+  margin-bottom: 20px;
+}
+
+#markdown {
+  width: 800px;
+  height: 200px;
+  font-size: 1em;
+}
+
+#output {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  min-height: 100px;
+  padding: 10px;
+}
+
+#output p {
+  line-height: 1.3em;
+}
+
+#output h1,
+#output h2,
+#output h3,
+#output h4,
+#output h5,
+#output h6 {
+  font-weight: bold;
+}
+
+#output h1 {
+  font-size: 1.7em;
+}
+
+#output h2 {
+  font-size: 1.5em;
+}
+
+#output h3 {
+  font-size: 1em;
+}
+
+#output ol,
+#output ul {
+  margin: 0;
+}
+
+#output blockquote,
+#output pre {
+  margin: 0;
+  padding: 5px;
+  color: #444;
+  background-color: #eee;
+  border: 1px solid #ddd;
+  line-height: 1.5em;
+}
+
+#output code {
+  margin: 0;
+  padding: 0;
+  line-height: 1em;
+}
