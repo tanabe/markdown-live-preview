@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #D1D1BC;
-  font: helvetica, arial, freesans, clean, sans-serif;
+  font-family: helvetica, arial, freesans, clean, sans-serif;
   font-size: 1em;
   line-height: 2em;
 }
