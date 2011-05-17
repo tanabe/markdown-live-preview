@@ -18,16 +18,24 @@ p {
   margin: 1em;
 }
 
-h1 {
-  color: #fff;
-  padding: 5px;
-  background-color: #302C29;
+a:link,
+a:visited,
+a:hover
+a:active {
+  color: #6C8C84;
 }
 
-h2 {
-  color: #412726;
+h1#header {
+  height: 50px;
+  color: #fff;
+  padding: 5px;
+  padding-left: 20px;
+  line-height: 50px;
+  background-color: #302C29;
+  font-size: 1.5em;
   font-weight: bold;
 }
+
 
 #container {
   width: 960px;
@@ -35,10 +43,17 @@ h2 {
   margin: 0 auto;
   background-color: #fff;
   overflow: hidden;
+  min-height: 500px;
 }
+
 
 #container .section {
   margin-bottom: 20px;
+}
+
+.section h2 {
+  color: #466964;
+  font-weight: bold;
 }
 
 #leftColumn {
@@ -57,11 +72,12 @@ textarea#markdown {
   width: 100%;
   height: 200px;
   font-size: 1em;
+  border: 2px solid #D1D1BC;
 }
 
 #output {
   background-color: #f8f8f8;
-  border: 1px solid #ccc;
+  border: 2px solid #A7C4BB;
   min-height: 100px;
   padding: 10px;
 }
@@ -77,6 +93,7 @@ textarea#markdown {
 #output h5,
 #output h6 {
   font-weight: bold;
+  color: #000;
 }
 
 #output h1 {
@@ -110,4 +127,18 @@ textarea#markdown {
   margin: 0;
   padding: 0;
   line-height: 1em;
+}
+
+#footer {
+  clear: both;
+  width: 100%;
+  height: 50px;
+  background-color: #302C29;
+  color: #fff;
+  line-height: 50px;
+  text-align: center;
+}
+
+#footer a {
+  color: #fff;
 }
