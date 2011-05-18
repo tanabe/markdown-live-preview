@@ -176,6 +176,13 @@ table#reference td {
 #reference ol, 
 #reference blockquote {
   margin: 0;
+  padding: 0;
+  padding-left: 0;
+ list-style-position: inside;
+}
+
+#reference ul li,
+#reference ol li {
   padding-left: 0;
 }
 
