@@ -26,6 +26,7 @@ a:active {
 }
 
 h1#header {
+  position: relative;
   height: 50px;
   color: #fff;
   padding: 5px;
@@ -34,6 +35,9 @@ h1#header {
   background-color: #302C29;
   font-size: 1.5em;
   font-weight: bold;
+  -moz-box-shadow: 0 1px 4px #000;
+  -webkit-box-shadow: 0 1px 4px #000;
+  box-shadow: 0 1px 4px #000;
 }
 
 
@@ -43,7 +47,8 @@ h1#header {
   margin: 0 auto;
   background-color: #fff;
   overflow: hidden;
-  min-height: 500px;
+  min-height: 100%;
+  height: 100% !important;
 }
 
 
@@ -54,6 +59,7 @@ h1#header {
 .section h2 {
   color: #466964;
   font-weight: bold;
+  font-size: 1.5em;
 }
 
 #leftColumn {
@@ -137,6 +143,10 @@ textarea#markdown {
   color: #fff;
   line-height: 50px;
   text-align: center;
+
+  -moz-box-shadow: 0 -1px 4px #000;
+  -webkit-box-shadow: 0 -1px 4px #000;
+  box-shadow: 0 -1px 4px #000;
 }
 
 #footer a {
