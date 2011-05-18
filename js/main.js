@@ -1,5 +1,5 @@
 var example = [
-  "# hello, This is Markdown Live Previewer",
+  "# hello, This is Markdown Live Preview",
   "",
   "----",
   "## what is Markdown?",

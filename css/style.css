@@ -27,6 +27,10 @@ a:active {
   color: #6C8C84;
 }
 
+img {
+  border: none;
+}
+
 h1#header {
   position: relative;
   height: 50px;
@@ -168,8 +172,11 @@ table#reference td {
   padding: 0;
 }
 
-#reference ul, ol, blockquote {
+#reference ul, 
+#reference ol, 
+#reference blockquote {
   margin: 0;
+  padding-left: 0;
 }
 
 #reference h1,
