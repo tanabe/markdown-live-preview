@@ -16,11 +16,20 @@ var example = [
   "## thanks",
   "* [markdown-js](https://github.com/evilstreak/markdown-js)"
 ].join("\n");
+
 $(function() {
   $("#markdown").val(example);
   $("#output").html(markdown.toHTML(example));
   $("#output").html(markdown.toHTML(example));
   $("#markdown").bind("keyup", function() {
     $("#output").html(markdown.toHTML($("#markdown").val()));
+  });
+
+  //reference
+  $("table#reference tr td:odd").each(function(index, element) {
+    var self = $(element);
+    if (self.html() === "") {
+      self.html(markdown.toHTML(self.siblings().html()));
+    }
   });
 });
