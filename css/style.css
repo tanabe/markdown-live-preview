@@ -86,6 +86,7 @@ textarea#markdown {
   height: 300px;
   font-size: 1em;
   border: 2px solid #D1D1BC;
+  resize: vertical;
 }
 
 #output {
