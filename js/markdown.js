@@ -1,6 +1,7 @@
 // Released under MIT license
 // Copyright (c) 2009-2010 Dominic Baggott
 // Copyright (c) 2009-2010 Ash Berlin
+// Copyright (c) 2011 Christoph Dorn <christoph@christophdorn.com> (http://www.christophdorn.com)
 
 (function( expose ) {
 
@@ -75,8 +76,8 @@ expose.parse = function( source, dialect ) {
  *  Take markdown (either as a string or as a JsonML tree) and run it through
  *  [[toHTMLTree]] then turn it into a well-formated HTML fragment.
  **/
-expose.toHTML = function toHTML( source , dialect ) {
-  var input = expose.toHTMLTree( source , dialect );
+expose.toHTML = function toHTML( source , dialect , options ) {
+  var input = expose.toHTMLTree( source , dialect , options );
 
   return expose.renderJsonML( input );
 }
@@ -92,7 +93,7 @@ expose.toHTML = function toHTML( source , dialect ) {
  *  to this function, it is first parsed into a markdown tree by calling
  *  [[parse]].
  **/
-expose.toHTMLTree = function toHTMLTree( input, dialect ) {
+expose.toHTMLTree = function toHTMLTree( input, dialect , options ) {
   // convert string input to an MD tree
   if ( typeof input ==="string" ) input = this.parse( input, dialect );
 
@@ -106,7 +107,7 @@ expose.toHTMLTree = function toHTMLTree( input, dialect ) {
     refs = attrs.references;
   }
 
-  var html = convert_tree_to_html( input, refs );
+  var html = convert_tree_to_html( input, refs , options );
   merge_text_nodes( html );
   return html;
 }
@@ -149,13 +150,13 @@ Markdown.prototype.split_blocks = function splitBlocks( input, startLine ) {
 
   var line_no = 1;
 
-  if ( ( m = (/^(\s*\n)/)(input) ) != null ) {
+  if ( ( m = /^(\s*\n)/.exec(input) ) != null ) {
     // skip (but count) leading blank lines
     line_no += count_lines( m[0] );
     re.lastIndex = m[0].length;
   }
 
-  while ( ( m = re(input) ) != null ) {
+  while ( ( m = re.exec(input) ) != null ) {
     blocks.push( mk_block( m[1], m[2], line_no ) );
     line_no += count_lines( m[0] );
   }
@@ -197,7 +198,7 @@ Markdown.prototype.processBlock = function processBlock( block, next ) {
     var res = cbs[ ord[i] ].call( this, block, next );
     if ( res ) {
       //D:this.debug("  matched");
-      if ( !res instanceof Array || ( res.length > 0 && !( res[0] instanceof Array ) ) )
+      if ( !isArray(res) || ( res.length > 0 && !( isArray(res[0]) ) ) )
         this.debug(ord[i], "didn't return a proper array");
       //D:this.debug( "" );
       return res;
@@ -251,7 +252,10 @@ Markdown.prototype.toTree = function toTree( source, custom_root ) {
 Markdown.prototype.debug = function () {
   var args = Array.prototype.slice.call( arguments);
   args.unshift(this.debug_indent);
-  print.apply( print, args );
+  if (typeof print !== "undefined")
+      print.apply( print, args );
+  if (typeof console !== "undefined" && typeof console.log !== "undefined")
+      console.log.apply( null, args );
 }
 
 Markdown.prototype.loop_re_over_block = function( re, block, cb ) {
@@ -259,7 +263,7 @@ Markdown.prototype.loop_re_over_block = function( re, block, cb ) {
   var m,
       b = block.valueOf();
 
-  while ( b.length && (m = re(b) ) != null) {
+  while ( b.length && (m = re.exec(b) ) != null) {
     b = b.substr( m[0].length );
     cb.call(this, m);
   }
@@ -288,7 +292,8 @@ Markdown.dialects.Gruber = {
 
       if ( !m ) return undefined;
 
-      var header = [ "header", { level: m[ 1 ].length }, m[ 2 ] ];
+      var header = [ "header", { level: m[ 1 ].length } ];
+      Array.prototype.push.apply(header, this.processInline(m[ 2 ]));
 
       if ( m[0].length < block.length )
         next.unshift( mk_block( block.substr( m[0].length ), block.trailing, block.lineNumber + 2 ) );
@@ -456,7 +461,7 @@ Markdown.dialects.Gruber = {
             ret = [];
 
         while ( blocks.length > 0 ) {
-          if ( re( blocks[0] ) ) {
+          if ( re.exec( blocks[0] ) ) {
             var b = blocks.shift(),
                 // Now remove that indent
                 x = b.replace( replace, "");
@@ -493,7 +498,7 @@ Markdown.dialects.Gruber = {
         if ( !m ) return undefined;
 
         function make_list( m ) {
-          var list = bullet_list( m[2] )
+          var list = bullet_list.exec( m[2] )
                    ? ["bulletlist"]
                    : ["numberlist"];
 
@@ -828,7 +833,9 @@ Markdown.dialects.Gruber.inline = {
         if ( m[4] !== undefined)
           attrs.title = m[4];
 
-        return [ m[0].length, [ "link", attrs, m[1] ] ];
+        var link = [ "link", attrs ];
+        Array.prototype.push.apply( link, this.processInline( m[1] ) );
+        return [ m[0].length, link ];
       }
 
       // [Alt text][id]
@@ -840,19 +847,16 @@ Markdown.dialects.Gruber.inline = {
         // [id] case, text == id
         if ( m[2] === undefined || m[2] === "" ) m[2] = m[1];
 
+        attrs = { ref: m[ 2 ].toLowerCase(),  original: m[ 0 ] };
+        link = [ "link_ref", attrs ];
+        Array.prototype.push.apply( link, this.processInline( m[1] ) );
+
         // We can't check if the reference is known here as it likely wont be
         // found till after. Check it in md tree->hmtl tree conversion.
         // Store the original so that conversion can revert if the ref isn't found.
         return [
           m[ 0 ].length,
-          [
-            "link_ref",
-            {
-              ref: m[ 2 ].toLowerCase(),
-              original: m[ 0 ]
-            },
-            m[ 1 ]
-          ]
+          link
         ];
       }
 
@@ -1161,11 +1165,15 @@ Markdown.dialects.Maruku.inline[ "{:" ] = function inline_meta( text, matches, o
 Markdown.buildBlockOrder ( Markdown.dialects.Maruku.block );
 Markdown.buildInlinePatterns( Markdown.dialects.Maruku.inline );
 
+var isArray = expose.isArray = function(obj) {
+    return (obj instanceof Array || typeof obj === "array" || Array.isArray(obj));
+}
+
 function extract_attr( jsonml ) {
-  return jsonml instanceof Array
+  return isArray(jsonml)
       && jsonml.length > 1
       && typeof jsonml[ 1 ] === "object"
-      && !( jsonml[ 1 ] instanceof Array )
+      && !( isArray(jsonml[ 1 ]) )
       ? jsonml[ 1 ]
       : undefined;
 }
@@ -1307,11 +1315,17 @@ function render_tree( jsonml ) {
   return "<"+ tag + tag_attrs + ">" + content.join( "" ) + "</" + tag + ">";
 }
 
-function convert_tree_to_html( tree, references ) {
+function convert_tree_to_html( tree, references, options ) {
+  options = options || {};
+
   // shallow clone
   var jsonml = tree.slice( 0 );
 
-  // Clone attributes if the exist
+  if (typeof options.preprocessTreeNode === "function") {
+      jsonml = options.preprocessTreeNode(jsonml, references);
+  }
+
+  // Clone attributes if they exist
   var attrs = extract_attr( jsonml );
   if ( attrs ) {
     jsonml[ 1 ] = {};
@@ -1410,7 +1424,7 @@ function convert_tree_to_html( tree, references ) {
   }
 
   for ( ; i < jsonml.length; ++i ) {
-    jsonml[ i ] = arguments.callee( jsonml[ i ], references );
+    jsonml[ i ] = arguments.callee( jsonml[ i ], references, options );
   }
 
   return jsonml;
