@@ -283,4 +283,8 @@
   text-decoration: underline;
 }
 
-
+.markdown-body pre,
+.markdown-body code {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
