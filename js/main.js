@@ -115,6 +115,8 @@ $(function() {
 
   //autoresize
   $('textarea').autosize();
+  
+  $('#markdown').focus();
 
   //leave
   $(window).bind('beforeunload', function() {
