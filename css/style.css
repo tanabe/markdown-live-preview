@@ -1,12 +1,13 @@
 html, body {
+  position: relative;
+  color: #333;
   overflow-x: hidden;
-  height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #D1D1BC;
-  font-family: helvetica, arial, freesans, clean, sans-serif;
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
   font-size: 1em;
   line-height: 1.5em;
+  background-color: #444;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -24,26 +25,72 @@ a:link,
 a:visited,
 a:hover
 a:active {
-  color: #6C8C84;
+  color: #333;
+  text-decoration: none;
 }
 
 img {
   border: none;
 }
 
-h1#header {
-  position: relative;
-  height: 50px;
+#header {
+  padding: 10px 0 ;
+  background-color: #444;
+  width: 100%;
+  text-align: center;
+}
+
+#header h1 {
   color: #fff;
-  padding: 5px;
-  padding-left: 20px;
-  line-height: 50px;
-  background-color: #302C29;
-  font-size: 1.5em;
-  font-weight: bold;
-  -moz-box-shadow: 0 1px 4px #000;
-  -webkit-box-shadow: 0 1px 4px #000;
-  box-shadow: 0 1px 4px #000;
+  padding-bottom: 10px;
+}
+
+ul#menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul#menu li {
+  color: #999;
+  margin: 0;
+  margin-right: 5px;
+  padding: 10px;
+  list-style: none;
+  display: inline-block;
+  border-radius: 10px;
+}
+
+ul#menu a.edit li {
+  padding-left: 35px;
+  background: transparent url(../image/icon_edit_off.png) no-repeat 10px center;
+}
+
+ul#menu a.edit.active li {
+  background: transparent url(../image/icon_edit.png) no-repeat 10px center;
+}
+
+ul#menu a.preview li {
+  padding-left: 40px;
+  background: transparent url(../image/icon_preview_off.png) no-repeat 10px center;
+}
+
+ul#menu a.preview.active li {
+  background: transparent url(../image/icon_preview.png) no-repeat 10px center;
+}
+
+ul#menu li:hover {
+/*  text-decoration: underline;*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0,0,0, 0.4), rgba(255,255,255,0.1) 0 1px 0;
+  box-shadow: inset 0 0 5px rgba(0,0,0, 0.4), rgba(255,255,255,0.1) 0 1px 0;
+  border-radius: 4px;
+}
+
+ul#menu a.active li {
+  color: #fff;
+  -webkit-box-shadow: inset 0 0 5px rgba(0,0,0, 0.4), rgba(255,255,255,0.1) 0 1px 0;
+  box-shadow: inset 0 0 5px rgba(0,0,0, 0.4), rgba(255,255,255,0.1) 0 1px 0;
+  border-radius: 4px;
 }
 
 #container {
@@ -54,13 +101,48 @@ h1#header {
   padding: 20px;
   margin: 0 auto;
   background-color: #fff;
-  overflow: hidden;
+  border-radius: 10px;
 }
-
 
 #container .section {
   margin-bottom: 20px;
 }
+
+#content .mode {
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+#content .mode ul.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+  background-color: #eee;
+}
+
+#content .mode ul.submenu li {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 3px;
+  padding: 0 5px;
+  border: 1px solid #ddd;
+  background-color: #f3f3f3;
+}
+
+#content .mode ul.submenu li:hover {
+  text-decoration: underline;
+}
+
+#content .mode .content {
+  padding: 10px;
+}
+
+#preview {
+  display: none;
+}
+
 
 .section h2 {
   color: #466964;
@@ -83,12 +165,16 @@ textarea#markdown {
   padding: 0;
   margin: 0;
   width: 100%;
-  height: 300px;
-  font-size: 1em;
-  border: 2px solid #D1D1BC;
+  height: 400px;
+  overflow: auto;
+  font-size: 15px;
+  border: none;
+/*  border: 2px solid #D1D1BC;*/
   resize: vertical;
+  outline: none;
 }
 
+/*
 #output {
   background-color: #f8f8f8;
   border: 2px solid #A7C4BB;
@@ -131,7 +217,7 @@ textarea#markdown {
 #output pre {
   margin: 0;
   padding: 5px;
-  color: #444;
+  color: #g;
   background-color: #eee;
   border: 1px solid #ddd;
   line-height: 1.5em;
@@ -142,6 +228,7 @@ textarea#markdown {
   padding: 0;
   line-height: 1em;
 }
+*/
 
  
 table#reference {
@@ -197,20 +284,45 @@ table#reference td {
   color: #000;
 }
 
-
 #footer {
   clear: both;
   width: 100%;
   height: 50px;
-  background-color: #302C29;
+  padding: 10px;
+  margin-bottom: 30px;
+  background-color: #444;
   color: #fff;
-  line-height: 50px;
   text-align: center;
-  -moz-box-shadow: 0 -1px 4px #000;
-  -webkit-box-shadow: 0 -1px 4px #000;
-  box-shadow: 0 -1px 4px #000;
 }
 
-#footer a {
+#footer #copyright {
+  font-size: 12px;
+  color: #999;
+}
+
+
+#footer #copyright a {
+  font-size: 12px;
+  color: #999;
+}
+
+#footer #copyright a:hover {
   color: #fff;
+  text-decoration: underline;
+}
+
+ul#shareLinks,
+ul#shareLinks li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul#shareLinks li {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+ul#shareLinks li.facebook {
+  margin-top: 10px;
 }

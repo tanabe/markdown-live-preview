@@ -9,20 +9,92 @@ var example = [
   "",
   "----",
   "## usage",
-  "1. write markdown text in above textarea",
-  "2. render automatically to the output area",
+  "1. Write markdown text in this textarea.",
+  "2. Click 'HTML Preview' button.",
+  "",
+  "----",
+  "## markdown quick reference",
+  "# headers",
+  "",
+  "*emphasis*",
+  "",
+  "**strong**",
+  "",
+  "* list",
+  "",
+  ">block quote",
+  "",
+  "    code (4 spaces indent)",
+  "[links](http://wikipedia.org)",
+  "",
+  "----",
+  "## changelog",
+  "* 17-Feb-2013 re-design",
   "",
   "----",
   "## thanks",
-  "* [markdown-js](https://github.com/evilstreak/markdown-js)"
+  "* [markdown-js](https://github.com/evilstreak/markdown-js)",
+  ""
 ].join("\n");
 
 $(function() {
-  $("#markdown").val(example);
-  $("#output").html(markdown.toHTML(example));
-  $("#output").html(markdown.toHTML(example));
-  $("#markdown").bind("keyup", function() {
-    $("#output").html(markdown.toHTML($("#markdown").val()));
+  var currentMode = 'edit';
+  var container = $('#container');
+  var header = $('#header');
+  var headerHeight = header.outerHeight();
+  var titleHeight = $('#header h1').outerHeight();
+  var fixedTop = -titleHeight;
+  var scrollTops = {
+    'edit' : 0,
+    'preview' : 0
+  };
+
+  var isEdited = false;
+
+  $(window).scroll(function() {
+    var scrollTop = $(window).scrollTop();
+    scrollTops[currentMode] = scrollTop;
+    if ((scrollTop > titleHeight)) {
+      header.css({
+        'position' : 'fixed',
+        'top' : fixedTop + 'px',
+        'z-index' : '100'
+      });
+
+      container.css({
+        'margin-top'  : headerHeight + 'px'
+      });
+
+    } else {
+      header.css('position', 'static');
+      container.css({
+        'margin-top'  : 0
+      });
+    }
+  });
+
+  $('#markdown').val(example);
+  $('#output').html(markdown.toHTML(example));
+  $('#markdown').bind('keyup', function() {
+    isEdited = true;
+    $('#output').html(markdown.toHTML($('#markdown').val()));
+  });
+
+  //menu
+  var menuItems = $('#menu a');
+  menuItems.click(function(event) {
+    event.preventDefault();
+
+    menuItems.removeClass('active');
+    var sender = $(event.currentTarget);
+    sender.addClass('active');
+
+    $('#content .mode').hide();
+    var menuId = sender.data('menuId');
+    currentMode = menuId;
+    $('#' + menuId).show();
+    $(window).scrollTop(scrollTops[currentMode]);
+
   });
 
   //reference
@@ -30,6 +102,24 @@ $(function() {
     var self = $(element);
     if (self.html() === "") {
       self.html(markdown.toHTML(self.siblings().html()));
+    }
+  });
+
+  //clear
+  $('#clearButton').click(function(event) {
+    event.preventDefault();
+    if (window.confirm('Are you sure you want to delete?')) {
+      $('#markdown').val('');
+    }
+  });
+
+  //autoresize
+  $('textarea').autosize();
+
+  //leave
+  $(window).bind('beforeunload', function() {
+    if (isEdited) {
+      return 'Are you sure you want to leave? Your changes will be lost.';
     }
   });
 });

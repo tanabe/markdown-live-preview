@@ -6,16 +6,75 @@
     <meta http-equiv="content-script-type" content="text/javascript">
     <meta http-equiv="content-style-type" content="text/css">
     <meta name="description" content="This is the Markdown editor with live preview. enjoy.">
-    <meta name="keywords" content="markdown,editor,github,reference">
+    <meta name="keywords" content="markdown,editor,github,live,preview,tutorial">
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/github.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
     <script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.autosize-min.js"></script>
     <script type="text/javascript" src="js/markdown.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
 
+    <title>Markdown Live Preview</title>
+  </head>
+  <body>
+
+    <div id="header">
+      <h1><a href="./"><img src="image/logo.png" width="306" height="20" alt="Markdown Live Preview"></a></h1>
+      <ul id="menu">
+        <a href="javascript:void(null);" data-menu-id="edit" class="edit active"><li>Edit Markdown</li></a>
+        <a href="javascript:void(null);" class="preview" data-menu-id="preview"><li>HTML Preview</li></a>
+      </ul>
+    </div>
+
+    <div id="container">
+      <div id="content" class="section">
+
+        <div id="edit" class="mode">
+          <ul class="submenu">
+            <a href="javascript:void(null);" id="clearButton"><li>clear</li></a>
+          </ul>
+          <div class="content">
+            <textarea id="markdown">
+            </textarea>
+          </div>
+        </div>
+
+        <div id="preview" class="mode">
+          <div id="output" class="content markdown-body">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="footer">
+      <ul id="shareLinks">
+        <li class="google">
+<!-- Place this tag where you want the share button to render. -->
+<div class="g-plus" data-action="share"></div>
+
+<!-- Place this tag after the last share tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+        </li>
+        <li class="twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://markdownlivepreview.com" data-via="tanabe">Tweet</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></li>
+        <li class="facebook"><iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fmarkdownlivepreview.com&amp;send=false&amp;layout=standard&amp;width=450&amp;show_faces=false&amp;font=tahoma&amp;colorscheme=dark&amp;action=like&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:35px;" allowTransparency="true"></iframe></li>
+      </ul>
+      <div id="copyright">Copyright 2013 <a href="https://twitter.com/tanabe">tanabe</a>.</div>
+    </div>
+
     <script type="text/javascript">
       var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-73660-11']);
+      _gaq.push(['_setAccount', 'UA-73660-14']);
       _gaq.push(['_trackPageview']);
 
       (function() {
@@ -24,84 +83,6 @@
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
-    <title>Markdown Live Preview</title>
-  </head>
-  <body>
-    <h1 id="header"><a href="./"><img src="image/logo.png" width="315" height="22" alt="Markdown Live Preview"></a></h1>
-    <div id="container">
 
-      <div id="leftColumn">
-        <div class="section">
-          <h2>markdown</h2>
-          <textarea id="markdown"></textarea>
-        </div>
-
-        <div class="section">
-          <h2>output</h2>
-          <div id="output"></div>
-        </div>
-     </div>
-
-     <div id="rightColumn">
-       <div class="section">
-         <h2>reference</h2>
-         <table id="reference">
-           <tr>
-             <th>You type</th>
-             <th>You get</th>
-           </tr>
-
-           <tr>
-             <td># h1</td>
-             <td></td>
-           </tr>
-
-           <tr>
-             <td>*emphasis*</td>
-             <td></td>
-           </tr>
-
-           <tr>
-             <td>**strong**</td>
-             <td></td>
-           </tr>
-
-           <tr>
-             <td>* list</td>
-             <td></td>
-           </tr>
-
-           <tr>
-             <td>1. list</td>
-             <td></td>
-           </tr>
-
-           <tr>
-             <td>&gt; this is<br>&gt; quote</td>
-             <td><script type="text/javascript">document.write(markdown.toHTML("> this is\n\n> quote"))</script></td>
-           </tr>
-
-           <tr>
-             <td>    code<br>(4 spaces indent)</td>
-             <td><script type="text/javascript">document.write(markdown.toHTML("    code"))</script></td>
-           </tr>
-
-           <tr>
-             <td>[Wikipedia](http://wikipedia.org)</td>
-             <td></td>
-           </tr>
-
-           <tr>
-             <td>----</td>
-             <td></td>
-           </tr>
-
-         </table>
-       </div>
-     </div>
-
-    </div>
-
-    <div id="footer"><a href="http://twitter.com/#!/tanabe">created by @tanabe</a></div>
   </body>
 </html>
