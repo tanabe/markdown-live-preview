@@ -42,10 +42,12 @@ img {
 
 #header h1 {
   color: #fff;
-  padding-bottom: 10px;
 }
 
 ul#menu {
+  /*v2.*/
+  display: none;
+
   margin: 0;
   padding: 0;
   list-style: none;
@@ -111,9 +113,13 @@ ul#menu a.active li {
 #content .mode {
   border: 1px solid #ddd;
   border-radius: 3px;
+  width: 465px;
+  display: inline-block;
+  vertical-align: top;
 }
 
 #content .mode ul.submenu {
+  display: none;
   list-style: none;
   margin: 0;
   padding: 5px;
@@ -140,7 +146,7 @@ ul#menu a.active li {
 }
 
 #preview {
-  display: none;
+  margin-left: 20px;
 }
 
 

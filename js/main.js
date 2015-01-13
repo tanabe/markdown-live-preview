@@ -110,14 +110,13 @@ $(function() {
     event.preventDefault();
     if (window.confirm('Are you sure you want to delete?')) {
       $('#markdown').val('');
+      $('#output').html('');
     }
   });
 
   //autoresize
   $('textarea').autosize();
   
-  //$('#markdown').focus();
-
   //leave
   $(window).bind('beforeunload', function() {
     if (isEdited) {
