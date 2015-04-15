@@ -21,6 +21,8 @@ see [Wikipedia](http://en.wikipedia.org/wiki/Markdown)
 
 **strong**
 
+~~strikethrough~~
+
 * list
 
 >block quote
