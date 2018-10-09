@@ -51,28 +51,6 @@ $(function() {
 
   var isEdited = false;
 
-  $(window).scroll(function() {
-    var scrollTop = $(window).scrollTop();
-    scrollTops[currentMode] = scrollTop;
-    if ((scrollTop > titleHeight)) {
-      header.css({
-        'position' : 'fixed',
-        'top' : fixedTop + 'px',
-        'z-index' : '100'
-      });
-
-      container.css({
-        'margin-top'  : headerHeight + 'px'
-      });
-
-    } else {
-      header.css('position', 'static');
-      container.css({
-        'margin-top'  : 0
-      });
-    }
-  });
-
   $('#markdown').val(example);
   $('#output').html(markdown.toHTML(example));
   $('#markdown').bind('keyup', function() {
@@ -110,14 +88,13 @@ $(function() {
     event.preventDefault();
     if (window.confirm('Are you sure you want to delete?')) {
       $('#markdown').val('');
+      $('#output').html('');
     }
   });
 
   //autoresize
   $('textarea').autosize();
   
-  //$('#markdown').focus();
-
   //leave
   $(window).bind('beforeunload', function() {
     if (isEdited) {

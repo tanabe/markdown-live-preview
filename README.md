@@ -30,6 +30,7 @@ see [Wikipedia](http://en.wikipedia.org/wiki/Markdown)
 
 ----
 ## changelog
+* 13-Jan-2015 re-design
 * 17-Feb-2013 re-design
 * 19-May-2011 launch
 
