@@ -3,7 +3,7 @@ var example = [
   "",
   "----",
   "## what is Markdown?",
-  "see [Wikipedia](http://en.wikipedia.org/wiki/Markdown)",
+  "see [Wikipedia](https://en.wikipedia.org/wiki/Markdown)",
   "",
   "> Markdown is a lightweight markup language, originally created by John Gruber and Aaron Swartz allowing people \"to write using an easy-to-read, easy-to-write plain text format, then convert it to structurally valid XHTML (or HTML)\".",
   "",
@@ -25,7 +25,7 @@ var example = [
   ">block quote",
   "",
   "    code (4 spaces indent)",
-  "[links](http://wikipedia.org)",
+  "[links](https://wikipedia.org)",
   "",
   "----",
   "## changelog",
@@ -56,6 +56,12 @@ $(function() {
   $('#markdown').bind('keyup', function() {
     isEdited = true;
     $('#output').html(markdown.toHTML($('#markdown').val()));
+    $('#output a').each(function(index, element) {
+        var href = element.getAttribute('href');
+        if (RegExp('^javascript', 'i').test(href)) {
+            element.setAttribute('href', '#');
+        }
+    });
   });
 
   //menu
