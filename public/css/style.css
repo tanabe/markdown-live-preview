@@ -40,8 +40,9 @@ img {
   text-align: center;
 }
 
-#header h1 {
+#header h1 a {
   color: #fff;
+  font-size: 1.5em;
 }
 
 ul#menu {
