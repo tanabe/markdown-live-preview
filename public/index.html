@@ -9,7 +9,7 @@
     <meta name="keywords" content="markdown,editor,github,live,preview,tutorial">
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/github.css">
+    <link rel="stylesheet" type="text/css" href="css/github-markdown.css">
     <link rel="icon" type="image/png" href="favicon.png">
 
     <script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
@@ -23,19 +23,12 @@
 
     <div id="header">
       <h1><a href="/">Markdown Live Preview</a></h1>
-      <ul id="menu">
-        <a href="javascript:void(null);" data-menu-id="edit" class="edit active"><li>Edit Markdown</li></a>
-        <a href="javascript:void(null);" class="preview" data-menu-id="preview"><li>HTML Preview</li></a>
-      </ul>
     </div>
 
     <div id="container">
       <div id="content" class="section">
 
         <div id="edit" class="mode">
-          <ul class="submenu">
-            <a href="javascript:void(null);" id="clearButton"><li>clear</li></a>
-          </ul>
           <div class="content">
             <textarea id="markdown">
 # Markdown syntax guide
@@ -89,9 +82,7 @@ You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
 
 ## Inline code
 
-May the `Force` be with you
-
-</textarea>
+May the `Force` be with you</textarea>
           </div>
         </div>
 
