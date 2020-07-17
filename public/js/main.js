@@ -1,49 +1,5 @@
-var example = [
-  "# hello, This is Markdown Live Preview",
-  "",
-  "----",
-  "## what is Markdown?",
-  "see [Wikipedia](https://en.wikipedia.org/wiki/Markdown)",
-  "",
-  "> Markdown is a lightweight markup language, originally created by John Gruber and Aaron Swartz allowing people \"to write using an easy-to-read, easy-to-write plain text format, then convert it to structurally valid XHTML (or HTML)\".",
-  "",
-  "----",
-  "## usage",
-  "1. Write markdown text in this textarea.",
-  "2. Click 'HTML Preview' button.",
-  "",
-  "----",
-  "## markdown quick reference",
-  "# headers",
-  "",
-  "*emphasis*",
-  "",
-  "**strong**",
-  "",
-  "* list",
-  "",
-  ">block quote",
-  "",
-  "    code (4 spaces indent)",
-  "[links](https://wikipedia.org)",
-  "",
-  "----",
-  "## changelog",
-  "* 17-Feb-2013 re-design",
-  "",
-  "----",
-  "## thanks",
-  "* [markdown-js](https://github.com/evilstreak/markdown-js)",
-  ""
-].join("\n");
-
 $(function() {
   var currentMode = 'edit';
-  var container = $('#container');
-  var header = $('#header');
-  var headerHeight = header.outerHeight();
-  var titleHeight = $('#header h1').outerHeight();
-  var fixedTop = -titleHeight;
   var scrollTops = {
     'edit' : 0,
     'preview' : 0
@@ -51,8 +7,7 @@ $(function() {
 
   var isEdited = false;
 
-  $('#markdown').val(example);
-  $('#output').html(markdown.toHTML(example));
+  //$('#markdown').val(example);
   $('#markdown').bind('keyup', function() {
     isEdited = true;
     $('#output').html(markdown.toHTML($('#markdown').val()));
@@ -107,4 +62,6 @@ $(function() {
       return 'Are you sure you want to leave? Your changes will be lost.';
     }
   });
+
+  $('#output').html(markdown.toHTML($('#markdown').val()));
 });
