@@ -1,10 +1,4 @@
 $(function() {
-  var currentMode = 'edit';
-  var scrollTops = {
-    'edit' : 0,
-    'preview' : 0
-  };
-
   var isEdited = false;
 
   let convert = () => {
