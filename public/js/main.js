@@ -3,7 +3,8 @@ $(function() {
 
   let convert = () => {
     let html = marked($('#markdown').val());
-    $('#output').html(html);
+    let sanitized = DOMPurify.sanitize(html);
+    $('#output').html(sanitized);
   }
 
   $('#markdown').bind('keyup', function() {
