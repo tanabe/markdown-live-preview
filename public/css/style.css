@@ -49,7 +49,7 @@ img {
   min-height: 100%;
   height: auto !important;
   height: 100%;
-  width: 960px;
+  width: 1100px;
   padding: 20px;
   margin: 0 auto;
   background-color: #fff;
@@ -63,7 +63,7 @@ img {
 #content .mode {
   border: 1px solid #ddd;
   border-radius: 3px;
-  width: 465px;
+  width: 535px;
   display: inline-block;
   vertical-align: top;
 }
@@ -98,7 +98,10 @@ textarea#markdown {
   resize: vertical;
   outline: none;
 }
- 
+
+#editor {
+  width: 100%;
+} 
 
 #footer {
   clear: both;

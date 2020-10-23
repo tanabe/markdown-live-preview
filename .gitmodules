@@ -1,3 +1,6 @@
 [submodule "github-markdown-css"]
 	path = github-markdown-css
 	url = https://github.com/sindresorhus/github-markdown-css.git
+[submodule "ace-builds"]
+	path = ace-builds
+	url = https://github.com/ajaxorg/ace-builds.git

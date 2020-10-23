@@ -1,32 +1,34 @@
 $(function() {
-  var isEdited = false;
+    var isEdited = false;
 
-  let convert = () => {
-    let html = marked($('#markdown').val());
-    let sanitized = DOMPurify.sanitize(html);
-    $('#output').html(sanitized);
-  }
-
-  $('#markdown').bind('keyup', function() {
-    isEdited = true;
-    convert();
-    $('#output a').each(function(index, element) {
-        var href = element.getAttribute('href');
-        if (RegExp('^javascript', 'i').test(href)) {
-            element.setAttribute('href', '#');
-        }
+    // Setup editor
+    var editor = ace.edit('editor');
+    editor.getSession().setUseWrapMode(true);
+    editor.setOptions({
+        maxLines: Infinity,
+        indentedSoftWrap: false,
+        fontSize: 14,
+        theme: 'ace/theme/github',
+        // TODO consider some options
     });
-  });
 
-  //autoresize
-  $('textarea').autosize();
-  
-  //leave
-  $(window).bind('beforeunload', function() {
-    if (isEdited) {
-      return 'Are you sure you want to leave? Your changes will be lost.';
+    editor.on('change', () => {
+        isEdited = true;
+        convert();
+    });
+
+    let convert = () => {
+        let html = marked(editor.getValue());
+        let sanitized = DOMPurify.sanitize(html);
+        $('#output').html(sanitized);
     }
-  });
+    
+    //leave
+    $(window).bind('beforeunload', function() {
+      if (isEdited) {
+        return 'Are you sure you want to leave? Your changes will be lost.';
+      }
+    });
 
-  convert();
+    convert();
 });
