@@ -4,10 +4,9 @@ $(function() {
     let adjustScreen = () => {
         let screenHeight = $(window).height();
         let headerHeight = $('#header').outerHeight();
-        let containerHeight = screenHeight - headerHeight;
-        console.log(containerHeight);
+        let footerHeight = $('#footer').outerHeight();
+        let containerHeight = screenHeight - headerHeight - footerHeight;
         $('#container').css({ top: `${headerHeight}px` });
-        $('#container').css({ height: `${containerHeight}px`});
         $('.column').css({ height: `${containerHeight}px`});
     };
 
@@ -18,6 +17,7 @@ $(function() {
     // Setup editor
     let editor = ace.edit('editor');
     editor.getSession().setUseWrapMode(true);
+    editor.renderer.setScrollMargin(10, 10, 10, 10);
     editor.setOptions({
         maxLines: Infinity,
         indentedSoftWrap: false,
@@ -26,7 +26,6 @@ $(function() {
         theme: 'ace/theme/github',
         // TODO consider some options
     });
-
     editor.on('change', () => {
         isEdited = true;
         convert();
