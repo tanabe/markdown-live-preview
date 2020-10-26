@@ -27,12 +27,10 @@
     </div>
 
     <div id="container">
-      <div id="content" class="section">
 
-        <div id="edit" class="mode">
-          <div class="content">
-
-            <div id="editor"># Markdown syntax guide
+      <div id="edit" class="column">
+        <div id="editor-wrapper">
+          <div id="editor"># Markdown syntax guide
 
 ## Headers
 
@@ -56,16 +54,16 @@ _You **can** combine them_
 
 * Item 1
 * Item 2
-  * Item 2a
-  * Item 2b
+* Item 2a
+* Item 2b
 
 ### Ordered
 
 1. Item 1
 1. Item 2
 1. Item 3
-    1. Item 3a
-    1. Item 3b
+  1. Item 3a
+  1. Item 3b
 
 ## Images
 
@@ -99,14 +97,12 @@ alert(message);
 ## Inline code
 
 This web site is using `markedjs/marked`.</div>
-          </div>
         </div>
-
-        <div id="preview" class="mode">
-          <div id="output" class="content markdown-body">
-          </div>
+      </div><!-- Do not insert new line here --><div id="preview" class="column">
+          <div id="preview-wrapper">
+            <div id="output" class="content markdown-body">
+          </div> 
         </div>
-
       </div>
     </div>
 

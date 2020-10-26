@@ -8,6 +8,12 @@ html, body {
   font-size: 1em;
   line-height: 1.5em;
   background-color: #444;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  overscroll-behavior: none;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -34,9 +40,13 @@ img {
 }
 
 #header {
-  padding: 10px 0 ;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
   background-color: #444;
   width: 100%;
+  padding: 10px;
   text-align: center;
 }
 
@@ -46,84 +56,66 @@ img {
 }
 
 #container {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  width: 1100px;
-  padding: 20px;
+  position: absolute;
+  width: 100%;
   margin: 0 auto;
   background-color: #fff;
-  border-radius: 10px;
+  overflow: hidden;
 }
 
-#container .section {
-  margin-bottom: 20px;
+#editor-wrapper {
+  border-right: 10px solid #eee;
 }
 
-#content .mode {
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  width: 535px;
-  display: inline-block;
-  vertical-align: top;
+#preview-wrapper {
+  padding-left: 10px;
 }
 
-#content .mode .content {
-  padding: 10px;
-}
-
-#preview {
-  margin-left: 20px;
-}
-
-#leftColumn {
-  float: left;
-  width: 700px;
-}
-
-#rightColumn {
-  width: 240px;
-  float: right;
-}
-
-textarea#markdown {
+.column {
   padding: 0;
   margin: 0;
-  width: 100%;
-  height: 400px;
-  overflow: auto;
-  font-size: 15px;
-  border: none;
-/*  border: 2px solid #D1D1BC;*/
-  resize: vertical;
-  outline: none;
+  white-space: nowrap;
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+  overflow-y: scroll;
 }
 
-#editor {
-  width: 100%;
-} 
-
 #footer {
-  clear: both;
+  padding: 5px;
+  z-index: 1001;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  padding: 10px;
   background-color: #444;
   color: #fff;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #footer #copyright {
-  font-size: 12px;
   color: #999;
 }
 
+#copyright img {
+  width: 16px;
+  display: block;
+  padding: 0;
+  margin: 0;
+}
 
 #footer #copyright a {
-  font-size: 12px;
+  display: block;
+  padding: 0;
+  margin: 0;
+  font-size:0;
   color: #999;
 }
 
 #footer #copyright a:hover {
   color: #fff;
-  text-decoration: underline;
+  text-decoration: none;
 }
