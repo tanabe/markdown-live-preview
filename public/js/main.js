@@ -1,13 +1,28 @@
 $(function() {
-    var isEdited = false;
+    let isEdited = false;
+
+    let adjustScreen = () => {
+        let screenHeight = $(window).height();
+        let headerHeight = $('#header').outerHeight();
+        let containerHeight = screenHeight - headerHeight;
+        console.log(containerHeight);
+        $('#container').css({ top: `${headerHeight}px` });
+        $('#container').css({ height: `${containerHeight}px`});
+        $('.column').css({ height: `${containerHeight}px`});
+    };
+
+    $(window).resize(() => {
+        adjustScreen();
+    });
 
     // Setup editor
-    var editor = ace.edit('editor');
+    let editor = ace.edit('editor');
     editor.getSession().setUseWrapMode(true);
     editor.setOptions({
         maxLines: Infinity,
         indentedSoftWrap: false,
         fontSize: 14,
+        autoScrollEditorIntoView: true,
         theme: 'ace/theme/github',
         // TODO consider some options
     });
@@ -15,6 +30,7 @@ $(function() {
     editor.on('change', () => {
         isEdited = true;
         convert();
+        adjustScreen();
     });
 
     let convert = () => {
@@ -31,4 +47,5 @@ $(function() {
     });
 
     convert();
+    adjustScreen();
 });
