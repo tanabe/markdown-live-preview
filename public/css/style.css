@@ -81,6 +81,10 @@ img {
   overflow-y: scroll;
 }
 
+#preview.column {
+  white-space: normal;
+}
+
 #footer {
   padding: 5px;
   z-index: 1001;
