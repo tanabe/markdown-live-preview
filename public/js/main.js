@@ -77,6 +77,9 @@ $(function () {
     document
       .getElementById("preview-wrapper")
       .setAttribute("dark", toggle.checked.toString());
+    document
+      .getElementById("container")
+      .setAttribute("dark", toggle.checked.toString());
     localStorage.setItem("darkmode", `${toggle.checked}`);
   }
 
