@@ -8,7 +8,9 @@
     <meta name="description" content="This is the online markdown editor with live preview.">
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="css/switch.css">
     <link rel="stylesheet" type="text/css" href="css/github-markdown.css">
+    
     <link rel="icon" type="image/png" href="favicon.png">
 
     <script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
@@ -23,6 +25,9 @@
   <body>
 
     <div id="header">
+      <label class="form-switch" id="toggleLightModeLabel">
+        <input type="checkbox" id="toggleLightModeInput">
+      <i></i> Toggle dark mode </label>
       <h1><a href="/">Markdown Live Preview</a></h1>
     </div>
 
