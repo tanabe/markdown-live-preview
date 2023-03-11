@@ -69,7 +69,16 @@ img {
 
 #preview-wrapper {
   padding-left: 10px;
+  
+  
 }
+
+#output[dark="true"], #output[dark="true"] * , #preview-wrapper[dark="true"], #container[dark="true"]{
+  background-color: #1d1f21 !important;
+  color: #b8c1bf;
+}
+
+
 
 .column {
   padding: 0;
@@ -123,3 +132,8 @@ img {
   color: #fff;
   text-decoration: none;
 }
+
+#toggleLightModeLabel{
+  position: absolute;
+  left: 1rem;
+} 
