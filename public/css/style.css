@@ -39,7 +39,7 @@ img {
   border: none;
 }
 
-#website-header {
+#header {
   position: fixed;
   z-index: 1000;
   top: 0;
@@ -50,7 +50,7 @@ img {
   text-align: center;
 }
 
-#website-header h1 a {
+#header h1 a {
   color: #fff;
   font-size: 1.5em;
 }
