@@ -33,7 +33,11 @@ $(function() {
     });
 
     let convert = () => {
-        let html = marked(editor.getValue());
+        let options = {
+            headerIds: false,
+            mangle: false
+        };
+        let html = marked.parse(editor.getValue(), options);
         let sanitized = DOMPurify.sanitize(html);
         $('#output').html(sanitized);
     }
