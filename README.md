@@ -8,7 +8,7 @@ This is the code for [Markdown Live Preview](https://markdownlivepreview.com/).
 $ make setup
 ```
 
-## Run server locally
+## Run local testing server
 
 ```
 $ ./scripts/run-server.sh
