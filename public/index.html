@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/github-markdown.css">
     <link rel="icon" type="image/png" href="favicon.png">
 
-    <script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery.autosize-min.js"></script>
     <script type="text/javascript" src="js/marked.min.js"></script>
     <script type="text/javascript" src="js/purify.min.js"></script>
@@ -22,9 +22,10 @@
   </head>
   <body>
 
-    <div id="header">
+    <header id="header">
       <h1><a href="/">Markdown Live Preview</a></h1>
-    </div>
+      <div id="github"><a href="https://github.com/tanabe/markdown-live-preview"><img src="image/GitHub-Mark-Light-32px.png"></a></div>
+    </header>
 
     <div id="container">
 
@@ -106,9 +107,7 @@ This web site is using `markedjs/marked`.</div>
       </div>
     </div>
 
-    <div id="footer">
-      <div id="copyright"><a href="https://github.com/tanabe/markdown-live-preview"><img src="image/GitHub-Mark-Light-32px.png"></a></div>
-    </div>
+    <footer id="footer"></footer>
 
     <script type="text/javascript">
       var _gaq = _gaq || [];

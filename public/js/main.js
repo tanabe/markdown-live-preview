@@ -1,5 +1,5 @@
 $(function() {
-    let isEdited = false;
+    let hasEdited = false;
 
     let adjustScreen = () => {
         let screenHeight = $(window).height();
@@ -27,7 +27,7 @@ $(function() {
         // TODO consider some options
     });
     editor.on('change', () => {
-        isEdited = true;
+        hasEdited = true;
         convert();
         adjustScreen();
     });
@@ -42,9 +42,9 @@ $(function() {
         $('#output').html(sanitized);
     }
     
-    //leave
+    // Confirms before leaving
     $(window).bind('beforeunload', function() {
-      if (isEdited) {
+      if (hasEdited) {
         return 'Are you sure you want to leave? Your changes will be lost.';
       }
     });

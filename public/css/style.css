@@ -7,7 +7,7 @@ html, body {
   font-family: Helvetica, arial, freesans, clean, sans-serif;
   font-size: 1em;
   line-height: 1.5em;
-  background-color: #444;
+  background-color: #fff;
   height: 100%;
   overflow: hidden;
 }
@@ -46,13 +46,28 @@ img {
   left: 0;
   background-color: #444;
   width: 100%;
-  padding: 10px;
-  text-align: center;
+  padding: 8px;
+  display: flex;
 }
 
 #header h1 a {
   color: #fff;
-  font-size: 1.5em;
+  font-size: 12px;
+}
+
+#github {
+  margin-left: auto;
+  width: 32px;
+}
+
+#github img {
+  width: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+#github a {
+  vertical-align: middle;
 }
 
 #container {
@@ -61,14 +76,15 @@ img {
   margin: 0 auto;
   background-color: #fff;
   overflow: hidden;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 #editor-wrapper {
-  border-right: 10px solid #eee;
+  border-right: 8px solid #eee;
 }
 
 #preview-wrapper {
-  padding-left: 10px;
+  padding: 8px 0 8px 8px;
 }
 
 .column {
@@ -86,7 +102,7 @@ img {
 }
 
 #footer {
-  padding: 5px;
+  padding: 8px;
   z-index: 1001;
   position: absolute;
   bottom: 0;
@@ -95,31 +111,9 @@ img {
   background-color: #444;
   color: #fff;
   text-align: center;
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
 }
 
-#footer #copyright {
-  color: #999;
-}
 
-#copyright img {
-  width: 16px;
-  display: block;
-  padding: 0;
-  margin: 0;
-}
-
-#footer #copyright a {
-  display: block;
-  padding: 0;
-  margin: 0;
-  font-size:0;
-  color: #999;
-}
-
-#footer #copyright a:hover {
-  color: #fff;
-  text-decoration: none;
-}
