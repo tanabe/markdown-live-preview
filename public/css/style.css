@@ -46,8 +46,12 @@ img {
   left: 0;
   background-color: #444;
   width: 100%;
-  padding: 8px;
   display: flex;
+  justify-content: space-between;
+}
+
+#header h1 {
+  margin: 8px 16px;
 }
 
 #header h1 a {
@@ -56,8 +60,8 @@ img {
 }
 
 #github {
-  margin-left: auto;
-  width: 32px;
+  margin: 8px 16px;
+  width: 16px;
 }
 
 #github img {
