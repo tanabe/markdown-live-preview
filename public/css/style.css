@@ -40,6 +40,8 @@ img {
 }
 
 #header {
+  font-size: 12px;
+  color: #fff;
   position: fixed;
   z-index: 1000;
   top: 0;
@@ -54,9 +56,16 @@ img {
   margin: 8px 16px;
 }
 
-#header h1 a {
+#header a {
   color: #fff;
-  font-size: 12px;
+}
+
+#header a:hover {
+  text-decoration: underline;
+}
+
+#reset {
+    margin-left: 16px;
 }
 
 #github {
