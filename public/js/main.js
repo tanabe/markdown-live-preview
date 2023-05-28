@@ -168,7 +168,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     if (lastState) {
         presetValue(lastState);
     } else {
-        reset();
+        presetValue(defaultInput);
     }
     setupResetButton();
     adjustScreen();
