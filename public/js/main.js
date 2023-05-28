@@ -1,7 +1,9 @@
 $(function() {
     let hasEdited = false;
 
-    const confirmationMessage = 'Are you sure you want to leave? Your changes will be lost.';
+    const localStorageNamespace = 'com.markdownlivepreview';
+    const localStorageKey = 'last_state';
+    const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
 
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -98,6 +100,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             theme: 'ace/theme/github',
             // TODO consider some options
         });
+
         editor.on('change', () => {
             let changed = editor.getValue() != defaultInput;
             if (changed) {
@@ -105,6 +108,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             }
             convert(editor.getValue());
             adjustScreen();
+
+            saveLastState();
         });
         return editor;
     };
@@ -122,34 +127,49 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     // Reset input text
     let reset = () => {
-        if (hasEdited) {
+        let changed = editor.getValue() != defaultInput;
+        if (hasEdited || changed) {
             var confirmed = window.confirm(confirmationMessage);
             if (!confirmed) {
                 return;
             }
         }
-        editor.setValue(defaultInput);
+        presetValue(defaultInput);
+    };
+
+    let presetValue = (value) => {
+        editor.setValue(value);
         editor.moveCursorTo(0, 0);
         editor.focus();
         editor.navigateLineEnd();
         hasEdited = false;
     };
 
-    // Setup reset button
-    document.querySelector("#reset").addEventListener('click', (event) => {
-        event.preventDefault();
-        reset();
-    });
-    
-    // Confirms before leaving
-    $(window).bind('beforeunload', function() {
-      if (hasEdited) {
-        return confirmationMessage;
-      }
-    });
+    let setupResetButton = () => {
+        document.querySelector("#reset").addEventListener('click', (event) => {
+            event.preventDefault();
+            reset();
+        });
+    };
+
+    let loadLastState = () => {
+        let lastState = Storehouse.getItem(localStorageNamespace, localStorageKey);
+        return lastState;
+    };
+
+    let saveLastState = () => {
+        let expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageKey, editor.getValue(), expiredAt);
+    };
 
     // entry point
+    let lastState = loadLastState();
     let editor = setupEditor();
-    reset();
+    if (lastState) {
+        presetValue(lastState);
+    } else {
+        reset();
+    }
+    setupResetButton();
     adjustScreen();
 });
