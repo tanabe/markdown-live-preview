@@ -1,6 +1,6 @@
 # Markdown Live Preview
 
-This is the code for [Markdown Live Preview](https://markdownlivepreview.com/).
+[Markdown Live Preview](https://markdownlivepreview.com/) is a tiny web tool to preview Markdown formatted text.
 
 ## Setup
 
