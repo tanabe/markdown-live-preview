@@ -64,7 +64,11 @@ img {
   text-decoration: underline;
 }
 
-#reset {
+#reset-button {
+    margin-left: 16px;
+}
+
+#copy-button {
     margin-left: 16px;
 }
 

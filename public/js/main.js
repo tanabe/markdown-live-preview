@@ -145,12 +145,47 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         hasEdited = false;
     };
 
+    let copyToClipboard = (text, successHandler, errorHandler) => {
+        navigator.clipboard.writeText(text).then(
+            () => {
+                successHandler();
+            },
+
+            () => {
+                errorHandler();
+            }
+        );
+    };
+
+    let notifyCopied = () => {
+        let labelElement = document.querySelector("#copy-button a");
+        labelElement.innerHTML = "Copied!";
+        setTimeout(() => {
+            labelElement.innerHTML = "Copy";
+        }, 1000)
+    };
+
+    // setup navigation actions
     let setupResetButton = () => {
-        document.querySelector("#reset").addEventListener('click', (event) => {
+        document.querySelector("#reset-button").addEventListener('click', (event) => {
             event.preventDefault();
             reset();
         });
     };
+
+    let setupCopyButton = (editor) => {
+        document.querySelector("#copy-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            let value = editor.getValue();
+            copyToClipboard(value, () => {
+                notifyCopied();
+            },
+            () => {
+                // nothing to do
+            });
+        });
+    };
+
 
     let loadLastState = () => {
         let lastState = Storehouse.getItem(localStorageNamespace, localStorageKey);
@@ -171,5 +206,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         presetValue(defaultInput);
     }
     setupResetButton();
+    setupCopyButton(editor);
     adjustScreen();
 });
