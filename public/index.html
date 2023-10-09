@@ -12,7 +12,6 @@
     <link rel="icon" type="image/png" href="favicon.png">
 
     <script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
-    <script type="text/javascript" src="js/jquery.autosize-min.js"></script>
     <script type="text/javascript" src="js/marked.min.js"></script>
     <script type="text/javascript" src="js/purify.min.js"></script>
     <script type="text/javascript" src="js/ace/ace.js"></script>
@@ -34,26 +33,26 @@
 
   <body>
 
-    <header id="header">
+    <header>
         <h1><a href="/">Markdown Live Preview</a><span id="reset-button"><a href="#">Reset</a></span><span id="copy-button"><a href="#">Copy</a></span></h1>
       <div id="github"><a href="https://github.com/tanabe/markdown-live-preview"><img src="image/GitHub-Mark-Light-32px.png"></a></div>
     </header>
 
     <div id="container">
 
-      <div id="edit" class="column">
-        <div id="editor-wrapper">
-          <div id="editor"></div>
+        <div id="edit" class="column">
+            <div id="editor-wrapper">
+                <div id="editor"></div>
+            </div>
         </div>
-      </div><!-- Do not insert new line here --><div id="preview" class="column">
-          <div id="preview-wrapper">
-            <div id="output" class="content markdown-body">
-          </div> 
+        <div id="preview" class="column">
+            <div id="preview-wrapper">
+                <div id="output" class="content markdown-body"></div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <footer id="footer"></footer>
+    <footer></footer>
 
     <script type="text/javascript">
       var _gaq = _gaq || [];
