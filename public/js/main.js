@@ -83,9 +83,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             indentedSoftWrap: false,
             fontSize: 14,
             autoScrollEditorIntoView: true,
-            theme: 'ace/theme/github',
-            // TODO consider some options
+            theme: 'ace/theme/chrome',
         });
+
+        var MarkdownMode = ace.require("ace/mode/markdown").Mode;
+        editor.session.setMode(new MarkdownMode());
 
         editor.on('change', () => {
             let changed = editor.getValue() != defaultInput;

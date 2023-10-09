@@ -8,10 +8,16 @@
 $ make setup
 ```
 
+## Build
+
+```
+$ make build
+```
+
 ## Run local testing server
 
 ```
-$ ./scripts/run-server.sh
+$ make run
 ```
 
 This script requires Python 3.

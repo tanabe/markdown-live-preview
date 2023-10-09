@@ -1,6 +1,15 @@
-[submodule "github-markdown-css"]
-	path = github-markdown-css
+[submodule "libs/github-markdown-css"]
+	path = libs/github-markdown-css
 	url = https://github.com/sindresorhus/github-markdown-css.git
-[submodule "ace-builds"]
-	path = ace-builds
+[submodule "libs/ace-builds"]
+	path = libs/ace-builds
 	url = https://github.com/ajaxorg/ace-builds.git
+[submodule "libs/DOMPurify"]
+	path = libs/DOMPurify
+	url = https://github.com/cure53/DOMPurify.git
+[submodule "libs/marked"]
+	path = libs/marked
+	url = https://github.com/markedjs/marked.git
+[submodule "libs/Storehouse-js"]
+	path = libs/Storehouse-js
+	url = https://github.com/tanabe/Storehouse-js.git
