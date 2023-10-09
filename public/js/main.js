@@ -1,3 +1,4 @@
+// TODO I want to remove jQuery itself and it's dependencies.
 $(function() {
     let hasEdited = false;
 
@@ -75,23 +76,9 @@ ${"`"}${"`"}${"`"}
 This web site is using ${"`"}markedjs/marked${"`"}.
 `;
 
-    let adjustScreen = () => {
-        let screenHeight = $(window).height();
-        let headerHeight = $('#header').outerHeight();
-        let footerHeight = $('#footer').outerHeight();
-        let containerHeight = screenHeight - headerHeight - footerHeight;
-        $('#container').css({ top: `${headerHeight}px` });
-        $('.column').css({ height: `${containerHeight}px`});
-    };
-
-    $(window).resize(() => {
-        adjustScreen();
-    });
-
     let setupEditor = () => {
         let editor = ace.edit('editor');
         editor.getSession().setUseWrapMode(true);
-        editor.renderer.setScrollMargin(10, 10, 10, 10);
         editor.setOptions({
             maxLines: Infinity,
             indentedSoftWrap: false,
@@ -107,8 +94,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 hasEdited = true;
             }
             convert(editor.getValue());
-            adjustScreen();
-
             saveLastState();
         });
         return editor;
@@ -135,6 +120,9 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             }
         }
         presetValue(defaultInput);
+        document.querySelectorAll('.column').forEach((element) => {
+            element.scrollTo({top: 0});
+        });
     };
 
     let presetValue = (value) => {
@@ -207,5 +195,4 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
-    adjustScreen();
 });

@@ -1,5 +1,4 @@
 html, body {
-  position: relative;
   color: #333;
   overflow-x: hidden;
   margin: 0;
@@ -8,12 +7,13 @@ html, body {
   font-size: 1em;
   line-height: 1.5em;
   background-color: #fff;
-  height: 100%;
-  overflow: hidden;
+  overscroll-behavior-y: none;
 }
 
 body {
-  overscroll-behavior: none;
+  display: flex;
+  flex-direction: column;
+  height:100vh;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -39,29 +39,37 @@ img {
   border: none;
 }
 
-#header {
+header {
   font-size: 12px;
   color: #fff;
-  position: fixed;
-  z-index: 1000;
-  top: 0;
-  left: 0;
   background-color: #444;
   width: 100%;
   display: flex;
   justify-content: space-between;
 }
 
-#header h1 {
+header h1 {
   margin: 8px 16px;
 }
 
-#header a {
+header a:link, header a:hover, header a:visited, header a:active {
   color: #fff;
 }
 
-#header a:hover {
+header a:hover {
   text-decoration: underline;
+}
+
+footer {
+  padding: 8px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  color: #fff;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 #reset-button {
@@ -88,12 +96,13 @@ img {
 }
 
 #container {
-  position: absolute;
+  flex-grow: 1;
+  overflow: hidden;
   width: 100%;
   margin: 0 auto;
   background-color: #fff;
-  overflow: hidden;
   border-bottom: 1px solid #e8e8e8;
+  display: flex;
 }
 
 #editor-wrapper {
@@ -105,32 +114,14 @@ img {
 }
 
 .column {
+  overflow-y: scroll;
+  flex-basis: 50%;
   padding: 0;
   margin: 0;
   white-space: nowrap;
-  display: inline-block;
-  width: 50%;
   vertical-align: top;
-  overflow-y: scroll;
 }
 
 #preview.column {
   white-space: normal;
 }
-
-#footer {
-  padding: 8px;
-  z-index: 1001;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #444;
-  color: #fff;
-  text-align: center;
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-
-
