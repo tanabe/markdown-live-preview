@@ -1,5 +1,4 @@
-// TODO I want to remove jQuery itself and it's dependencies.
-$(function() {
+document.addEventListener("DOMContentLoaded", (event) => {
     let hasEdited = false;
 
     const localStorageNamespace = 'com.markdownlivepreview';
@@ -107,7 +106,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         };
         let html = marked.parse(markdown, options);
         let sanitized = DOMPurify.sanitize(html);
-        $('#output').html(sanitized);
+        document.querySelector('#output').innerHTML = sanitized;
     };
 
     // Reset input text
