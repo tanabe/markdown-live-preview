@@ -40,16 +40,14 @@ img {
 }
 
 header {
-  font-size: 12px;
-  color: #fff;
-  background-color: #444;
-  width: 100%;
   display: flex;
   justify-content: space-between;
-}
-
-header h1 {
-  margin: 8px 16px;
+  align-items: center;
+  padding: 8px 16px;
+  width: 100%;
+  background-color: #444;
+  font-size: 12px;
+  color: #fff;
 }
 
 header a:link, header a:hover, header a:visited, header a:active {
@@ -58,6 +56,46 @@ header a:link, header a:hover, header a:visited, header a:active {
 
 header a:hover {
   text-decoration: underline;
+}
+
+#menu-items {
+    display: flex;
+}
+
+#reset-button {
+    margin-left: 16px;
+}
+
+#copy-button {
+    margin-left: 16px;
+}
+
+#sync-button {
+    margin-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+header input[type="checkbox"] {
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-top: 0px;
+}
+
+#github {
+    padding-right: 32px;
+}
+
+#github img {
+  display: block;
+  width: 16px;
+}
+
+#github a {
+  display: block;
+  width: 16px;
 }
 
 footer {
@@ -70,29 +108,6 @@ footer {
   text-align: center;
   justify-content: center;
   align-items: center;
-}
-
-#reset-button {
-    margin-left: 16px;
-}
-
-#copy-button {
-    margin-left: 16px;
-}
-
-#github {
-  margin: 8px 16px;
-  width: 16px;
-}
-
-#github img {
-  width: 16px;
-  padding: 0;
-  margin: 0;
-}
-
-#github a {
-  vertical-align: middle;
 }
 
 #container {
