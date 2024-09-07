@@ -7,7 +7,7 @@ setup:
 build:
 	rm -rf public/js/ace
 	cp -r libs/ace-builds/src-min-noconflict public/js/ace
-	cp libs/github-markdown-css/github-markdown.css public/css/
+	cp libs/github-markdown-css/github-markdown-light.css public/css/
 	cp libs/Storehouse-js/src/storehouse.js public/js/
 	cd libs/marked; \
 	npm i; \
