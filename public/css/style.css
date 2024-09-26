@@ -140,3 +140,21 @@ footer {
 #preview.column {
   white-space: normal;
 }
+
+#divider {
+    width: 5px;
+    background-color: #ccc;
+    cursor: ew-resize;
+}
+
+#printer-button {
+    margin-right: 32px;
+}
+
+#load-button {
+    margin-left: 48px;
+}
+
+#save-button {
+    margin-left: 16px;
+}
