@@ -45,7 +45,7 @@ _You **can** combine them_
 
 ## Images
 
-![This is an alt text.](/image/sample.webp "This is a sample image.")
+![This is an alt text.](image/sample.webp "This is a sample image.") 
 
 ## Links
 
@@ -217,6 +217,27 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupLoadButton = () => {
+        document.querySelector("#load-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            loadMD();
+        });
+    };
+
+    let setupSaveButton = () => {
+        document.querySelector("#save-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            saveMD();
+        });
+    };
+
+    let setupPrinterButton = () => {
+        document.querySelector("#printer-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            self['iframe-pdf'].window.generatePrinter();
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -239,6 +260,83 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         Storehouse.setItem(localStorageNamespace, localStorageScrollBarKey, settings, expiredAt);
     };
 
+    // ----- load save button ----
+
+    self.currentFileName = 'document.md';
+    let loadMD = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.md';
+        const textarea = 
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    presetValue(ev.target.result)
+                    currentFileName = file.name; // Update filename
+                };
+                reader.readAsText(file);
+            }
+
+            document.body.removeChild(input); // Remove the input element after usage
+        };
+
+        input.click(); // Trigger file input click
+    }
+
+    let saveMD = () => {
+        const blob = new Blob([editor.getValue()], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.href = url;
+        link.download = currentFileName; // Use the current file name for saving
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        URL.revokeObjectURL(url);
+        document.body.removeChild(link); // Remove the link element after usage
+    }    
+
+    // ----- divider resize ----
+    
+    let setupDividerResize = () => {
+        const container = document.getElementById('container');
+        const edit = document.getElementById('edit');
+        const preview = document.getElementById('preview');
+        const divider = document.getElementById('divider');
+
+        let isDragging = false;
+
+        // Saat user mulai drag
+        divider.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            document.body.style.cursor = 'ew-resize';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            // Dapatkan lebar total container
+            const containerWidth = container.offsetWidth;
+            
+            // Hitung posisi relatif dari mouse terhadap container
+            const newLeftWidth = (e.clientX / containerWidth) * 100;
+            const newRightWidth = 100 - newLeftWidth;
+            
+            // Update lebar edit dan preview
+            edit.style.flexBasis = `${newLeftWidth}%`;
+            preview.style.flexBasis = `${newRightWidth}%`;
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+        });
+    }
 
     // ----- entry point -----
 
@@ -251,7 +349,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupLoadButton();
+    setupSaveButton();
+    setupPrinterButton();
+    setupDividerResize();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
+    
 });
