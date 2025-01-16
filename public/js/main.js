@@ -117,6 +117,23 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         document.querySelector('#output').innerHTML = sanitized;
     };
 
+    // Open markdown file from disk and render it
+    let call_file_browser = () => {
+        let fb = document.createElement("input");
+        fb.type = 'file';
+        fb.accept = '.md';
+
+        fb.onchange = () => {
+            let fr = new FileReader();
+            fr.onload = () => {
+                editor.setValue(fr.result);
+                editor.focus();
+            }
+            fr.readAsText(fb.files[0]); // the first file selected is read.
+        }
+        fb.click();
+    }
+
     // Reset input text
     let reset = () => {
         let changed = editor.getValue() != defaultInput;
@@ -219,6 +236,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupOpenFileButton = (editor) => {
+        document.querySelector("#open-folder-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            call_file_browser();
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -253,6 +277,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupOpenFileButton();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
