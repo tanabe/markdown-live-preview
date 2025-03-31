@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+    mermaid.initialize({ startOnLoad: false });
+
     let hasEdited = false;
     let scrollBarSync = false;
 
@@ -47,7 +49,7 @@ _You **can** combine them_
 
 ## Images
 
-![This is an alt text.](/image/sample.webp "This is a sample image.")
+![This is an alt text.](image/sample.webp "This is a sample image.") 
 
 ## Links
 
@@ -73,6 +75,18 @@ ${"`"}${"`"}${"`"}
 let message = 'Hello world';
 alert(message);
 ${"`"}${"`"}${"`"}
+
+## Flow Chart (Mermaid) Example
+
+${"`"}${"`"}${"`"}mermaid
+graph LR;
+    A[Start] --> B[Process];
+    B --> C[Decision];
+    C -->|Yes| D[End];
+    C -->|No| A;
+${"`"}${"`"}${"`"}      
+
+See [Mermaid Documentation](https://mermaid.js.org/intro/syntax-reference.html)
 
 ## Inline code
 
@@ -106,6 +120,61 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         return editor;
     };
 
+    let blinkCopyButton = (copyBtn) => {
+        copyBtn.style.visibility = 'hidden';
+        setTimeout(() => {
+            copyBtn.style.visibility = 'visible';
+        }, 400);
+    }; 
+    
+    let copySVG = (svgElement,copyBtn) => {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+    
+        // Encode SVG to Base64
+        const base64 = btoa(unescape(encodeURIComponent(svgData)));
+        const imgSrc = `data:image/svg+xml;base64,${base64}`;
+        
+        // make canvas
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+    
+        // Set canvas attributes
+        const svgWidth = svgElement.viewBox.baseVal.width;
+        const svgHeight = svgElement.viewBox.baseVal.height;
+        canvas.width = svgWidth;
+        canvas.height = svgHeight;
+        canvas.style.position = 'fixed';
+        canvas.style.top = '-500000px';
+        document.body.appendChild(canvas);
+    
+        // Make image from SVG
+        const img = new Image();
+        img.style.position = 'fixed';
+        img.style.top = '-500000px';
+        document.body.appendChild(img);
+    
+        img.onload = function() {
+            // draw SVG to canvas
+            ctx.drawImage(img, 0, 0);
+            
+            // convert image to blob and copy img
+            canvas.toBlob(function(blob) {
+                const item = new ClipboardItem({ 'image/png': blob });
+                navigator.clipboard.write([item]).then(function() {
+                blinkCopyButton(copyBtn);
+                document.body.removeChild(canvas);
+                document.body.removeChild(img);
+                }, function(err) {
+                console.error('Could not copy image: ', err);
+                document.body.removeChild(canvas);
+                document.body.removeChild(img);
+                });
+            });
+        };
+
+        img.src = imgSrc;
+    }
+
     // Render markdown text as html
     let convert = (markdown) => {
         let options = {
@@ -114,7 +183,48 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         };
         let html = marked.parse(markdown, options);
         let sanitized = DOMPurify.sanitize(html);
-        document.querySelector('#output').innerHTML = sanitized;
+        let output = document.querySelector('#output');
+        output.innerHTML = sanitized;
+        mermaid.init(undefined, output.querySelectorAll('.language-mermaid'));
+
+        // Add random target (like win_xxx) to all <a> tags
+        const links = output.querySelectorAll('a');
+        links.forEach(link => {
+            link.setAttribute('target', 'win_' + Math.random().toString(36).substr(2, 5)); // Short random string
+        });
+
+        const codes = output.querySelectorAll('code');
+        codes.forEach(code => {
+            const pre = code.parentNode;
+            if(pre.nodeName != 'PRE'){return}
+
+            // Create the copy button
+            const copyBtn = document.createElement('button');
+            copyBtn.classList.add('code-copy-button');
+
+            // Append the copy button to the parent <pre> element
+            pre.style.position = 'relative';
+            pre.style.width = 'calc(100% - 40px)';
+            pre.appendChild(copyBtn);
+
+            // Add copy functionality
+            copyBtn.addEventListener('click', () => {
+                if (code.innerHTML.match(/^\s*<svg/si)) {
+                    const svgElement = code.firstElementChild;
+                    copySVG(svgElement,copyBtn);
+                    return;
+                }
+                
+                //- other text code
+                navigator.clipboard.writeText(code.innerText).then(() => {
+                    //- blink button
+                    blinkCopyButton(copyBtn);
+                }).catch(err => {
+                    console.error('Failed to copy code: ', err);
+                });
+            });
+        });
+
     };
 
     // Reset input text
@@ -219,6 +329,27 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupLoadButton = () => {
+        document.querySelector("#load-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            loadMD();
+        });
+    };
+
+    let setupSaveButton = () => {
+        document.querySelector("#save-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            saveMD();
+        });
+    };
+
+    let setupPrinterButton = () => {
+        document.querySelector("#printer-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            self['iframe-pdf'].window.generatePrinter();
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -241,6 +372,83 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         Storehouse.setItem(localStorageNamespace, localStorageScrollBarKey, settings, expiredAt);
     };
 
+    // ----- load save button ----
+
+    self.currentFileName = 'document.md';
+    let loadMD = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.md';
+        const textarea = 
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    presetValue(ev.target.result)
+                    currentFileName = file.name; // Update filename
+                };
+                reader.readAsText(file);
+            }
+
+            document.body.removeChild(input); // Remove the input element after usage
+        };
+
+        input.click(); // Trigger file input click
+    }
+
+    let saveMD = () => {
+        const blob = new Blob([editor.getValue()], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.href = url;
+        link.download = currentFileName; // Use the current file name for saving
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        URL.revokeObjectURL(url);
+        document.body.removeChild(link); // Remove the link element after usage
+    }    
+
+    // ----- divider resize ----
+    
+    let setupDividerResize = () => {
+        const container = document.getElementById('container');
+        const edit = document.getElementById('edit');
+        const preview = document.getElementById('preview');
+        const divider = document.getElementById('divider');
+
+        let isDragging = false;
+
+        // Saat user mulai drag
+        divider.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            document.body.style.cursor = 'ew-resize';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            // Dapatkan lebar total container
+            const containerWidth = container.offsetWidth;
+            
+            // Hitung posisi relatif dari mouse terhadap container
+            const newLeftWidth = (e.clientX / containerWidth) * 100;
+            const newRightWidth = 100 - newLeftWidth;
+            
+            // Update lebar edit dan preview
+            edit.style.flexBasis = `${newLeftWidth}%`;
+            preview.style.flexBasis = `${newRightWidth}%`;
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+        });
+    }
 
     // ----- entry point -----
 
@@ -253,7 +461,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupLoadButton();
+    setupSaveButton();
+    setupPrinterButton();
+    setupDividerResize();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
+    
 });
