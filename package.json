@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "http-server public"
+    "serve": "http-server public",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -19,7 +22,10 @@
   },
   "homepage": "https://github.com/tanabe/markdown-live-preview#readme",
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "vite": "^6.2.5"
+  },
+  "dependencies": {
+    "marked": "^15.0.7"
   }
-
 }
