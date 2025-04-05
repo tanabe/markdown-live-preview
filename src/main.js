@@ -1,3 +1,5 @@
+import { marked } from 'marked';
+
 document.addEventListener("DOMContentLoaded", () => {
     let hasEdited = false;
     let scrollBarSync = false;
