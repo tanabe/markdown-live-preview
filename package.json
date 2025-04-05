@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "dompurify": "^3.2.5",
+    "github-markdown-css": "^5.8.1",
     "marked": "^15.0.7"
   }
 }

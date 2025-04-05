@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import 'github-markdown-css/github-markdown-light.css';
 
 document.addEventListener("DOMContentLoaded", () => {
     let hasEdited = false;
