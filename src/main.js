@@ -1,4 +1,5 @@
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 document.addEventListener("DOMContentLoaded", () => {
     let hasEdited = false;
