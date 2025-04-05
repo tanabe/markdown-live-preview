@@ -14,13 +14,11 @@ $ make setup
 $ make build
 ```
 
-## Run local testing server
+## Local Development
 
 ```
-$ make run
+$ make dev
 ```
-
-This script requires Python 3.
 
 ## License
 See the [LICENSE](https://github.com/tanabe/markdown-live-preview/blob/master/LICENSE) file in this repo.
