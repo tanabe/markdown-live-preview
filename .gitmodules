@@ -1,6 +1,3 @@
-[submodule "libs/ace-builds"]
-	path = libs/ace-builds
-	url = https://github.com/ajaxorg/ace-builds.git
 [submodule "libs/Storehouse-js"]
 	path = libs/Storehouse-js
 	url = https://github.com/tanabe/Storehouse-js.git

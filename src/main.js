@@ -1,3 +1,9 @@
+import ace from 'ace-builds';
+ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
+
+import 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-markdown';
+import 'ace-builds/src-noconflict/theme-chrome';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
@@ -85,18 +91,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let setupEditor = () => {
         let editor = ace.edit('editor');
+        editor.setTheme('ace/theme/chrome');
         editor.getSession().setUseWrapMode(true);
         editor.setOptions({
             maxLines: Infinity,
             indentedSoftWrap: false,
             fontSize: 14,
             autoScrollEditorIntoView: true,
-            theme: 'ace/theme/chrome',
         });
 
-        var MarkdownMode = ace.require("ace/mode/markdown").Mode;
-        editor.session.setMode(new MarkdownMode());
-
+        editor.session.setMode('ace/mode/markdown');
         editor.on('change', () => {
             let changed = editor.getValue() != defaultInput;
             if (changed) {
