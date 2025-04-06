@@ -1,6 +1,7 @@
 import ace from 'ace-builds';
 ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
 
+import Storehouse from 'storehouse-js';
 import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-markdown';
 import 'ace-builds/src-noconflict/theme-chrome';
