@@ -2,6 +2,7 @@ import ace from 'ace-builds';
 ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
 
 import Storehouse from 'storehouse-js';
+import * as monaco from 'monaco-editor';
 import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-markdown';
 import 'ace-builds/src-noconflict/theme-chrome';
@@ -91,18 +92,21 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 `;
 
     let setupEditor = () => {
-        let editor = ace.edit('editor');
-        editor.setTheme('ace/theme/chrome');
-        editor.getSession().setUseWrapMode(true);
-        editor.setOptions({
-            maxLines: Infinity,
-            indentedSoftWrap: false,
+        let editor = monaco.editor.create(document.querySelector('#editor'), {
             fontSize: 14,
-            autoScrollEditorIntoView: true,
+            language: 'markdown',
+            minimap: {enabled: false},
+            /*
+            wordWrap: 'on',
+            wordWrapColumn: 0,
+            scrollBeyondLastColumn: 0,
+            horizontalScrollbarSize: 0,
+            */
+            scrollBeyondLastLine: false,
+            automaticLayout: true
         });
 
-        editor.session.setMode('ace/mode/markdown');
-        editor.on('change', () => {
+        editor.onDidChangeModelContent(() => {
             let changed = editor.getValue() != defaultInput;
             if (changed) {
                 hasEdited = true;
@@ -110,6 +114,23 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             let value = editor.getValue();
             convert(value);
             saveLastContent(value);
+        });
+
+        editor.onDidScrollChange((e) => {
+            if (!scrollBarSync) {
+                return;
+            }
+
+            const scrollTop = e.scrollTop;
+            const scrollHeight = e.scrollHeight;
+            const height = editor.getLayoutInfo().height;
+
+            const maxScrollTop = scrollHeight - height;
+            const scrollRatio = scrollTop / maxScrollTop;
+
+            let previewElement = document.querySelector('#preview');
+            let targetY = (previewElement.scrollHeight - previewElement.clientHeight) * scrollRatio;
+            previewElement.scrollTo(0, targetY);
         });
 
         return editor;
@@ -143,9 +164,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let presetValue = (value) => {
         editor.setValue(value);
-        editor.moveCursorTo(0, 0);
+        editor.revealPosition({ lineNumber: 1, column: 1 });
         editor.focus();
-        editor.navigateLineEnd();
         hasEdited = false;
     };
 
@@ -160,18 +180,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             let checked = event.currentTarget.checked;
             scrollBarSync = checked;
             saveScrollBarSettings(checked);
-        });
-
-        document.querySelector('#edit').addEventListener('scroll', (event) => {
-            if (!scrollBarSync) {
-                return;
-            }
-            let editorElement = event.currentTarget;
-            let ratio = editorElement.scrollTop / (editorElement.scrollHeight - editorElement.clientHeight);
-
-            let previewElement = document.querySelector('#preview');
-            let targetY = (previewElement.scrollHeight - previewElement.clientHeight) * ratio;
-            previewElement.scrollTo(0, targetY);
         });
     };
 

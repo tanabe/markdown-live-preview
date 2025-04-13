@@ -122,6 +122,11 @@ footer {
 
 #editor-wrapper {
   border-right: 8px solid #eee;
+  height: 100%;
+}
+
+#editor {
+  height: 100%;
 }
 
 #preview-wrapper {
