@@ -1,12 +1,6 @@
-import ace from 'ace-builds';
-ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
-
 import Storehouse from 'storehouse-js';
 import * as monaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
-import 'ace-builds/src-noconflict/ace';
-import 'ace-builds/src-noconflict/mode-markdown';
-import 'ace-builds/src-noconflict/theme-chrome';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
