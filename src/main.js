@@ -3,6 +3,7 @@ ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
 
 import Storehouse from 'storehouse-js';
 import * as monaco from 'monaco-editor';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-markdown';
 import 'ace-builds/src-noconflict/theme-chrome';
@@ -90,6 +91,12 @@ ${"`"}${"`"}${"`"}
 
 This web site is using ${"`"}markedjs/marked${"`"}.
 `;
+
+    self.MonacoEnvironment = {
+        getWorker(_, label) {
+            return new editorWorker()
+        }
+    }
 
     let setupEditor = () => {
         let editor = monaco.editor.create(document.querySelector('#editor'), {
