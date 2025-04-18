@@ -129,12 +129,11 @@ footer {
 }
 
 #preview-wrapper {
-  padding: 8px 0 8px 8px;
+  padding:8px 0 16px 16px;
 }
 
 .column {
-  overflow-y: scroll;
-  flex-basis: 50%;
+  width: 50%;
   padding: 0;
   margin: 0;
   white-space: nowrap;
@@ -142,5 +141,32 @@ footer {
 }
 
 #preview.column {
+  overflow-y: scroll;
   white-space: normal;
+}
+
+.split-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.editor-pane,
+.preview-pane {
+  height: 100%;
+}
+
+.split-divider {
+  width: 5px;
+  background: #ccc;
+  cursor: col-resize;
+  z-index: 1;
+}
+
+.split-divider.hover {
+  background: #999;
+}
+
+.split-divider.active {
+  background: #666;
 }
