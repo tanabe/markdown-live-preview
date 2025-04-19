@@ -12,7 +12,7 @@
 
 
     <title>Markdown Live Preview</title>
-    <script type="module" crossorigin src="/assets/index-BA4eIQg4.js"></script>
+    <script type="module" crossorigin src="/assets/index-eahjrYwN.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-ZEyKteFu.css">
   </head>
 
@@ -38,14 +38,17 @@
         <div id="github"><a href="https://github.com/tanabe/markdown-live-preview"><img src="image/GitHub-Mark-Light-32px.webp"></a></div>
     </header>
 
-    <div id="container">
+    <div id="container" class="split-container">
 
-        <div id="edit" class="column">
+        <div id="edit" class="column editor-pane">
             <div id="editor-wrapper">
                 <div id="editor"></div>
             </div>
         </div>
-        <div id="preview" class="column">
+
+        <div id="split-divider" class="split-divider"></div>
+
+        <div id="preview" class="column preview-pane">
             <div id="preview-wrapper">
                 <div id="output" class="content markdown-body"></div>
             </div>
@@ -53,6 +56,5 @@
     </div>
 
     <footer></footer>
-
   </body>
 </html>
