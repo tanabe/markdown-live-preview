@@ -262,6 +262,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     let setupDivider = () => {
+        let lastLeftRatio = 0.5;
         const divider = document.getElementById('split-divider');
         const leftPane = document.getElementById('edit');
         const rightPane = document.getElementById('preview');
@@ -309,6 +310,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             const leftWidth = Math.max(minWidth, Math.min(offsetX, maxWidth));
             leftPane.style.width = leftWidth + 'px';
             rightPane.style.width = (totalWidth - leftWidth - dividerWidth) + 'px';
+            lastLeftRatio = leftWidth / (totalWidth - dividerWidth);
         });
   
         document.addEventListener('mouseup', () => {
@@ -319,6 +321,19 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 document.body.style.cursor = 'default';
                 document.body.style.userSelect = '';
             }
+        });
+
+        window.addEventListener('resize', () => {
+            const containerRect = container.getBoundingClientRect();
+            const totalWidth = containerRect.width;
+            const dividerWidth = divider.offsetWidth;
+            const availableWidth = totalWidth - dividerWidth;
+
+            const newLeft = availableWidth * lastLeftRatio;
+            const newRight = availableWidth * (1 - lastLeftRatio);
+
+            leftPane.style.width = newLeft + 'px';
+            rightPane.style.width = newRight + 'px';
         });
     };
 
