@@ -1,11 +1,9 @@
 import Storehouse from 'storehouse-js';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
-import 'monaco-editor/esm/vs/basic-languages/markdown/markdown.contribution.js';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
 
-document.addEventListener("DOMContentLoaded", () => {
+const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
 
@@ -13,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
-
     // default template
     const defaultInput = `# Markdown syntax guide
 
@@ -88,7 +85,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     self.MonacoEnvironment = {
         getWorker(_, label) {
-            return new Proxy({}, { get: () => () => {} });
+            return new Proxy({}, { get: () => () => { } });
         }
     }
 
@@ -96,7 +93,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         let editor = monaco.editor.create(document.querySelector('#editor'), {
             fontSize: 14,
             language: 'markdown',
-            minimap: {enabled: false},
+            minimap: { enabled: false },
             scrollBeyondLastLine: false,
             automaticLayout: true,
             scrollbar: {
@@ -161,7 +158,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
         presetValue(defaultInput);
         document.querySelectorAll('.column').forEach((element) => {
-            element.scrollTo({top: 0});
+            element.scrollTo({ top: 0 });
         });
     };
 
@@ -233,9 +230,9 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             copyToClipboard(value, () => {
                 notifyCopied();
             },
-            () => {
-                // nothing to do
-            });
+                () => {
+                    // nothing to do
+                });
         });
     };
 
@@ -267,25 +264,25 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         const leftPane = document.getElementById('edit');
         const rightPane = document.getElementById('preview');
         const container = document.getElementById('container');
-  
+
         let isDragging = false;
-  
+
         divider.addEventListener('mouseenter', () => {
             divider.classList.add('hover');
         });
-  
+
         divider.addEventListener('mouseleave', () => {
             if (!isDragging) {
                 divider.classList.remove('hover');
             }
         });
-  
+
         divider.addEventListener('mousedown', () => {
             isDragging = true;
             divider.classList.add('active');
             document.body.style.cursor = 'col-resize';
         });
-        
+
         divider.addEventListener('dblclick', () => {
             const containerRect = container.getBoundingClientRect();
             const totalWidth = containerRect.width;
@@ -295,7 +292,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             leftPane.style.width = halfWidth + 'px';
             rightPane.style.width = halfWidth + 'px';
         });
-  
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             document.body.style.userSelect = 'none';
@@ -303,7 +300,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             const totalWidth = containerRect.width;
             const offsetX = e.clientX - containerRect.left;
             const dividerWidth = divider.offsetWidth;
-  
+
             // Prevent overlap or out-of-bounds
             const minWidth = 100;
             const maxWidth = totalWidth - minWidth - dividerWidth;
@@ -312,7 +309,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             rightPane.style.width = (totalWidth - leftWidth - dividerWidth) + 'px';
             lastLeftRatio = leftWidth / (totalWidth - dividerWidth);
         });
-  
+
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
@@ -338,7 +335,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- entry point -----
-
     let lastContent = loadLastContent();
     let editor = setupEditor();
     if (lastContent) {
@@ -353,4 +349,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     initScrollBarSync(scrollBarSettings);
 
     setupDivider();
+};
+
+window.addEventListener("load", () => {
+    init();
 });
