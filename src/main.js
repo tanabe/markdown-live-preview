@@ -101,6 +101,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 vertical: 'visible',
                 horizontal: 'visible'
             },
+            wordWrap: 'on',
             hover: { enabled: false },
             quickSuggestions: false,
             suggestOnTriggerCharacters: false,
