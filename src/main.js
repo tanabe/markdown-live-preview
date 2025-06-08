@@ -238,6 +238,98 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let openPrintWindow = () => {
+        // Get the content from the preview pane
+        let previewContent = document.querySelector('#output').innerHTML;
+        
+        // Get the GitHub markdown CSS
+        let markdownStyles = '';
+        for (let sheet of document.styleSheets) {
+            if (sheet.href && sheet.href.includes('github-markdown')) {
+                try {
+                    for (let rule of sheet.cssRules) {
+                        markdownStyles += rule.cssText + '\n';
+                    }
+                } catch (e) {
+                    // Handle cross-origin CSS
+                    markdownStyles = `@import url('${sheet.href}');`;
+                }
+                break;
+            }
+        }
+        
+        // Create a new window with the content
+        let printWindow = window.open('', '_blank', 'width=800,height=600');
+        
+        if (printWindow) {
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Markdown Preview</title>
+                    <style>
+                        ${markdownStyles}
+                        body {
+                            margin: 0;
+                            padding: 20px;
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+                        }
+                        .markdown-body {
+                            box-sizing: border-box;
+                            min-width: 200px;
+                            max-width: 980px;
+                            margin: 0 auto;
+                            padding: 45px;
+                        }
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .markdown-body {
+                                padding: 20px;
+                            }
+                            /* Avoid page breaks inside these elements */
+                            pre, blockquote, table {
+                                page-break-inside: avoid;
+                            }
+                            /* Ensure headings stay with their content */
+                            h1, h2, h3, h4, h5, h6 {
+                                page-break-after: avoid;
+                            }
+                            /* Avoid breaking lists */
+                            ul, ol {
+                                page-break-inside: avoid;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="markdown-body">
+                        ${previewContent}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            // Wait for content to load before printing
+            printWindow.onload = () => {
+                printWindow.focus();
+                printWindow.print();
+            };
+        }
+    };
+
+    let setupPrintButton = () => {
+        document.querySelector("#print-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            openPrintWindow();
+        });
+    };
+
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -346,6 +438,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupPrintButton();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
