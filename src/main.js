@@ -23,10 +23,10 @@ const init = () => {
 
 ## Emphasis
 
-*This text will be italic*  
+*This text will be italic*
 _This will also be italic_
 
-**This text will be bold**  
+**This text will be bold**
 __This will also be bold__
 
 _You **can** combine them_
@@ -145,8 +145,25 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             mangle: false
         };
         let html = marked.parse(markdown, options);
+
+        // Sanitize first
         let sanitized = DOMPurify.sanitize(html);
-        document.querySelector('#output').innerHTML = sanitized;
+
+        // Inject sanitized HTML into the DOM
+        const outputElement = document.querySelector('#output');
+        outputElement.innerHTML = sanitized;
+
+        // Render math using KaTeX
+        if (window.renderMathInElement) {
+            renderMathInElement(outputElement, {
+                // These delimiters match LaTeX-style math in Markdown
+                delimiters: [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false }
+                ],
+                throwOnError: false
+            });
+        }
     };
 
     // Reset input text
