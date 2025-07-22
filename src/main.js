@@ -2,9 +2,6 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-// Import both CSS files as URLs for dynamic switching
-import githubMarkdownLight from 'github-markdown-css/github-markdown-light.css?url';
-import githubMarkdownDark from 'github-markdown-css/github-markdown-dark.css?url';
 
 const init = () => {
     let hasEdited = false;
@@ -274,9 +271,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         Storehouse.setItem(localStorageNamespace, localStorageThemeKey, theme, expiredAt);
     };
 
-    // Cache the markdown CSS link element
-    let markdownCSSLink = null;
-    
     let applyTheme = (theme) => {
         // Update data attribute for CSS variables
         document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
@@ -284,16 +278,15 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         // Update Monaco editor theme
         monaco.editor.setTheme(theme === 'dark' ? 'vs-dark' : 'vs');
         
-        // Update or create markdown CSS link
-        if (!markdownCSSLink) {
-            markdownCSSLink = document.createElement('link');
-            markdownCSSLink.rel = 'stylesheet';
-            markdownCSSLink.setAttribute('data-markdown-css', 'true');
-            document.head.appendChild(markdownCSSLink);
+        // Update markdown CSS link
+        const markdownLink = document.getElementById('markdown-theme-css');
+        if (markdownLink) {
+            if (theme === 'dark') {
+                markdownLink.href = 'https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown-dark.min.css';
+            } else {
+                markdownLink.href = 'https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown-light.min.css';
+            }
         }
-        
-        // Simply update the href - browser will handle the switch
-        markdownCSSLink.href = theme === 'dark' ? githubMarkdownDark : githubMarkdownLight;
     };
 
     let setupThemeToggle = () => {
@@ -400,6 +393,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     
     // Initialize theme
     const currentTheme = loadThemePreference();
+    
+    // Apply theme settings
     applyTheme(currentTheme);
     
     setupThemeToggle();

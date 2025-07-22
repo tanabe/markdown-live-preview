@@ -10,14 +10,91 @@
 }
 
 [data-theme="dark"] {
-  --bg-color: #1e1e1e;
-  --text-color: #d4d4d4;
-  --header-bg: #2d2d2d;
-  --header-text: #cccccc;
-  --border-color: #3e3e3e;
+  --bg-color: #212121;
+  --text-color: #E8E8E8;
+  --header-bg: #1a1a1a;
+  --header-text: #E8E8E8;
+  --border-color: #555555;
   --divider-color: #4a4a4a;
   --divider-hover: #5a5a5a;
   --divider-active: #6a6a6a;
+}
+
+/* Dark mode overrides for GitHub markdown CSS */
+[data-theme="dark"] .markdown-body {
+  color: #E8E8E8 !important;
+  background-color: #212121 !important;
+}
+
+[data-theme="dark"] #output {
+  background-color: #212121 !important;
+  color: #E8E8E8 !important;
+}
+
+/* Headings */
+[data-theme="dark"] .markdown-body h1,
+[data-theme="dark"] .markdown-body h2,
+[data-theme="dark"] .markdown-body h3,
+[data-theme="dark"] .markdown-body h4,
+[data-theme="dark"] .markdown-body h5,
+[data-theme="dark"] .markdown-body h6 {
+  color: #F5F5F5 !important;
+  border-color: #555555 !important;
+}
+
+/* Blockquotes */
+[data-theme="dark"] .markdown-body blockquote {
+  color: #B8B8B8 !important;
+  border-left-color: #555555 !important;
+}
+
+/* Code */
+[data-theme="dark"] .markdown-body code {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #F5F5F5 !important;
+}
+
+[data-theme="dark"] .markdown-body pre {
+  background-color: #1a1a1a !important;
+  border-color: #555555 !important;
+}
+
+[data-theme="dark"] .markdown-body pre code {
+  background-color: transparent !important;
+}
+
+/* Tables */
+[data-theme="dark"] .markdown-body table {
+  color: #E8E8E8 !important;
+}
+
+[data-theme="dark"] .markdown-body table th,
+[data-theme="dark"] .markdown-body table td {
+  border-color: #555555 !important;
+}
+
+[data-theme="dark"] .markdown-body table tr {
+  background-color: transparent !important;
+  border-color: #555555 !important;
+}
+
+[data-theme="dark"] .markdown-body table tr:nth-child(2n) {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+[data-theme="dark"] .markdown-body table th {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Links */
+[data-theme="dark"] .markdown-body a {
+  color: #58a6ff !important;
+}
+
+/* Horizontal rules */
+[data-theme="dark"] .markdown-body hr {
+  background-color: #555555 !important;
+  border-color: #555555 !important;
 }
 
 
@@ -161,6 +238,8 @@ footer {
 
 #preview-wrapper {
   padding: 8px 16px 16px 16px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 .column {
@@ -174,6 +253,7 @@ footer {
 #preview.column {
   overflow-y: scroll;
   white-space: normal;
+  background-color: var(--bg-color);
 }
 
 .split-container {
