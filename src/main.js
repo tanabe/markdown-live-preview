@@ -2,7 +2,9 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import 'github-markdown-css/github-markdown-light.css';
+// Import both CSS files as URLs for dynamic switching
+import githubMarkdownLight from 'github-markdown-css/github-markdown-light.css?url';
+import githubMarkdownDark from 'github-markdown-css/github-markdown-dark.css?url';
 
 const init = () => {
     let hasEdited = false;
@@ -11,6 +13,7 @@ const init = () => {
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
+    const localStorageThemeKey = 'theme_preference';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -105,7 +108,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             hover: { enabled: false },
             quickSuggestions: false,
             suggestOnTriggerCharacters: false,
-            folding: false
+            folding: false,
+            theme: 'vs'
         });
 
         editor.onDidChangeModelContent(() => {
@@ -260,6 +264,53 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         Storehouse.setItem(localStorageNamespace, localStorageScrollBarKey, settings, expiredAt);
     };
 
+    let loadThemePreference = () => {
+        let theme = Storehouse.getItem(localStorageNamespace, localStorageThemeKey);
+        return theme || 'light';
+    };
+
+    let saveThemePreference = (theme) => {
+        let expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageThemeKey, theme, expiredAt);
+    };
+
+    // Cache the markdown CSS link element
+    let markdownCSSLink = null;
+    
+    let applyTheme = (theme) => {
+        // Update data attribute for CSS variables
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+        
+        // Update Monaco editor theme
+        monaco.editor.setTheme(theme === 'dark' ? 'vs-dark' : 'vs');
+        
+        // Update or create markdown CSS link
+        if (!markdownCSSLink) {
+            markdownCSSLink = document.createElement('link');
+            markdownCSSLink.rel = 'stylesheet';
+            markdownCSSLink.setAttribute('data-markdown-css', 'true');
+            document.head.appendChild(markdownCSSLink);
+        }
+        
+        // Simply update the href - browser will handle the switch
+        markdownCSSLink.href = theme === 'dark' ? githubMarkdownDark : githubMarkdownLight;
+    };
+
+    let setupThemeToggle = () => {
+        const themeCheckbox = document.getElementById('theme-checkbox');
+        const currentTheme = loadThemePreference();
+        
+        // Set initial checkbox state
+        themeCheckbox.checked = currentTheme === 'dark';
+        
+        // Handle theme toggle
+        themeCheckbox.addEventListener('change', (event) => {
+            const newTheme = event.target.checked ? 'dark' : 'light';
+            saveThemePreference(newTheme);
+            applyTheme(newTheme);
+        });
+    };
+
     let setupDivider = () => {
         let lastLeftRatio = 0.5;
         const divider = document.getElementById('split-divider');
@@ -346,6 +397,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    
+    // Initialize theme
+    const currentTheme = loadThemePreference();
+    applyTheme(currentTheme);
+    
+    setupThemeToggle();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);

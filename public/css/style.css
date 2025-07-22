@@ -1,12 +1,35 @@
+:root {
+  --bg-color: #fafafa;
+  --text-color: #24292e;
+  --header-bg: #3a3a3a;
+  --header-text: #f6f8fa;
+  --border-color: #e1e4e8;
+  --divider-color: #d1d5da;
+  --divider-hover: #959da5;
+  --divider-active: #6a737d;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --header-bg: #2d2d2d;
+  --header-text: #cccccc;
+  --border-color: #3e3e3e;
+  --divider-color: #4a4a4a;
+  --divider-hover: #5a5a5a;
+  --divider-active: #6a6a6a;
+}
+
+
 html, body {
-  color: #333;
+  color: var(--text-color);
   overflow-x: hidden;
   margin: 0;
   padding: 0;
   font-family: Helvetica, arial, freesans, clean, sans-serif;
   font-size: 1em;
   line-height: 1.5em;
-  background-color: #fff;
+  background-color: var(--bg-color);
   overscroll-behavior-y: none;
 }
 
@@ -31,7 +54,7 @@ a:link,
 a:visited,
 a:hover
 a:active {
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
 }
 
@@ -45,13 +68,13 @@ header {
   align-items: center;
   padding: 8px 16px;
   width: 100%;
-  background-color: #444;
+  background-color: var(--header-bg);
   font-size: 12px;
-  color: #fff;
+  color: var(--header-text);
 }
 
 header a:link, header a:hover, header a:visited, header a:active {
-  color: #fff;
+  color: var(--header-text);
 }
 
 header a:hover {
@@ -71,6 +94,14 @@ header a:hover {
 }
 
 #sync-button {
+    margin-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#theme-button {
     margin-left: 16px;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -103,8 +134,8 @@ footer {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: #fff;
-  color: #fff;
+  background-color: var(--bg-color);
+  color: var(--header-text);
   text-align: center;
   justify-content: center;
   align-items: center;
@@ -115,8 +146,8 @@ footer {
   overflow: hidden;
   width: 100%;
   margin: 0 auto;
-  background-color: #fff;
-  border-bottom: 1px solid #e8e8e8;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
 }
 
@@ -158,15 +189,15 @@ footer {
 
 .split-divider {
   width: 5px;
-  background: #ccc;
+  background: var(--divider-color);
   cursor: col-resize;
   z-index: 1;
 }
 
 .split-divider.hover {
-  background: #999;
+  background: var(--divider-hover);
 }
 
 .split-divider.active {
-  background: #666;
+  background: var(--divider-active);
 }
