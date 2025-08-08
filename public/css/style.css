@@ -62,11 +62,9 @@ header a:hover {
     display: flex;
 }
 
-#reset-button {
-    margin-left: 16px;
-}
-
-#copy-button {
+#reset-button,
+#copy-button,
+#upload-image-button {
     margin-left: 16px;
 }
 
