@@ -23,7 +23,7 @@
   "homepage": "https://github.com/tanabe/markdown-live-preview#readme",
   "devDependencies": {
     "http-server": "^14.1.1",
-    "vite": "^6.2.7"
+    "vite": "^6.3.6"
   },
   "dependencies": {
     "dompurify": "^3.2.5",
