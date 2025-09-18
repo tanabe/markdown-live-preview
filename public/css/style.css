@@ -70,6 +70,10 @@ header a:hover {
     margin-left: 16px;
 }
 
+#print-button {
+    margin-left: 16px;
+}
+
 #sync-button {
     margin-left: 16px;
     -webkit-user-select: none;
