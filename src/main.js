@@ -8,6 +8,17 @@ const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
 
+    const sessionImages = new Map();
+
+    let renderer = new marked.Renderer();
+    renderer.image = (href, title, text) => {
+        let resolvedHref = href;
+        if (sessionImages.has(href)) {
+            resolvedHref = sessionImages.get(href);
+        }
+        return `<img src="${resolvedHref}" alt="${DOMPurify.sanitize(text || '')}" ${title ? `title="${DOMPurify.sanitize(title)}"` : ''}>`;
+    };
+
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
@@ -142,10 +153,27 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     let convert = (markdown) => {
         let options = {
             headerIds: false,
-            mangle: false
+            mangle: false,
+            renderer
         };
+
         let html = marked.parse(markdown, options);
-        let sanitized = DOMPurify.sanitize(html);
+
+        // Post-process <img> tags to replace with blob URLs if in sessionImages
+        html = html.replace(/<img\s+([^>]*?)src=["']([^"']+)["'](.*?)>/gi, (match, before, src, after) => {
+            if (sessionImages.has(src)) {
+                const blobUrl = sessionImages.get(src);
+                return `<img ${before}src="${blobUrl}"${after}>`;
+            }
+            return match;
+        });
+
+        let sanitized = DOMPurify.sanitize(html, {
+            ADD_ATTR: ['target'],
+            ADD_URI_SAFE: ['blob'],
+            ALLOWED_URI_REGEXP: /^(?:(?:https?|ftp|mailto|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+        });
+
         document.querySelector('#output').innerHTML = sanitized;
     };
 
@@ -336,6 +364,61 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupImageUpload = () => {
+        const fileInput = document.getElementById('image-input');
+        const uploadBtn = document.getElementById('upload-image-button');
+
+        uploadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) {
+                return;
+            }
+
+            let imagesAdded = 0;
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const relativePath = file.webkitRelativePath || file.name;
+                const parts = relativePath.split('/');
+                let virtualPath;
+
+                if (parts.length > 1) {
+                    const folderName = parts.slice(0, -1).join('/');
+                    virtualPath = `${folderName}/${file.name}`;
+                } else {
+                    virtualPath = `${file.name}`;
+                }
+
+                const url = URL.createObjectURL(file);
+                sessionImages.set(virtualPath, url);
+
+                console.log(`Stored temporary image key: ${virtualPath}`);
+                imagesAdded++;
+            });
+
+            alert(`Uploaded ${imagesAdded} image${imagesAdded > 1 ? "s" : ""}! (the temporary image storage expires on refresh)`);
+            fileInput.value = '';
+
+            const previewEl = document.querySelector('#output');
+            previewEl.innerHTML = previewEl.innerHTML.replace(
+                /<img\s+([^>]*?)src=["']([^"']+)["'](.*?)>/gi,
+                (match, before, src, after) => {
+                    if (sessionImages.has(src)) {
+                        const blobUrl = sessionImages.get(src);
+                        return `<img ${before}src="${blobUrl}"${after}>`;
+                    }
+                    return match;
+                }
+            );
+        });
+    };
+
     // ----- entry point -----
     let lastContent = loadLastContent();
     let editor = setupEditor();
@@ -346,6 +429,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupImageUpload();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
