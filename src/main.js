@@ -3,6 +3,7 @@ import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm'
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
+import { getDocumentTitleFromMarkdown, exportAsHTML, exportAsPDF, exportAsDOCX } from './export.js';
 
 const init = () => {
     let hasEdited = false;
@@ -238,6 +239,41 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    // Export menu setup
+    let setupExportMenu = (editor) => {
+        let outputEl = document.querySelector('#output');
+        let getBodyHtml = () => outputEl.innerHTML;
+        let getTitle = () => getDocumentTitleFromMarkdown(editor.getValue());
+
+        let htmlBtn = document.querySelector('#export-html');
+        let pdfBtn = document.querySelector('#export-pdf');
+        let docxBtn = document.querySelector('#export-docx');
+
+        if (htmlBtn) {
+            htmlBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportAsHTML({ bodyHtml: getBodyHtml(), title: getTitle() });
+            });
+        }
+        if (pdfBtn) {
+            pdfBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportAsPDF({ bodyHtml: getBodyHtml(), title: getTitle() });
+            });
+        }
+        if (docxBtn) {
+            docxBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await exportAsDOCX({ bodyHtml: getBodyHtml(), title: getTitle() });
+                } catch (err) {
+                    console.error('DOCX export failed', err);
+                    alert('DOCX export failed. Please try again.');
+                }
+            });
+        }
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -346,6 +382,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupExportMenu(editor);
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);

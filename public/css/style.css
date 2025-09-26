@@ -98,6 +98,46 @@ header input[type="checkbox"] {
   width: 16px;
 }
 
+/* Dropdown (Export menu) */
+.dropdown {
+  position: relative;
+  margin-left: 16px;
+}
+
+header .dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #2b2b2b;
+  min-width: 200px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  z-index: 10;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #555;
+}
+
+header .dropdown-content a {
+  color: #f5f5f5;
+  padding: 10px 14px;
+  display: block;
+}
+
+header .dropdown-content a:hover {
+  background-color: #3a3a3a;
+  text-decoration: none;
+}
+
+header .dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Export button hover cue */
+#export-button:hover {
+  text-decoration: underline;
+}
+
 footer {
   padding: 8px;
   bottom: 0;
