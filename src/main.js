@@ -2,6 +2,7 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import lzstring from 'lz-string';
 import 'github-markdown-css/github-markdown-light.css';
 
 const init = () => {
@@ -118,6 +119,15 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             saveLastContent(value);
         });
 
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                const value = editor.getValue();
+                const compressed = lzstring.compressToEncodedURIComponent(value);
+                window.location.hash = compressed;
+            }
+        });
+
         editor.onDidScrollChange((e) => {
             if (!scrollBarSync) {
                 return;
@@ -158,6 +168,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 return;
             }
         }
+
+        if (window.location.hash) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+
         presetValue(defaultInput);
         document.querySelectorAll('.column').forEach((element) => {
             element.scrollTo({ top: 0 });
@@ -337,13 +352,35 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- entry point -----
+    const hash = window.location.hash ? window.location.hash.substring(1) : '';
     let lastContent = loadLastContent();
     let editor = setupEditor();
-    if (lastContent) {
+    function loadFromHash(hashValue) {
+        try {
+            const decompressed = lzstring.decompressFromEncodedURIComponent(hashValue);
+            if (decompressed) {
+                presetValue(decompressed);
+            }
+        } catch (e) {
+            // invalid hash, ignore and leave data as it is
+        }
+    }
+
+    if (hash) {
+        loadFromHash(hash);
+    } else if (lastContent) {
         presetValue(lastContent);
     } else {
         presetValue(defaultInput);
     }
+
+    window.addEventListener('hashchange', () => {
+        const newHash = window.location.hash ? window.location.hash.substring(1) : '';
+        if (newHash) {
+            loadFromHash(newHash);
+        }
+    });
+
     setupResetButton();
     setupCopyButton(editor);
 
