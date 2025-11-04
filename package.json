@@ -27,8 +27,7 @@
   },
   "dependencies": {
     "dompurify": "^3.2.5",
-    "github-markdown-css": "^5.8.1",
-    "html2canvas": "^1.4.1",
+        "github-markdown-css": "^5.8.1",
     "marked": "^15.0.7",
     "monaco-editor": "^0.52.2",
     "storehouse-js": "github:tanabe/Storehouse-js"

@@ -1,0 +1,43 @@
+/* Print styles for PDF export via browser print */
+
+@page {
+  margin: 20mm;
+}
+
+/* Reset general styles for print */
+* {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+html, body {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+/* Hide UI chrome */
+header, footer, #split-divider, #editor, #editor-wrapper, #menu-items, #github {
+  display: none !important;
+}
+
+/* Ensure preview content is visible and fits page */
+#preview, #preview-wrapper, .markdown-body {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Content wrapper on print window */
+article.markdown-body {
+  box-sizing: border-box;
+}
+
+/* Page break rules to improve pagination */
+h1, h2, h3 {
+  page-break-after: avoid;
+}
+
+pre, blockquote, table, img {
+  page-break-inside: avoid;
+}

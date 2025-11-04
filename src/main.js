@@ -2,8 +2,8 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import html2canvas from 'html2canvas'; // Re-import html2canvas
 import 'github-markdown-css/github-markdown-light.css';
+import { getDocumentTitleFromMarkdown, exportAsHTML, exportAsPDF } from './export.js';
 
 const init = () => {
     let hasEdited = false;
@@ -368,39 +368,17 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
 
         // Download PDF
-        document.getElementById('download-pdf').addEventListener('click', (event) => {
+        document.getElementById('export-pdf').addEventListener('click', (event) => {
             event.preventDefault();
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
             const outputElement = document.getElementById('output');
-            doc.html(outputElement, {
-                callback: function (doc) {
-                    doc.save('markdown-preview.pdf');
-                },
-                x: 10,
-                y: 10,
-                html2canvas: {
-                    scale: 0.8 // Adjust scale for better fit
-                }
-            });
-            doc.setFontSize(12);
-            const lineHeight = doc.getTextDimensions('T').h; // Estimate line height
-
-            for (let i = 0; i < lines.length; i++) {
-                if (y + lineHeight > pageHeight - margin) {
-                    doc.addPage();
-                    y = margin;
-                }
-                doc.text(lines[i], margin, y);
-                y += lineHeight;
-            }
-
-            doc.save('markdown-preview.pdf');
+            const content = outputElement.innerHTML;
+            const title = getDocumentTitleFromMarkdown(editor.getValue());
+            exportAsPDF({ bodyHtml: content, title: title });
             dropdownContent.style.display = 'none'; // Close dropdown after action
         });
 
-        // Download DOC (as HTML saved with .doc extension)
-        document.getElementById('download-doc').addEventListener('click', (event) => {
+        // Download DOC
+        document.getElementById('export-doc').addEventListener('click', (event) => {
             event.preventDefault();
             const outputElement = document.getElementById('output');
             const content = outputElement.innerHTML;
@@ -414,19 +392,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            dropdownContent.style.display = 'none'; // Close dropdown after action
+            dropdownContent.style.display = 'none';
         });
 
-        // Copy Markdown to clipboard
-        document.getElementById('copy-markdown').addEventListener('click', (event) => {
+        // Download HTML
+        document.getElementById('export-html').addEventListener('click', (event) => {
             event.preventDefault();
-            let value = editor.getValue();
-            copyToClipboard(value, () => {
-                alert('Markdown copied to clipboard!');
-            },
-            () => {
-                alert('Failed to copy markdown to clipboard.');
-            });
+            const outputElement = document.getElementById('output');
+            const content = outputElement.innerHTML;
+            const title = getDocumentTitleFromMarkdown(editor.getValue());
+            exportAsHTML({ bodyHtml: content, title: title });
             dropdownContent.style.display = 'none'; // Close dropdown after action
         });
     };
