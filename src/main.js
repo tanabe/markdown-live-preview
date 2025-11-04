@@ -2,6 +2,7 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import html2canvas from 'html2canvas'; // Re-import html2canvas
 import 'github-markdown-css/github-markdown-light.css';
 
 const init = () => {
@@ -346,6 +347,91 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+
+    // ----- download menu -----
+    let setupDownloadMenu = (editor) => {
+        const downloadButton = document.getElementById('download-button');
+        const downloadMenu = document.getElementById('download-menu');
+        const dropdownContent = downloadMenu.querySelector('.dropdown-content');
+
+        // Toggle dropdown visibility
+        downloadButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close the dropdown if the user clicks outside of it
+        window.addEventListener('click', (event) => {
+            if (!downloadMenu.contains(event.target)) {
+                dropdownContent.style.display = 'none';
+            }
+        });
+
+        // Download PDF
+        document.getElementById('download-pdf').addEventListener('click', (event) => {
+            event.preventDefault();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const outputElement = document.getElementById('output');
+            doc.html(outputElement, {
+                callback: function (doc) {
+                    doc.save('markdown-preview.pdf');
+                },
+                x: 10,
+                y: 10,
+                html2canvas: {
+                    scale: 0.8 // Adjust scale for better fit
+                }
+            });
+            doc.setFontSize(12);
+            const lineHeight = doc.getTextDimensions('T').h; // Estimate line height
+
+            for (let i = 0; i < lines.length; i++) {
+                if (y + lineHeight > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+                doc.text(lines[i], margin, y);
+                y += lineHeight;
+            }
+
+            doc.save('markdown-preview.pdf');
+            dropdownContent.style.display = 'none'; // Close dropdown after action
+        });
+
+        // Download DOC (as HTML saved with .doc extension)
+        document.getElementById('download-doc').addEventListener('click', (event) => {
+            event.preventDefault();
+            const outputElement = document.getElementById('output');
+            const content = outputElement.innerHTML;
+            const filename = 'markdown-preview.doc';
+            const blob = new Blob(['<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Document</title></head><body>' + content + '</body></html>'], {
+                type: 'application/msword'
+            });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            dropdownContent.style.display = 'none'; // Close dropdown after action
+        });
+
+        // Copy Markdown to clipboard
+        document.getElementById('copy-markdown').addEventListener('click', (event) => {
+            event.preventDefault();
+            let value = editor.getValue();
+            copyToClipboard(value, () => {
+                alert('Markdown copied to clipboard!');
+            },
+            () => {
+                alert('Failed to copy markdown to clipboard.');
+            });
+            dropdownContent.style.display = 'none'; // Close dropdown after action
+        });
+    };
+
+    setupDownloadMenu(editor);
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);

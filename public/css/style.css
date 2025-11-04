@@ -84,8 +84,53 @@ header input[type="checkbox"] {
     margin-top: 0px;
 }
 
+#download-menu {
+    position: relative;
+    display: inline-block;
+    margin-left: 16px;
+}
+
+#download-button {
+    color: #fff;
+    font-size: 16px; /* Adjust size as needed */
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0; /* Align dropdown to the right of the button */
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+#download-menu:hover .dropdown-content {
+    display: block;
+}
+
+#right-menu-items {
+    display: flex;
+    align-items: center;
+}
+
 #github {
     padding-right: 32px;
+    margin-left: 16px; /* Add some space between download and github icons */
 }
 
 #github img {
@@ -96,6 +141,14 @@ header input[type="checkbox"] {
 #github a {
   display: block;
   width: 16px;
+}
+
+.dropdown-content a {
+    color: #fff; /* Match navbar color */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
 }
 
 footer {

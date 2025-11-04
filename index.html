@@ -9,6 +9,8 @@
 
     <link rel="stylesheet" type="text/css" href="css/style.css?v=1.10.1">
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module" src="/src/main.js?v=1.10.1"></script>
     <title>Markdown Live Preview</title>
   </head>
@@ -32,7 +34,16 @@
             <div id="copy-button"><a href="#">Copy</a></div>
             <div id="sync-button"><input type="checkbox" id="sync-scroll-checkbox"><label for="sync-scroll-checkbox">Sync scroll</label></div>
         </div>
-        <div id="github"><a href="https://github.com/tanabe/markdown-live-preview"><img src="image/GitHub-Mark-Light-32px.webp"></a></div>
+        <div id="right-menu-items">
+            <div id="download-menu">
+                <a href="#" id="download-button"><i class="fas fa-download"></i></a>
+                <div class="dropdown-content">
+                <a href="#" id="download-pdf">Download PDF</a>
+                <a href="#" id="download-doc">Download DOC</a>
+            </div>
+            </div>
+            <div id="github"><a href="https://github.com/tanabe/markdown-live-preview"><img src="image/GitHub-Mark-Light-32px.webp"></a></div>
+        </div>
     </header>
 
     <div id="container" class="split-container">
