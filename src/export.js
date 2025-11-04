@@ -79,29 +79,66 @@ export function exportAsHTML({ bodyHtml, title }) {
 }
 
 export function exportAsPDF({ bodyHtml, title }) {
-  // Open a print-ready window using same origin to allow resource loading
   const cssCdn = 'https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown-light.min.css';
-  const win = window.open('', '_blank');
-  if (!win) {
-    alert('Popup blocked. Please allow popups to export as PDF.');
-    return;
-  }
-  win.document.open();
-  win.document.write(`<!DOCTYPE html>
+  const printCss = '/css/style.css'; // Reference the main stylesheet for print media
+
+  const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
   <link rel="stylesheet" href="${cssCdn}" />
-  <link rel="stylesheet" href="/css/style.css" media="print" />
+  <link rel="stylesheet" href="${printCss}" media="print" />
+  <style>
+    /* Additional print-specific styles if needed, or overrides */
+    @page {
+      margin: 10mm;
+    }
+    html, body {
+      padding: 10mm !important;
+      overflow: hidden !important;
+    }
+    article.markdown-body {
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
   <article class="markdown-body">${bodyHtml}</article>
-  <script>window.addEventListener('load', () => { setTimeout(() => { window.print(); }, 50); });</script>
 </body>
-</html>`);
-  win.document.close();
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const newWindow = window.open(url, '_blank');
+  if (!newWindow) {
+    alert('Popup blocked. Please allow popups to export as PDF.');
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  newWindow.addEventListener('load', () => {
+    newWindow.print();
+    URL.revokeObjectURL(url); // Clean up the Blob URL after printing
+  });
+
+  newWindow.addEventListener('afterprint', () => {
+    newWindow.close(); // Close the window after printing
+  });
 }
 
 function escapeHtml(str) {
