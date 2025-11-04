@@ -81,7 +81,6 @@ export function exportAsHTML({ bodyHtml, title }) {
 export function exportAsPDF({ bodyHtml, title }) {
   // Open a print-ready window using same origin to allow resource loading
   const cssCdn = 'https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown-light.min.css';
-  const printCss = '/css/print.css';
   const win = window.open('', '_blank');
   if (!win) {
     alert('Popup blocked. Please allow popups to export as PDF.');
@@ -95,7 +94,7 @@ export function exportAsPDF({ bodyHtml, title }) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
   <link rel="stylesheet" href="${cssCdn}" />
-  <link rel="stylesheet" href="${printCss}" />
+  <link rel="stylesheet" href="/css/style.css" media="print" />
 </head>
 <body>
   <article class="markdown-body">${bodyHtml}</article>
