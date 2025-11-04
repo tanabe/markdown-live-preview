@@ -92,7 +92,7 @@ header input[type="checkbox"] {
 
 #download-button {
     color: #fff;
-    font-size: 16px; /* Adjust size as needed */
+    font-size: 16px;
     padding: 8px;
     cursor: pointer;
 }
@@ -130,7 +130,7 @@ header input[type="checkbox"] {
 
 #github {
     padding-right: 32px;
-    margin-left: 16px; /* Add some space between download and github icons */
+    margin-left: 16px;
 }
 
 #github img {
