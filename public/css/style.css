@@ -84,8 +84,53 @@ header input[type="checkbox"] {
     margin-top: 0px;
 }
 
+#download-menu {
+    position: relative;
+    display: inline-block;
+    margin-left: 16px;
+}
+
+#download-button {
+    color: #fff;
+    font-size: 16px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0; /* Align dropdown to the right of the button */
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+#download-menu:hover .dropdown-content {
+    display: block;
+}
+
+#right-menu-items {
+    display: flex;
+    align-items: center;
+}
+
 #github {
     padding-right: 32px;
+    margin-left: 16px;
 }
 
 #github img {
@@ -96,6 +141,14 @@ header input[type="checkbox"] {
 #github a {
   display: block;
   width: 16px;
+}
+
+.dropdown-content a {
+    color: #333 !important;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
 }
 
 footer {
@@ -169,4 +222,50 @@ footer {
 
 .split-divider.active {
   background: #666;
+}
+
+@media print {
+  /* Print styles for PDF export via browser print */
+
+  @page {
+    margin: 20mm;
+  }
+
+  /* Reset general styles for print */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Hide UI chrome */
+  header, footer, #split-divider, #editor, #editor-wrapper, #menu-items, #github {
+    display: none !important;
+  }
+
+  /* Ensure preview content is visible and fits page */
+  #preview, #preview-wrapper, .markdown-body {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Content wrapper on print window */
+  article.markdown-body {
+    box-sizing: border-box;
+  }
+
+  /* Page break rules to improve pagination */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  pre, blockquote, table, img {
+    page-break-inside: avoid;
+  }
 }
