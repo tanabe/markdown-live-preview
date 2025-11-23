@@ -226,7 +226,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         const words = text.trim().split(/\s+/).filter(word => word.length > 0);
         const wordCount = text.trim() === '' ? 0 : words.length;
         
-        // Count characters (excluding spaces for more meaningful count)
+        // Count total characters
         const charCount = text.length;
         
         document.querySelector('#word-count').textContent = `Words: ${wordCount}`;
@@ -387,6 +387,68 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    // ----- fullscreen -----
+
+    let isFullscreen = false;
+    
+    let toggleFullscreen = () => {
+        const fullscreenBtn = document.querySelector("#fullscreen-button");
+        
+        if (!isFullscreen) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            }
+            document.body.classList.add('fullscreen-mode');
+            if (fullscreenBtn) {
+                fullscreenBtn.querySelector('a').textContent = 'Exit Fullscreen';
+            }
+            isFullscreen = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            document.body.classList.remove('fullscreen-mode');
+            if (fullscreenBtn) {
+                fullscreenBtn.querySelector('a').textContent = 'Fullscreen';
+            }
+            isFullscreen = false;
+        }
+    };
+
+    let setupFullscreenButton = () => {
+        const fullscreenBtn = document.querySelector("#fullscreen-button");
+
+        fullscreenBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            toggleFullscreen();
+        });
+
+        // Handle fullscreen change from browser (e.g., ESC key)
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                document.body.classList.remove('fullscreen-mode');
+                fullscreenBtn.querySelector('a').textContent = 'Fullscreen';
+                isFullscreen = false;
+            }
+        });
+
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (!document.webkitFullscreenElement) {
+                document.body.classList.remove('fullscreen-mode');
+                fullscreenBtn.querySelector('a').textContent = 'Fullscreen';
+                isFullscreen = false;
+            }
+        });
+    };
+
     let setupKeyboardShortcuts = () => {
         document.addEventListener('keydown', (event) => {
             const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
@@ -411,7 +473,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             else if (ctrlKey && event.key === 'h') {
                 event.preventDefault();
                 const modal = document.querySelector("#help-modal");
-                modal.style.display = modal.style.display === "block" ? "none" : "block";
+                const isVisible = modal.style.display === "block";
+                modal.style.display = isVisible ? "none" : "block";
             }
             // Ctrl/Cmd + D: Toggle dark mode
             else if (ctrlKey && event.key === 'd') {
@@ -566,6 +629,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     setupExportPDFButton();
     setupImportButton();
     setupHelpButton();
+    setupFullscreenButton();
     setupKeyboardShortcuts();
 
     let scrollBarSettings = loadScrollBarSettings() || false;

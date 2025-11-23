@@ -94,6 +94,10 @@ header a:hover {
     margin-left: 16px;
 }
 
+#fullscreen-button {
+    margin-left: 16px;
+}
+
 #dark-mode-button {
     margin-left: 16px;
     -webkit-user-select: none;
@@ -397,5 +401,100 @@ body.dark-mode .markdown-table code {
   
   .modal {
     display: none !important;
+  }
+}
+
+/* Fullscreen mode */
+body.fullscreen-mode {
+  overflow: hidden;
+}
+
+body.fullscreen-mode header,
+body.fullscreen-mode footer {
+  display: none;
+}
+
+body.fullscreen-mode #container {
+  height: 100vh;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  header {
+    flex-wrap: wrap;
+    padding: 4px 8px;
+  }
+
+  #menu-items {
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+
+  #menu-items > div {
+    margin-left: 8px !important;
+    margin-bottom: 4px;
+  }
+
+  #menu-items > div:first-child {
+    margin-left: 0 !important;
+  }
+
+  #stats-display {
+    font-size: 10px;
+    gap: 8px;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  #github {
+    padding-right: 8px;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10% auto;
+    padding: 15px;
+  }
+
+  .split-container {
+    flex-direction: column;
+  }
+
+  .column {
+    width: 100% !important;
+  }
+
+  #edit {
+    height: 50vh;
+  }
+
+  #preview {
+    height: 50vh;
+  }
+
+  .split-divider {
+    width: 100%;
+    height: 5px;
+    cursor: row-resize;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  header {
+    font-size: 10px;
+  }
+
+  #menu-items {
+    gap: 4px;
+  }
+
+  .help-section h3 {
+    font-size: 1em;
+  }
+
+  .markdown-table {
+    font-size: 0.9em;
   }
 }
