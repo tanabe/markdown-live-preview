@@ -106,6 +106,32 @@ header a:hover {
     user-select: none;
 }
 
+#theme-selector {
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#theme-dropdown {
+    background-color: #555;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+}
+
+#theme-dropdown:hover {
+    background-color: #666;
+}
+
+#theme-dropdown:focus {
+    border-color: #888;
+}
+
 #stats-display {
     display: flex;
     gap: 16px;

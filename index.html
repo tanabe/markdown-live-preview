@@ -37,7 +37,14 @@
             <div id="help-button"><a href="#">Help</a></div>
             <div id="fullscreen-button"><a href="#">Fullscreen</a></div>
             <div id="sync-button"><input type="checkbox" id="sync-scroll-checkbox"><label for="sync-scroll-checkbox">Sync scroll</label></div>
-            <div id="dark-mode-button"><input type="checkbox" id="dark-mode-checkbox"><label for="dark-mode-checkbox">Dark mode</label></div>
+            <div id="theme-selector">
+                <label for="theme-dropdown">Theme:</label>
+                <select id="theme-dropdown">
+                    <option value="vs">Light</option>
+                    <option value="vs-dark">Dark</option>
+                    <option value="hc-black">High Contrast</option>
+                </select>
+            </div>
         </div>
         <div id="stats-display">
             <span id="word-count">Words: 0</span>

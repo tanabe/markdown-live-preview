@@ -9,11 +9,13 @@ const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
     let darkMode = false;
+    let currentTheme = 'vs';
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageDarkModeKey = 'dark_mode_settings';
+    const localStorageThemeKey = 'theme_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -357,6 +359,56 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
     };
 
+    // ----- theme switching -----
+
+    let initThemeSelector = (savedTheme) => {
+        const themeDropdown = document.querySelector('#theme-dropdown');
+        currentTheme = savedTheme || 'vs';
+        themeDropdown.value = currentTheme;
+        applyTheme(currentTheme);
+
+        themeDropdown.addEventListener('change', (event) => {
+            const theme = event.target.value;
+            currentTheme = theme;
+            applyTheme(theme);
+            saveThemeSettings(theme);
+            showToast(`Theme changed to ${getThemeName(theme)}`, 'success', 2000);
+        });
+    };
+
+    let applyTheme = (theme) => {
+        monaco.editor.setTheme(theme);
+        
+        // Apply corresponding body class for preview styling
+        document.body.classList.remove('dark-mode', 'light-mode', 'hc-mode');
+        
+        if (theme === 'vs-dark') {
+            document.body.classList.add('dark-mode');
+        } else if (theme === 'hc-black') {
+            document.body.classList.add('dark-mode', 'hc-mode');
+        } else {
+            document.body.classList.add('light-mode');
+        }
+    };
+
+    let getThemeName = (theme) => {
+        const themeNames = {
+            'vs': 'Light',
+            'vs-dark': 'Dark',
+            'hc-black': 'High Contrast'
+        };
+        return themeNames[theme] || theme;
+    };
+
+    let loadThemeSettings = () => {
+        return Storehouse.getItem(localStorageNamespace, localStorageThemeKey);
+    };
+
+    let saveThemeSettings = (theme) => {
+        const expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageThemeKey, theme, expiredAt);
+    };
+
     // ----- setup -----
 
     // setup navigation actions
@@ -513,14 +565,19 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 const isVisible = modal.style.display === "block";
                 modal.style.display = isVisible ? "none" : "block";
             }
-            // Ctrl/Cmd + D: Toggle dark mode
+            // Ctrl/Cmd + D: Cycle through themes
             else if (ctrlKey && event.key === 'd') {
                 event.preventDefault();
-                const checkbox = document.querySelector('#dark-mode-checkbox');
-                checkbox.checked = !checkbox.checked;
-                darkMode = checkbox.checked;
-                applyDarkMode(checkbox.checked);
-                saveDarkModeSettings(checkbox.checked);
+                const themeDropdown = document.querySelector('#theme-dropdown');
+                const themes = ['vs', 'vs-dark', 'hc-black'];
+                const currentIndex = themes.indexOf(currentTheme);
+                const nextIndex = (currentIndex + 1) % themes.length;
+                const nextTheme = themes[nextIndex];
+                themeDropdown.value = nextTheme;
+                currentTheme = nextTheme;
+                applyTheme(nextTheme);
+                saveThemeSettings(nextTheme);
+                showToast(`Theme: ${getThemeName(nextTheme)}`, 'info', 1500);
             }
             // Ctrl/Cmd + K: Reset
             else if (ctrlKey && event.key === 'k') {
@@ -793,6 +850,9 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
+
+    let themeSettings = loadThemeSettings() || 'vs';
+    initThemeSelector(themeSettings);
 
     let darkModeSettings = loadDarkModeSettings() || false;
     initDarkMode(darkModeSettings);
