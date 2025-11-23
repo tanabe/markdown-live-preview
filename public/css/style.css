@@ -78,6 +78,29 @@ header a:hover {
     user-select: none;
 }
 
+#download-md-button {
+    margin-left: 16px;
+}
+
+#export-pdf-button {
+    margin-left: 16px;
+}
+
+#dark-mode-button {
+    margin-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#stats-display {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: #ccc;
+}
+
 header input[type="checkbox"] {
     vertical-align: middle;
     margin-right: 4px;
@@ -169,4 +192,63 @@ footer {
 
 .split-divider.active {
   background: #666;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+body.dark-mode header {
+  background-color: #2d2d30;
+}
+
+body.dark-mode #container {
+  background-color: #1e1e1e;
+  border-bottom-color: #3e3e42;
+}
+
+body.dark-mode .split-divider {
+  background: #3e3e42;
+}
+
+body.dark-mode .split-divider.hover {
+  background: #505050;
+}
+
+body.dark-mode .split-divider.active {
+  background: #606060;
+}
+
+body.dark-mode #stats-display {
+  color: #858585;
+}
+
+/* Print styles for PDF export */
+@media print {
+  header, footer {
+    display: none;
+  }
+  
+  #container {
+    display: block;
+  }
+  
+  #edit {
+    display: none;
+  }
+  
+  #split-divider {
+    display: none;
+  }
+  
+  #preview {
+    width: 100% !important;
+    overflow: visible;
+  }
+  
+  .markdown-body {
+    max-width: 100%;
+  }
 }

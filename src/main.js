@@ -3,14 +3,17 @@ import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm'
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
+import html2pdf from 'html2pdf.js';
 
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
+    let darkMode = false;
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
+    const localStorageDarkModeKey = 'dark_mode_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -116,6 +119,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             let value = editor.getValue();
             convert(value);
             saveLastContent(value);
+            updateStats(value);
         });
 
         editor.onDidScrollChange((e) => {
@@ -215,6 +219,82 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }, 1000)
     };
 
+    // ----- stats utils -----
+
+    let updateStats = (text) => {
+        // Count words (split by whitespace and filter empty strings)
+        const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+        const wordCount = text.trim() === '' ? 0 : words.length;
+        
+        // Count characters (excluding spaces for more meaningful count)
+        const charCount = text.length;
+        
+        document.querySelector('#word-count').textContent = `Words: ${wordCount}`;
+        document.querySelector('#char-count').textContent = `Chars: ${charCount}`;
+    };
+
+    // ----- download utils -----
+
+    let downloadMarkdown = () => {
+        let content = editor.getValue();
+        let blob = new Blob([content], { type: 'text/markdown' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'document.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    let exportToPDF = () => {
+        const element = document.querySelector('#output');
+        const options = {
+            margin: 1,
+            filename: 'document.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                logging: false
+            },
+            jsPDF: { 
+                unit: 'in', 
+                format: 'letter', 
+                orientation: 'portrait' 
+            }
+        };
+        
+        html2pdf().set(options).from(element).save();
+    };
+
+    // ----- dark mode -----
+
+    let initDarkMode = (settings) => {
+        let checkbox = document.querySelector('#dark-mode-checkbox');
+        checkbox.checked = settings;
+        darkMode = settings;
+        applyDarkMode(settings);
+
+        checkbox.addEventListener('change', (event) => {
+            let checked = event.currentTarget.checked;
+            darkMode = checked;
+            applyDarkMode(checked);
+            saveDarkModeSettings(checked);
+        });
+    };
+
+    let applyDarkMode = (enabled) => {
+        if (enabled) {
+            document.body.classList.add('dark-mode');
+            monaco.editor.setTheme('vs-dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            monaco.editor.setTheme('vs');
+        }
+    };
+
     // ----- setup -----
 
     // setup navigation actions
@@ -238,6 +318,20 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupDownloadButton = () => {
+        document.querySelector("#download-md-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            downloadMarkdown();
+        });
+    };
+
+    let setupExportPDFButton = () => {
+        document.querySelector("#export-pdf-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            exportToPDF();
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -258,6 +352,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     let saveScrollBarSettings = (settings) => {
         let expiredAt = new Date(2099, 1, 1);
         Storehouse.setItem(localStorageNamespace, localStorageScrollBarKey, settings, expiredAt);
+    };
+
+    let loadDarkModeSettings = () => {
+        let lastSettings = Storehouse.getItem(localStorageNamespace, localStorageDarkModeKey);
+        return lastSettings;
+    };
+
+    let saveDarkModeSettings = (settings) => {
+        let expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageDarkModeKey, settings, expiredAt);
     };
 
     let setupDivider = () => {
@@ -344,13 +448,23 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     } else {
         presetValue(defaultInput);
     }
+    
+    // Initialize UI components
     setupResetButton();
     setupCopyButton(editor);
+    setupDownloadButton();
+    setupExportPDFButton();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
 
+    let darkModeSettings = loadDarkModeSettings() || false;
+    initDarkMode(darkModeSettings);
+
     setupDivider();
+    
+    // Initialize stats with current content
+    updateStats(editor.getValue());
 };
 
 window.addEventListener("load", () => {
