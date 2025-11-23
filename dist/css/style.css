@@ -78,6 +78,51 @@ header a:hover {
     user-select: none;
 }
 
+#download-md-button {
+    margin-left: 16px;
+}
+
+#export-pdf-button {
+    margin-left: 16px;
+}
+
+#import-button {
+    margin-left: 16px;
+}
+
+#help-button {
+    margin-left: 16px;
+}
+
+#fullscreen-button {
+    margin-left: 16px;
+}
+
+#dark-mode-button {
+    margin-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#stats-display {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: #ccc;
+}
+
+#autosave-indicator {
+    color: #4caf50;
+    opacity: 0.8;
+}
+
+#autosave-indicator.saving {
+    color: #ff9800;
+    opacity: 1;
+}
+
 header input[type="checkbox"] {
     vertical-align: middle;
     margin-right: 4px;
@@ -169,4 +214,287 @@ footer {
 
 .split-divider.active {
   background: #666;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+body.dark-mode header {
+  background-color: #2d2d30;
+}
+
+body.dark-mode #container {
+  background-color: #1e1e1e;
+  border-bottom-color: #3e3e42;
+}
+
+body.dark-mode .split-divider {
+  background: #3e3e42;
+}
+
+body.dark-mode .split-divider.hover {
+  background: #505050;
+}
+
+body.dark-mode .split-divider.active {
+  background: #606060;
+}
+
+body.dark-mode #stats-display {
+  color: #858585;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 700px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .modal-content {
+  background-color: #2d2d30;
+  border-color: #3e3e42;
+  color: #d4d4d4;
+}
+
+.close-modal {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+  color: #000;
+}
+
+body.dark-mode .close-modal:hover,
+body.dark-mode .close-modal:focus {
+  color: #fff;
+}
+
+.help-section {
+  margin: 20px 0;
+}
+
+.help-section h3 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.help-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.help-section li {
+  margin: 8px 0;
+  padding: 4px 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 6px;
+  font-family: monospace;
+  font-size: 0.9em;
+  color: #333;
+  background-color: #f4f4f4;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+}
+
+body.dark-mode kbd {
+  color: #d4d4d4;
+  background-color: #3e3e42;
+  border-color: #555;
+}
+
+.markdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.markdown-table th,
+.markdown-table td {
+  text-align: left;
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.markdown-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+body.dark-mode .markdown-table th {
+  background-color: #3e3e42;
+}
+
+body.dark-mode .markdown-table th,
+body.dark-mode .markdown-table td {
+  border-color: #555;
+}
+
+.markdown-table code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+body.dark-mode .markdown-table code {
+  background-color: #3e3e42;
+}
+
+/* Print styles for PDF export */
+@media print {
+  header, footer {
+    display: none;
+  }
+  
+  #container {
+    display: block;
+  }
+  
+  #edit {
+    display: none;
+  }
+  
+  #split-divider {
+    display: none;
+  }
+  
+  #preview {
+    width: 100% !important;
+    overflow: visible;
+  }
+  
+  .markdown-body {
+    max-width: 100%;
+  }
+  
+  .modal {
+    display: none !important;
+  }
+}
+
+/* Fullscreen mode */
+body.fullscreen-mode {
+  overflow: hidden;
+}
+
+body.fullscreen-mode header,
+body.fullscreen-mode footer {
+  display: none;
+}
+
+body.fullscreen-mode #container {
+  height: 100vh;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  header {
+    flex-wrap: wrap;
+    padding: 4px 8px;
+  }
+
+  #menu-items {
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+
+  #menu-items > div {
+    margin-left: 8px !important;
+    margin-bottom: 4px;
+  }
+
+  #menu-items > div:first-child {
+    margin-left: 0 !important;
+  }
+
+  #stats-display {
+    font-size: 10px;
+    gap: 8px;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  #github {
+    padding-right: 8px;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10% auto;
+    padding: 15px;
+  }
+
+  .split-container {
+    flex-direction: column;
+  }
+
+  .column {
+    width: 100% !important;
+  }
+
+  #edit {
+    height: 50vh;
+  }
+
+  #preview {
+    height: 50vh;
+  }
+
+  .split-divider {
+    width: 100%;
+    height: 5px;
+    cursor: row-resize;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  header {
+    font-size: 10px;
+  }
+
+  #menu-items {
+    gap: 4px;
+  }
+
+  .help-section h3 {
+    font-size: 1em;
+  }
+
+  .markdown-table {
+    font-size: 0.9em;
+  }
 }
