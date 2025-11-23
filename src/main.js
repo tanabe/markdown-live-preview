@@ -269,6 +269,31 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         html2pdf().set(options).from(element).save();
     };
 
+    // ----- import utils -----
+
+    let importFile = () => {
+        let fileInput = document.querySelector('#file-input');
+        fileInput.click();
+    };
+
+    let handleFileImport = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target.result;
+            editor.setValue(content);
+            editor.revealPosition({ lineNumber: 1, column: 1 });
+            editor.focus();
+            hasEdited = true;
+        };
+        reader.readAsText(file);
+        
+        // Reset file input
+        event.target.value = '';
+    };
+
     // ----- dark mode -----
 
     let initDarkMode = (settings) => {
@@ -332,6 +357,79 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupImportButton = () => {
+        document.querySelector("#import-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            importFile();
+        });
+        
+        document.querySelector("#file-input").addEventListener('change', handleFileImport);
+    };
+
+    let setupHelpButton = () => {
+        const modal = document.querySelector("#help-modal");
+        const helpBtn = document.querySelector("#help-button");
+        const closeBtn = document.querySelector(".close-modal");
+
+        helpBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            modal.style.display = "block";
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = "none";
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+    };
+
+    let setupKeyboardShortcuts = () => {
+        document.addEventListener('keydown', (event) => {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const ctrlKey = isMac ? event.metaKey : event.ctrlKey;
+
+            // Ctrl/Cmd + S: Download Markdown
+            if (ctrlKey && event.key === 's') {
+                event.preventDefault();
+                downloadMarkdown();
+            }
+            // Ctrl/Cmd + P: Export PDF
+            else if (ctrlKey && event.key === 'p') {
+                event.preventDefault();
+                exportToPDF();
+            }
+            // Ctrl/Cmd + O: Import file
+            else if (ctrlKey && event.key === 'o') {
+                event.preventDefault();
+                importFile();
+            }
+            // Ctrl/Cmd + H: Show/Hide help
+            else if (ctrlKey && event.key === 'h') {
+                event.preventDefault();
+                const modal = document.querySelector("#help-modal");
+                modal.style.display = modal.style.display === "block" ? "none" : "block";
+            }
+            // Ctrl/Cmd + D: Toggle dark mode
+            else if (ctrlKey && event.key === 'd') {
+                event.preventDefault();
+                const checkbox = document.querySelector('#dark-mode-checkbox');
+                checkbox.checked = !checkbox.checked;
+                darkMode = checkbox.checked;
+                applyDarkMode(checkbox.checked);
+                saveDarkModeSettings(checkbox.checked);
+            }
+            // Ctrl/Cmd + K: Reset
+            else if (ctrlKey && event.key === 'k') {
+                event.preventDefault();
+                reset();
+            }
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -342,6 +440,18 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     let saveLastContent = (content) => {
         let expiredAt = new Date(2099, 1, 1);
         Storehouse.setItem(localStorageNamespace, localStorageKey, content, expiredAt);
+        showAutosaveIndicator();
+    };
+
+    let showAutosaveIndicator = () => {
+        const indicator = document.querySelector('#autosave-indicator');
+        indicator.textContent = '💾 Saving...';
+        indicator.classList.add('saving');
+        
+        setTimeout(() => {
+            indicator.textContent = '✓ Saved';
+            indicator.classList.remove('saving');
+        }, 500);
     };
 
     let loadScrollBarSettings = () => {
@@ -454,6 +564,9 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     setupCopyButton(editor);
     setupDownloadButton();
     setupExportPDFButton();
+    setupImportButton();
+    setupHelpButton();
+    setupKeyboardShortcuts();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
