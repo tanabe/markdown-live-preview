@@ -5,6 +5,13 @@ import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
 import html2pdf from 'html2pdf.js';
 
+// Global configuration constants
+const APP_CONFIG = {
+    MAX_IMAGE_SIZE_MB: 5,
+    READING_SPEED_WPM: 200,
+    SERVICE_WORKER_UPDATE_INTERVAL_MS: 30 * 60 * 1000 // 30 minutes
+};
+
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
@@ -217,8 +224,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         toast.innerHTML = `
             <span class="toast-icon">${icons[type] || icons.info}</span>
             <span class="toast-message">${message}</span>
-            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            <button class="toast-close">×</button>
         `;
+        
+        // Add event listener for close button
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => toast.remove());
         
         container.appendChild(toast);
         
@@ -267,8 +278,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         // Count total characters
         const charCount = text.length;
         
-        // Calculate reading time (average 200 words per minute)
-        const readingTime = Math.ceil(wordCount / 200) || 0;
+        // Calculate reading time (configurable words per minute)
+        const readingTime = Math.ceil(wordCount / APP_CONFIG.READING_SPEED_WPM) || 0;
         
         document.querySelector('#word-count').textContent = `Words: ${wordCount}`;
         document.querySelector('#char-count').textContent = `Chars: ${charCount}`;
@@ -408,10 +419,10 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
     
     let processImageFile = (file) => {
-        // Check file size (max 5MB)
-        const maxSize = 5 * 1024 * 1024;
+        // Check file size (configurable max size)
+        const maxSize = APP_CONFIG.MAX_IMAGE_SIZE_MB * 1024 * 1024;
         if (file.size > maxSize) {
-            showToast('Image size should be less than 5MB', 'error');
+            showToast(`Image size should be less than ${APP_CONFIG.MAX_IMAGE_SIZE_MB}MB`, 'error');
             return;
         }
         
@@ -1004,10 +1015,10 @@ if ('serviceWorker' in navigator) {
             .then((registration) => {
                 console.log('ServiceWorker registered:', registration.scope);
                 
-                // Check for updates periodically
+                // Check for updates periodically (every 30 minutes)
                 setInterval(() => {
                     registration.update();
-                }, 60000); // Check every minute
+                }, APP_CONFIG.SERVICE_WORKER_UPDATE_INTERVAL_MS);
             })
             .catch((error) => {
                 console.log('ServiceWorker registration failed:', error);
