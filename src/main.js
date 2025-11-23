@@ -166,6 +166,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         document.querySelectorAll('.column').forEach((element) => {
             element.scrollTo({ top: 0 });
         });
+        showToast('Editor reset to default content', 'info');
     };
 
     let presetValue = (value) => {
@@ -197,6 +198,36 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         scrollBarSync = false;
     };
 
+    // ----- toast notification system -----
+    
+    let showToast = (message, type = 'info', duration = 3000) => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icons = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ'
+        };
+        
+        toast.innerHTML = `
+            <span class="toast-icon">${icons[type] || icons.info}</span>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        container.appendChild(toast);
+        
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+    };
+
     // ----- clipboard utils -----
 
     let copyToClipboard = (text, successHandler, errorHandler) => {
@@ -212,11 +243,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     let notifyCopied = () => {
-        let labelElement = document.querySelector("#copy-button a");
-        labelElement.innerHTML = "Copied!";
-        setTimeout(() => {
-            labelElement.innerHTML = "Copy";
-        }, 1000)
+        showToast('Markdown copied to clipboard!', 'success');
     };
 
     // ----- stats utils -----
@@ -246,9 +273,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        showToast('Markdown file downloaded successfully!', 'success');
     };
 
     let exportToPDF = () => {
+        showToast('Generating PDF...', 'info', 2000);
         const element = document.querySelector('#output');
         const options = {
             margin: 1,
@@ -266,7 +295,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             }
         };
         
-        html2pdf().set(options).from(element).save();
+        html2pdf().set(options).from(element).save().then(() => {
+            showToast('PDF exported successfully!', 'success');
+        }).catch(() => {
+            showToast('Failed to export PDF', 'error');
+        });
     };
 
     // ----- import utils -----
@@ -287,6 +320,10 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             editor.revealPosition({ lineNumber: 1, column: 1 });
             editor.focus();
             hasEdited = true;
+            showToast(`File "${file.name}" imported successfully!`, 'success');
+        };
+        reader.onerror = () => {
+            showToast('Failed to import file', 'error');
         };
         reader.readAsText(file);
         
