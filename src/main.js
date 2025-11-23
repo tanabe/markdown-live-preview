@@ -248,6 +248,15 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         showToast('Markdown copied to clipboard!', 'success');
     };
 
+    let copyHTMLToClipboard = () => {
+        const htmlContent = document.querySelector('#output').innerHTML;
+        copyToClipboard(htmlContent, () => {
+            showToast('HTML copied to clipboard!', 'success');
+        }, () => {
+            showToast('Failed to copy HTML', 'error');
+        });
+    };
+
     // ----- stats utils -----
 
     let updateStats = (text) => {
@@ -258,8 +267,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         // Count total characters
         const charCount = text.length;
         
+        // Calculate reading time (average 200 words per minute)
+        const readingTime = Math.ceil(wordCount / 200) || 0;
+        
         document.querySelector('#word-count').textContent = `Words: ${wordCount}`;
         document.querySelector('#char-count').textContent = `Chars: ${charCount}`;
+        document.querySelector('#reading-time').textContent = `Reading: ${readingTime} min`;
     };
 
     // ----- download utils -----
@@ -523,6 +536,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 () => {
                     // nothing to do
                 });
+        });
+    };
+
+    let setupCopyHTMLButton = () => {
+        document.querySelector("#copy-html-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            copyHTMLToClipboard();
         });
     };
 
@@ -935,6 +955,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     setupToolbar();
     setupResetButton();
     setupCopyButton(editor);
+    setupCopyHTMLButton();
     setupDownloadButton();
     setupExportPDFButton();
     setupImportButton();
