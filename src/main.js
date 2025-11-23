@@ -5,15 +5,24 @@ import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
 import html2pdf from 'html2pdf.js';
 
+// Global configuration constants
+const APP_CONFIG = {
+    MAX_IMAGE_SIZE_MB: 5,
+    READING_SPEED_WPM: 200,
+    SERVICE_WORKER_UPDATE_INTERVAL_MS: 30 * 60 * 1000 // 30 minutes
+};
+
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
     let darkMode = false;
+    let currentTheme = 'vs';
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageDarkModeKey = 'dark_mode_settings';
+    const localStorageThemeKey = 'theme_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -166,6 +175,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         document.querySelectorAll('.column').forEach((element) => {
             element.scrollTo({ top: 0 });
         });
+        showToast('Editor reset to default content', 'info');
     };
 
     let presetValue = (value) => {
@@ -197,6 +207,40 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         scrollBarSync = false;
     };
 
+    // ----- toast notification system -----
+    
+    let showToast = (message, type = 'info', duration = 3000) => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icons = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ'
+        };
+        
+        toast.innerHTML = `
+            <span class="toast-icon">${icons[type] || icons.info}</span>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close">×</button>
+        `;
+        
+        // Add event listener for close button
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => toast.remove());
+        
+        container.appendChild(toast);
+        
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+    };
+
     // ----- clipboard utils -----
 
     let copyToClipboard = (text, successHandler, errorHandler) => {
@@ -212,11 +256,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     let notifyCopied = () => {
-        let labelElement = document.querySelector("#copy-button a");
-        labelElement.innerHTML = "Copied!";
-        setTimeout(() => {
-            labelElement.innerHTML = "Copy";
-        }, 1000)
+        showToast('Markdown copied to clipboard!', 'success');
+    };
+
+    let copyHTMLToClipboard = () => {
+        const htmlContent = document.querySelector('#output').innerHTML;
+        copyToClipboard(htmlContent, () => {
+            showToast('HTML copied to clipboard!', 'success');
+        }, () => {
+            showToast('Failed to copy HTML', 'error');
+        });
     };
 
     // ----- stats utils -----
@@ -229,8 +278,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         // Count total characters
         const charCount = text.length;
         
+        // Calculate reading time (configurable words per minute)
+        const readingTime = Math.ceil(wordCount / APP_CONFIG.READING_SPEED_WPM) || 0;
+        
         document.querySelector('#word-count').textContent = `Words: ${wordCount}`;
         document.querySelector('#char-count').textContent = `Chars: ${charCount}`;
+        document.querySelector('#reading-time').textContent = `Reading: ${readingTime} min`;
     };
 
     // ----- download utils -----
@@ -246,9 +299,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        showToast('Markdown file downloaded successfully!', 'success');
     };
 
     let exportToPDF = () => {
+        showToast('Generating PDF...', 'info', 2000);
         const element = document.querySelector('#output');
         const options = {
             margin: 1,
@@ -266,7 +321,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             }
         };
         
-        html2pdf().set(options).from(element).save();
+        html2pdf().set(options).from(element).save().then(() => {
+            showToast('PDF exported successfully!', 'success');
+        }).catch(() => {
+            showToast('Failed to export PDF', 'error');
+        });
     };
 
     // ----- import utils -----
@@ -287,11 +346,109 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             editor.revealPosition({ lineNumber: 1, column: 1 });
             editor.focus();
             hasEdited = true;
+            showToast(`File "${file.name}" imported successfully!`, 'success');
+        };
+        reader.onerror = () => {
+            showToast('Failed to import file', 'error');
         };
         reader.readAsText(file);
         
         // Reset file input
         event.target.value = '';
+    };
+
+    // ----- image upload -----
+
+    let setupImageUpload = () => {
+        const imageInput = document.querySelector('#image-input');
+        const editorElement = document.querySelector('#editor');
+        
+        // Handle image button click
+        document.getElementById('toolbar-image').addEventListener('click', (e) => {
+            e.preventDefault();
+            imageInput.click();
+        });
+        
+        // Handle image file selection
+        imageInput.addEventListener('change', handleImageUpload);
+        
+        // Drag and drop support
+        editorElement.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            editorElement.classList.add('drag-over');
+        });
+        
+        editorElement.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            editorElement.classList.remove('drag-over');
+        });
+        
+        editorElement.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            editorElement.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageDrop(files);
+            }
+        });
+    };
+    
+    let handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select an image file', 'error');
+            return;
+        }
+        
+        processImageFile(file);
+        event.target.value = '';
+    };
+    
+    let handleImageDrop = (files) => {
+        for (let file of files) {
+            if (file.type.startsWith('image/')) {
+                processImageFile(file);
+            }
+        }
+    };
+    
+    let processImageFile = (file) => {
+        // Check file size (configurable max size)
+        const maxSize = APP_CONFIG.MAX_IMAGE_SIZE_MB * 1024 * 1024;
+        if (file.size > maxSize) {
+            showToast(`Image size should be less than ${APP_CONFIG.MAX_IMAGE_SIZE_MB}MB`, 'error');
+            return;
+        }
+        
+        showToast('Processing image...', 'info', 1500);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64Image = e.target.result;
+            const selection = editor.getSelection();
+            const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            const markdown = `![${fileName}](${base64Image})`;
+            
+            editor.executeEdits('image-upload', [{
+                range: selection,
+                text: markdown
+            }]);
+            
+            editor.focus();
+            showToast('Image inserted successfully!', 'success');
+        };
+        
+        reader.onerror = () => {
+            showToast('Failed to process image', 'error');
+        };
+        
+        reader.readAsDataURL(file);
     };
 
     // ----- dark mode -----
@@ -320,6 +477,56 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
     };
 
+    // ----- theme switching -----
+
+    let initThemeSelector = (savedTheme) => {
+        const themeDropdown = document.querySelector('#theme-dropdown');
+        currentTheme = savedTheme || 'vs';
+        themeDropdown.value = currentTheme;
+        applyTheme(currentTheme);
+
+        themeDropdown.addEventListener('change', (event) => {
+            const theme = event.target.value;
+            currentTheme = theme;
+            applyTheme(theme);
+            saveThemeSettings(theme);
+            showToast(`Theme changed to ${getThemeName(theme)}`, 'success', 2000);
+        });
+    };
+
+    let applyTheme = (theme) => {
+        monaco.editor.setTheme(theme);
+        
+        // Apply corresponding body class for preview styling
+        document.body.classList.remove('dark-mode', 'light-mode', 'hc-mode');
+        
+        if (theme === 'vs-dark') {
+            document.body.classList.add('dark-mode');
+        } else if (theme === 'hc-black') {
+            document.body.classList.add('dark-mode', 'hc-mode');
+        } else {
+            document.body.classList.add('light-mode');
+        }
+    };
+
+    let getThemeName = (theme) => {
+        const themeNames = {
+            'vs': 'Light',
+            'vs-dark': 'Dark',
+            'hc-black': 'High Contrast'
+        };
+        return themeNames[theme] || theme;
+    };
+
+    let loadThemeSettings = () => {
+        return Storehouse.getItem(localStorageNamespace, localStorageThemeKey);
+    };
+
+    let saveThemeSettings = (theme) => {
+        const expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageThemeKey, theme, expiredAt);
+    };
+
     // ----- setup -----
 
     // setup navigation actions
@@ -340,6 +547,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 () => {
                     // nothing to do
                 });
+        });
+    };
+
+    let setupCopyHTMLButton = () => {
+        document.querySelector("#copy-html-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            copyHTMLToClipboard();
         });
     };
 
@@ -476,21 +690,147 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 const isVisible = modal.style.display === "block";
                 modal.style.display = isVisible ? "none" : "block";
             }
-            // Ctrl/Cmd + D: Toggle dark mode
+            // Ctrl/Cmd + D: Cycle through themes
             else if (ctrlKey && event.key === 'd') {
                 event.preventDefault();
-                const checkbox = document.querySelector('#dark-mode-checkbox');
-                checkbox.checked = !checkbox.checked;
-                darkMode = checkbox.checked;
-                applyDarkMode(checkbox.checked);
-                saveDarkModeSettings(checkbox.checked);
+                const themeDropdown = document.querySelector('#theme-dropdown');
+                const themes = ['vs', 'vs-dark', 'hc-black'];
+                const currentIndex = themes.indexOf(currentTheme);
+                const nextIndex = (currentIndex + 1) % themes.length;
+                const nextTheme = themes[nextIndex];
+                themeDropdown.value = nextTheme;
+                currentTheme = nextTheme;
+                applyTheme(nextTheme);
+                saveThemeSettings(nextTheme);
+                showToast(`Theme: ${getThemeName(nextTheme)}`, 'info', 1500);
             }
             // Ctrl/Cmd + K: Reset
             else if (ctrlKey && event.key === 'k') {
                 event.preventDefault();
                 reset();
             }
+            // Ctrl/Cmd + B: Bold
+            else if (ctrlKey && event.key === 'b') {
+                event.preventDefault();
+                insertMarkdown('bold');
+            }
+            // Ctrl/Cmd + I: Italic
+            else if (ctrlKey && event.key === 'i') {
+                event.preventDefault();
+                insertMarkdown('italic');
+            }
         });
+    };
+
+    // ----- toolbar actions -----
+    
+    let insertMarkdown = (type) => {
+        const selection = editor.getSelection();
+        const selectedText = editor.getModel().getValueInRange(selection);
+        let replacement = '';
+        let cursorOffset = 0;
+
+        switch(type) {
+            case 'bold':
+                replacement = selectedText ? `**${selectedText}**` : '**bold text**';
+                cursorOffset = selectedText ? 2 : 2;
+                break;
+            case 'italic':
+                replacement = selectedText ? `*${selectedText}*` : '*italic text*';
+                cursorOffset = selectedText ? 1 : 1;
+                break;
+            case 'strikethrough':
+                replacement = selectedText ? `~~${selectedText}~~` : '~~strikethrough text~~';
+                cursorOffset = selectedText ? 2 : 2;
+                break;
+            case 'h1':
+                replacement = selectedText ? `# ${selectedText}` : '# Heading 1';
+                cursorOffset = 2;
+                break;
+            case 'h2':
+                replacement = selectedText ? `## ${selectedText}` : '## Heading 2';
+                cursorOffset = 3;
+                break;
+            case 'h3':
+                replacement = selectedText ? `### ${selectedText}` : '### Heading 3';
+                cursorOffset = 4;
+                break;
+            case 'link':
+                replacement = selectedText ? `[${selectedText}](url)` : '[link text](url)';
+                cursorOffset = selectedText ? selectedText.length + 3 : 12;
+                break;
+            case 'image':
+                replacement = selectedText ? `![${selectedText}](image-url)` : '![alt text](image-url)';
+                cursorOffset = selectedText ? selectedText.length + 4 : 13;
+                break;
+            case 'code':
+                replacement = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : '```\ncode block\n```';
+                cursorOffset = 4;
+                break;
+            case 'inline-code':
+                replacement = selectedText ? `\`${selectedText}\`` : '`code`';
+                cursorOffset = selectedText ? 1 : 1;
+                break;
+            case 'ul':
+                replacement = selectedText ? `- ${selectedText}` : '- List item';
+                cursorOffset = 2;
+                break;
+            case 'ol':
+                replacement = selectedText ? `1. ${selectedText}` : '1. List item';
+                cursorOffset = 3;
+                break;
+            case 'task':
+                replacement = selectedText ? `- [ ] ${selectedText}` : '- [ ] Task item';
+                cursorOffset = 6;
+                break;
+            case 'quote':
+                replacement = selectedText ? `> ${selectedText}` : '> Blockquote';
+                cursorOffset = 2;
+                break;
+            case 'table':
+                replacement = '| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Cell 1   | Cell 2   | Cell 3   |';
+                cursorOffset = 2;
+                break;
+            case 'emoji':
+                replacement = '😊';
+                cursorOffset = 0;
+                break;
+        }
+
+        editor.executeEdits('toolbar', [{
+            range: selection,
+            text: replacement
+        }]);
+
+        // Set cursor position
+        if (!selectedText) {
+            const position = selection.getStartPosition();
+            editor.setPosition({
+                lineNumber: position.lineNumber,
+                column: position.column + cursorOffset
+            });
+        }
+        
+        editor.focus();
+    };
+
+    let setupToolbar = () => {
+        document.getElementById('toolbar-bold').addEventListener('click', () => insertMarkdown('bold'));
+        document.getElementById('toolbar-italic').addEventListener('click', () => insertMarkdown('italic'));
+        document.getElementById('toolbar-strikethrough').addEventListener('click', () => insertMarkdown('strikethrough'));
+        document.getElementById('toolbar-h1').addEventListener('click', () => insertMarkdown('h1'));
+        document.getElementById('toolbar-h2').addEventListener('click', () => insertMarkdown('h2'));
+        document.getElementById('toolbar-h3').addEventListener('click', () => insertMarkdown('h3'));
+        document.getElementById('toolbar-link').addEventListener('click', () => insertMarkdown('link'));
+        // toolbar-image is handled in setupImageUpload for file upload functionality
+        document.getElementById('toolbar-code').addEventListener('click', () => insertMarkdown('code'));
+        document.getElementById('toolbar-inline-code').addEventListener('click', () => insertMarkdown('inline-code'));
+        document.getElementById('toolbar-ul').addEventListener('click', () => insertMarkdown('ul'));
+        document.getElementById('toolbar-ol').addEventListener('click', () => insertMarkdown('ol'));
+        document.getElementById('toolbar-task').addEventListener('click', () => insertMarkdown('task'));
+        document.getElementById('toolbar-quote').addEventListener('click', () => insertMarkdown('quote'));
+        document.getElementById('toolbar-table').addEventListener('click', () => insertMarkdown('table'));
+        document.getElementById('toolbar-emoji').addEventListener('click', () => insertMarkdown('emoji'));
     };
 
     // ----- local state -----
@@ -623,17 +963,23 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     
     // Initialize UI components
+    setupToolbar();
     setupResetButton();
     setupCopyButton(editor);
+    setupCopyHTMLButton();
     setupDownloadButton();
     setupExportPDFButton();
     setupImportButton();
+    setupImageUpload();
     setupHelpButton();
     setupFullscreenButton();
     setupKeyboardShortcuts();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
+
+    let themeSettings = loadThemeSettings() || 'vs';
+    initThemeSelector(themeSettings);
 
     let darkModeSettings = loadDarkModeSettings() || false;
     initDarkMode(darkModeSettings);
@@ -643,6 +989,42 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     // Initialize stats with current content
     updateStats(editor.getValue());
 };
+
+// ----- PWA Support -----
+
+let deferredPrompt;
+
+// Capture the install prompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show install button/prompt if needed
+    console.log('PWA install prompt available');
+});
+
+// Handle app installed
+window.addEventListener('appinstalled', () => {
+    console.log('PWA installed successfully');
+    deferredPrompt = null;
+});
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('ServiceWorker registered:', registration.scope);
+                
+                // Check for updates periodically (every 30 minutes)
+                setInterval(() => {
+                    registration.update();
+                }, APP_CONFIG.SERVICE_WORKER_UPDATE_INTERVAL_MS);
+            })
+            .catch((error) => {
+                console.log('ServiceWorker registration failed:', error);
+            });
+    });
+}
 
 window.addEventListener("load", () => {
     init();
