@@ -368,10 +368,30 @@ body.dark-mode .toolbar-divider {
 
 #editor-wrapper {
   height: calc(100% - 49px);
+  position: relative;
 }
 
 #editor {
   height: 100%;
+  transition: opacity 0.2s;
+}
+
+#editor.drag-over {
+  opacity: 0.5;
+  border: 2px dashed #4caf50;
+}
+
+#editor.drag-over::after {
+  content: '📷 Drop images here';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #4caf50;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 10;
 }
 
 #preview-wrapper {

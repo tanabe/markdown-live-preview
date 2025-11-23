@@ -333,6 +333,100 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         event.target.value = '';
     };
 
+    // ----- image upload -----
+
+    let setupImageUpload = () => {
+        const imageInput = document.querySelector('#image-input');
+        const editorElement = document.querySelector('#editor');
+        
+        // Handle image button click
+        document.getElementById('toolbar-image').addEventListener('click', (e) => {
+            e.preventDefault();
+            imageInput.click();
+        });
+        
+        // Handle image file selection
+        imageInput.addEventListener('change', handleImageUpload);
+        
+        // Drag and drop support
+        editorElement.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            editorElement.classList.add('drag-over');
+        });
+        
+        editorElement.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            editorElement.classList.remove('drag-over');
+        });
+        
+        editorElement.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            editorElement.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageDrop(files);
+            }
+        });
+    };
+    
+    let handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select an image file', 'error');
+            return;
+        }
+        
+        processImageFile(file);
+        event.target.value = '';
+    };
+    
+    let handleImageDrop = (files) => {
+        for (let file of files) {
+            if (file.type.startsWith('image/')) {
+                processImageFile(file);
+            }
+        }
+    };
+    
+    let processImageFile = (file) => {
+        // Check file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            showToast('Image size should be less than 5MB', 'error');
+            return;
+        }
+        
+        showToast('Processing image...', 'info', 1500);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64Image = e.target.result;
+            const selection = editor.getSelection();
+            const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            const markdown = `![${fileName}](${base64Image})`;
+            
+            editor.executeEdits('image-upload', [{
+                range: selection,
+                text: markdown
+            }]);
+            
+            editor.focus();
+            showToast('Image inserted successfully!', 'success');
+        };
+        
+        reader.onerror = () => {
+            showToast('Failed to process image', 'error');
+        };
+        
+        reader.readAsDataURL(file);
+    };
+
     // ----- dark mode -----
 
     let initDarkMode = (settings) => {
@@ -697,7 +791,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         document.getElementById('toolbar-h2').addEventListener('click', () => insertMarkdown('h2'));
         document.getElementById('toolbar-h3').addEventListener('click', () => insertMarkdown('h3'));
         document.getElementById('toolbar-link').addEventListener('click', () => insertMarkdown('link'));
-        document.getElementById('toolbar-image').addEventListener('click', () => insertMarkdown('image'));
+        // toolbar-image is handled in setupImageUpload for file upload functionality
         document.getElementById('toolbar-code').addEventListener('click', () => insertMarkdown('code'));
         document.getElementById('toolbar-inline-code').addEventListener('click', () => insertMarkdown('inline-code'));
         document.getElementById('toolbar-ul').addEventListener('click', () => insertMarkdown('ul'));
@@ -844,6 +938,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     setupDownloadButton();
     setupExportPDFButton();
     setupImportButton();
+    setupImageUpload();
     setupHelpButton();
     setupFullscreenButton();
     setupKeyboardShortcuts();
