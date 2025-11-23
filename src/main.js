@@ -490,7 +490,128 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 event.preventDefault();
                 reset();
             }
+            // Ctrl/Cmd + B: Bold
+            else if (ctrlKey && event.key === 'b') {
+                event.preventDefault();
+                insertMarkdown('bold');
+            }
+            // Ctrl/Cmd + I: Italic
+            else if (ctrlKey && event.key === 'i') {
+                event.preventDefault();
+                insertMarkdown('italic');
+            }
         });
+    };
+
+    // ----- toolbar actions -----
+    
+    let insertMarkdown = (type) => {
+        const selection = editor.getSelection();
+        const selectedText = editor.getModel().getValueInRange(selection);
+        let replacement = '';
+        let cursorOffset = 0;
+
+        switch(type) {
+            case 'bold':
+                replacement = selectedText ? `**${selectedText}**` : '**bold text**';
+                cursorOffset = selectedText ? 2 : 2;
+                break;
+            case 'italic':
+                replacement = selectedText ? `*${selectedText}*` : '*italic text*';
+                cursorOffset = selectedText ? 1 : 1;
+                break;
+            case 'strikethrough':
+                replacement = selectedText ? `~~${selectedText}~~` : '~~strikethrough text~~';
+                cursorOffset = selectedText ? 2 : 2;
+                break;
+            case 'h1':
+                replacement = selectedText ? `# ${selectedText}` : '# Heading 1';
+                cursorOffset = 2;
+                break;
+            case 'h2':
+                replacement = selectedText ? `## ${selectedText}` : '## Heading 2';
+                cursorOffset = 3;
+                break;
+            case 'h3':
+                replacement = selectedText ? `### ${selectedText}` : '### Heading 3';
+                cursorOffset = 4;
+                break;
+            case 'link':
+                replacement = selectedText ? `[${selectedText}](url)` : '[link text](url)';
+                cursorOffset = selectedText ? selectedText.length + 3 : 12;
+                break;
+            case 'image':
+                replacement = selectedText ? `![${selectedText}](image-url)` : '![alt text](image-url)';
+                cursorOffset = selectedText ? selectedText.length + 4 : 13;
+                break;
+            case 'code':
+                replacement = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : '```\ncode block\n```';
+                cursorOffset = 4;
+                break;
+            case 'inline-code':
+                replacement = selectedText ? `\`${selectedText}\`` : '`code`';
+                cursorOffset = selectedText ? 1 : 1;
+                break;
+            case 'ul':
+                replacement = selectedText ? `- ${selectedText}` : '- List item';
+                cursorOffset = 2;
+                break;
+            case 'ol':
+                replacement = selectedText ? `1. ${selectedText}` : '1. List item';
+                cursorOffset = 3;
+                break;
+            case 'task':
+                replacement = selectedText ? `- [ ] ${selectedText}` : '- [ ] Task item';
+                cursorOffset = 6;
+                break;
+            case 'quote':
+                replacement = selectedText ? `> ${selectedText}` : '> Blockquote';
+                cursorOffset = 2;
+                break;
+            case 'table':
+                replacement = '| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Cell 1   | Cell 2   | Cell 3   |';
+                cursorOffset = 2;
+                break;
+            case 'emoji':
+                replacement = '😊';
+                cursorOffset = 0;
+                break;
+        }
+
+        editor.executeEdits('toolbar', [{
+            range: selection,
+            text: replacement
+        }]);
+
+        // Set cursor position
+        if (!selectedText) {
+            const position = selection.getStartPosition();
+            editor.setPosition({
+                lineNumber: position.lineNumber,
+                column: position.column + cursorOffset
+            });
+        }
+        
+        editor.focus();
+    };
+
+    let setupToolbar = () => {
+        document.getElementById('toolbar-bold').addEventListener('click', () => insertMarkdown('bold'));
+        document.getElementById('toolbar-italic').addEventListener('click', () => insertMarkdown('italic'));
+        document.getElementById('toolbar-strikethrough').addEventListener('click', () => insertMarkdown('strikethrough'));
+        document.getElementById('toolbar-h1').addEventListener('click', () => insertMarkdown('h1'));
+        document.getElementById('toolbar-h2').addEventListener('click', () => insertMarkdown('h2'));
+        document.getElementById('toolbar-h3').addEventListener('click', () => insertMarkdown('h3'));
+        document.getElementById('toolbar-link').addEventListener('click', () => insertMarkdown('link'));
+        document.getElementById('toolbar-image').addEventListener('click', () => insertMarkdown('image'));
+        document.getElementById('toolbar-code').addEventListener('click', () => insertMarkdown('code'));
+        document.getElementById('toolbar-inline-code').addEventListener('click', () => insertMarkdown('inline-code'));
+        document.getElementById('toolbar-ul').addEventListener('click', () => insertMarkdown('ul'));
+        document.getElementById('toolbar-ol').addEventListener('click', () => insertMarkdown('ol'));
+        document.getElementById('toolbar-task').addEventListener('click', () => insertMarkdown('task'));
+        document.getElementById('toolbar-quote').addEventListener('click', () => insertMarkdown('quote'));
+        document.getElementById('toolbar-table').addEventListener('click', () => insertMarkdown('table'));
+        document.getElementById('toolbar-emoji').addEventListener('click', () => insertMarkdown('emoji'));
     };
 
     // ----- local state -----
@@ -623,6 +744,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     
     // Initialize UI components
+    setupToolbar();
     setupResetButton();
     setupCopyButton(editor);
     setupDownloadButton();
