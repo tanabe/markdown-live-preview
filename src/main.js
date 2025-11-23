@@ -958,6 +958,42 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     updateStats(editor.getValue());
 };
 
+// ----- PWA Support -----
+
+let deferredPrompt;
+
+// Capture the install prompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show install button/prompt if needed
+    console.log('PWA install prompt available');
+});
+
+// Handle app installed
+window.addEventListener('appinstalled', () => {
+    console.log('PWA installed successfully');
+    deferredPrompt = null;
+});
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('ServiceWorker registered:', registration.scope);
+                
+                // Check for updates periodically
+                setInterval(() => {
+                    registration.update();
+                }, 60000); // Check every minute
+            })
+            .catch((error) => {
+                console.log('ServiceWorker registration failed:', error);
+            });
+    });
+}
+
 window.addEventListener("load", () => {
     init();
 });
