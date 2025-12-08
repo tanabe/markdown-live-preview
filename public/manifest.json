@@ -1,0 +1,32 @@
+{
+  "name": "Markdown Live Preview",
+  "short_name": "MD Preview",
+  "description": "A feature-rich markdown editor with live preview, themes, and export options",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#444444",
+  "orientation": "any",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/image/screenshot.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ]
+}
