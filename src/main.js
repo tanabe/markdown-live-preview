@@ -245,6 +245,188 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    // ----- import/export functions -----
+
+    let setupImportButton = (editor) => {
+        const importButton = document.querySelector("#import-button a");
+        const fileInput = document.querySelector("#file-input");
+
+        importButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    editor.setValue(content);
+                    editor.revealPosition({ lineNumber: 1, column: 1 });
+                    editor.focus();
+                    hasEdited = true;
+                };
+                reader.readAsText(file);
+                // Reset file input so same file can be imported again
+                fileInput.value = '';
+            }
+        });
+    };
+
+    let setupExportButtons = (editor) => {
+        // Export as Markdown
+        document.querySelector("#export-md").addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const content = editor.getValue();
+            downloadFile(content, 'document.md', 'text/plain;charset=utf-8');
+        });
+
+        // Export as HTML
+        document.querySelector("#export-html").addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const htmlContent = generateFullHTML();
+            downloadFile(htmlContent, 'document.html', 'text/html;charset=utf-8');
+        });
+
+        // Export as PDF (uses print dialog - standard browser approach)
+        document.querySelector("#export-pdf").addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.print();
+        });
+    };
+
+    let downloadFile = (content, filename, mimeType) => {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        // Delay cleanup to ensure download starts
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    };
+
+    let generateFullHTML = () => {
+        const previewContent = document.querySelector('#output').innerHTML;
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Export</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown-light.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+        @media (max-width: 767px) {
+            body { padding: 15px; }
+        }
+    </style>
+</head>
+<body class="markdown-body">
+${previewContent}
+</body>
+</html>`;
+    };
+
+    let exportAsPDF = () => {
+        // Create a new window with just the preview content
+        const previewContent = document.querySelector('#output').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Markdown Export</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown-light.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+        .markdown-body {
+            font-size: 12pt;
+            line-height: 1.6;
+        }
+        .markdown-body pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+        }
+        .markdown-body code {
+            background-color: rgba(175, 184, 193, 0.2);
+            border-radius: 4px;
+            padding: 0.2em 0.4em;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .markdown-body table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .markdown-body table th,
+        .markdown-body table td {
+            border: 1px solid #d0d7de;
+            padding: 8px 12px;
+        }
+        .markdown-body table th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        .markdown-body table tr:nth-child(even) {
+            background-color: #f6f8fa;
+        }
+        .markdown-body blockquote {
+            border-left: 4px solid #d0d7de;
+            background-color: #f6f8fa;
+            padding: 8px 16px;
+            margin: 16px 0;
+            color: #57606a;
+        }
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body class="markdown-body">
+${previewContent}
+<script>
+    window.onload = function() {
+        setTimeout(function() {
+            window.print();
+            window.close();
+        }, 250);
+    };
+</script>
+</body>
+</html>`);
+        printWindow.document.close();
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -354,6 +536,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     setupResetButton();
     setupCopyButton(editor);
     setupPrintButton();
+    setupImportButton(editor);
+    setupExportButtons(editor);
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);

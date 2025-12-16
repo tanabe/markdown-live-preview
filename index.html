@@ -40,6 +40,23 @@
   <header>
     <div id="menu-items">
       <div><a href="/">Markdown Live Preview</a></div>
+      <div id="import-button"><a href="#">Import</a><input type="file"
+               id="file-input"
+               accept=".md,.markdown,.txt"
+               hidden></div>
+      <div id="export-dropdown"
+           class="dropdown">
+        <a href="#"
+           id="export-button">Export ▾</a>
+        <div class="dropdown-content">
+          <a href="#"
+             id="export-md">Markdown (.md)</a>
+          <a href="#"
+             id="export-html">HTML (.html)</a>
+          <a href="#"
+             id="export-pdf">PDF (.pdf)</a>
+        </div>
+      </div>
       <div id="reset-button"><a href="#">Reset</a></div>
       <div id="copy-button"><a href="#">Copy</a></div>
       <div id="print-button"><a href="#">Print</a></div>
