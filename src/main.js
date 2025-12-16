@@ -238,6 +238,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let setupPrintButton = () => {
+        document.querySelector("#print-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            window.print();
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -346,6 +353,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+    setupPrintButton();
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
