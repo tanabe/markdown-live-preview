@@ -1,19 +1,22 @@
-import Storehouse from 'storehouse-js';
-import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
-import 'github-markdown-css/github-markdown-light.css';
+import Storehouse from "storehouse-js";
+import * as monaco from "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import "github-markdown-css/github-markdown-light.css";
 
 const init = () => {
-    let hasEdited = false;
-    let scrollBarSync = false;
+  let hasEdited = false;
+  let scrollBarSync = false;
+  let isDarkMode = false;
 
-    const localStorageNamespace = 'com.markdownlivepreview';
-    const localStorageKey = 'last_state';
-    const localStorageScrollBarKey = 'scroll_bar_settings';
-    const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
-    // default template
-    const defaultInput = `# Markdown syntax guide
+  const localStorageNamespace = "com.markdownlivepreview";
+  const localStorageKey = "last_state";
+  const localStorageScrollBarKey = "scroll_bar_settings";
+  const localStorageThemeKey = "theme_settings";
+  const confirmationMessage =
+    "Are you sure you want to reset? Your changes will be lost.";
+  // default template
+  const defaultInput = `# Markdown syntax guide
 
 ## Headers
 
@@ -84,275 +87,348 @@ ${"`"}${"`"}${"`"}
 This web site is using ${"`"}markedjs/marked${"`"}.
 `;
 
-    self.MonacoEnvironment = {
-        getWorker(_, label) {
-            return new Proxy({}, { get: () => () => { } });
-        }
+  self.MonacoEnvironment = {
+    getWorker(_, label) {
+      return new Proxy({}, { get: () => () => {} });
+    },
+  };
+
+  let setupEditor = () => {
+    let editor = monaco.editor.create(document.querySelector("#editor"), {
+      fontSize: 14,
+      language: "markdown",
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      automaticLayout: true,
+      scrollbar: {
+        vertical: "visible",
+        horizontal: "visible",
+      },
+      wordWrap: "on",
+      hover: { enabled: false },
+      quickSuggestions: false,
+      suggestOnTriggerCharacters: false,
+      folding: false,
+    });
+
+    editor.onDidChangeModelContent(() => {
+      let changed = editor.getValue() != defaultInput;
+      if (changed) {
+        hasEdited = true;
+      }
+      let value = editor.getValue();
+      convert(value);
+      saveLastContent(value);
+    });
+
+    editor.onDidScrollChange((e) => {
+      if (!scrollBarSync) {
+        return;
+      }
+
+      const scrollTop = e.scrollTop;
+      const scrollHeight = e.scrollHeight;
+      const height = editor.getLayoutInfo().height;
+
+      const maxScrollTop = scrollHeight - height;
+      const scrollRatio = scrollTop / maxScrollTop;
+
+      let previewElement = document.querySelector("#preview");
+      let targetY =
+        (previewElement.scrollHeight - previewElement.clientHeight) *
+        scrollRatio;
+      previewElement.scrollTo(0, targetY);
+    });
+
+    return editor;
+  };
+
+  // Render markdown text as html
+  let convert = (markdown) => {
+    let options = {
+      headerIds: false,
+      mangle: false,
+    };
+    let html = marked.parse(markdown, options);
+    let sanitized = DOMPurify.sanitize(html);
+    document.querySelector("#output").innerHTML = sanitized;
+  };
+
+  // Reset input text
+  let reset = () => {
+    let changed = editor.getValue() != defaultInput;
+    if (hasEdited || changed) {
+      var confirmed = window.confirm(confirmationMessage);
+      if (!confirmed) {
+        return;
+      }
     }
+    presetValue(defaultInput);
+    document.querySelectorAll(".column").forEach((element) => {
+      element.scrollTo({ top: 0 });
+    });
+  };
 
-    let setupEditor = () => {
-        let editor = monaco.editor.create(document.querySelector('#editor'), {
-            fontSize: 14,
-            language: 'markdown',
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            scrollbar: {
-                vertical: 'visible',
-                horizontal: 'visible'
-            },
-            wordWrap: 'on',
-            hover: { enabled: false },
-            quickSuggestions: false,
-            suggestOnTriggerCharacters: false,
-            folding: false
-        });
+  let presetValue = (value) => {
+    editor.setValue(value);
+    editor.revealPosition({ lineNumber: 1, column: 1 });
+    editor.focus();
+    hasEdited = false;
+  };
 
-        editor.onDidChangeModelContent(() => {
-            let changed = editor.getValue() != defaultInput;
-            if (changed) {
-                hasEdited = true;
-            }
-            let value = editor.getValue();
-            convert(value);
-            saveLastContent(value);
-        });
+  // ----- sync scroll position -----
 
-        editor.onDidScrollChange((e) => {
-            if (!scrollBarSync) {
-                return;
-            }
+  let initScrollBarSync = (settings) => {
+    let checkbox = document.querySelector("#sync-scroll-checkbox");
+    checkbox.checked = settings;
+    scrollBarSync = settings;
 
-            const scrollTop = e.scrollTop;
-            const scrollHeight = e.scrollHeight;
-            const height = editor.getLayoutInfo().height;
+    checkbox.addEventListener("change", (event) => {
+      let checked = event.currentTarget.checked;
+      scrollBarSync = checked;
+      saveScrollBarSettings(checked);
+    });
+  };
 
-            const maxScrollTop = scrollHeight - height;
-            const scrollRatio = scrollTop / maxScrollTop;
+  let enableScrollBarSync = () => {
+    scrollBarSync = true;
+  };
 
-            let previewElement = document.querySelector('#preview');
-            let targetY = (previewElement.scrollHeight - previewElement.clientHeight) * scrollRatio;
-            previewElement.scrollTo(0, targetY);
-        });
+  let disableScrollBarSync = () => {
+    scrollBarSync = false;
+  };
 
-        return editor;
-    };
+  // ----- clipboard utils -----
 
-    // Render markdown text as html
-    let convert = (markdown) => {
-        let options = {
-            headerIds: false,
-            mangle: false
-        };
-        let html = marked.parse(markdown, options);
-        let sanitized = DOMPurify.sanitize(html);
-        document.querySelector('#output').innerHTML = sanitized;
-    };
+  let copyToClipboard = (text, successHandler, errorHandler) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        successHandler();
+      },
 
-    // Reset input text
-    let reset = () => {
-        let changed = editor.getValue() != defaultInput;
-        if (hasEdited || changed) {
-            var confirmed = window.confirm(confirmationMessage);
-            if (!confirmed) {
-                return;
-            }
-        }
-        presetValue(defaultInput);
-        document.querySelectorAll('.column').forEach((element) => {
-            element.scrollTo({ top: 0 });
-        });
-    };
+      () => {
+        errorHandler();
+      }
+    );
+  };
 
-    let presetValue = (value) => {
-        editor.setValue(value);
-        editor.revealPosition({ lineNumber: 1, column: 1 });
-        editor.focus();
-        hasEdited = false;
-    };
+  let notifyCopied = () => {
+    let labelElement = document.querySelector("#copy-button a");
+    labelElement.innerHTML = "Copied!";
+    setTimeout(() => {
+      labelElement.innerHTML = "Copy";
+    }, 1000);
+  };
 
-    // ----- sync scroll position -----
+  // ----- setup -----
 
-    let initScrollBarSync = (settings) => {
-        let checkbox = document.querySelector('#sync-scroll-checkbox');
-        checkbox.checked = settings;
-        scrollBarSync = settings;
+  // setup navigation actions
+  let setupResetButton = () => {
+    document
+      .querySelector("#reset-button")
+      .addEventListener("click", (event) => {
+        event.preventDefault();
+        reset();
+      });
+  };
 
-        checkbox.addEventListener('change', (event) => {
-            let checked = event.currentTarget.checked;
-            scrollBarSync = checked;
-            saveScrollBarSettings(checked);
-        });
-    };
-
-    let enableScrollBarSync = () => {
-        scrollBarSync = true;
-    };
-
-    let disableScrollBarSync = () => {
-        scrollBarSync = false;
-    };
-
-    // ----- clipboard utils -----
-
-    let copyToClipboard = (text, successHandler, errorHandler) => {
-        navigator.clipboard.writeText(text).then(
-            () => {
-                successHandler();
-            },
-
-            () => {
-                errorHandler();
-            }
+  let setupCopyButton = (editor) => {
+    document
+      .querySelector("#copy-button")
+      .addEventListener("click", (event) => {
+        event.preventDefault();
+        let value = editor.getValue();
+        copyToClipboard(
+          value,
+          () => {
+            notifyCopied();
+          },
+          () => {
+            // nothing to do
+          }
         );
-    };
+      });
+  };
 
-    let notifyCopied = () => {
-        let labelElement = document.querySelector("#copy-button a");
-        labelElement.innerHTML = "Copied!";
-        setTimeout(() => {
-            labelElement.innerHTML = "Copy";
-        }, 1000)
-    };
+  // ----- local state -----
 
-    // ----- setup -----
+  let loadLastContent = () => {
+    let lastContent = Storehouse.getItem(
+      localStorageNamespace,
+      localStorageKey
+    );
+    return lastContent;
+  };
 
-    // setup navigation actions
-    let setupResetButton = () => {
-        document.querySelector("#reset-button").addEventListener('click', (event) => {
-            event.preventDefault();
-            reset();
-        });
-    };
+  let saveLastContent = (content) => {
+    let expiredAt = new Date(2099, 1, 1);
+    Storehouse.setItem(
+      localStorageNamespace,
+      localStorageKey,
+      content,
+      expiredAt
+    );
+  };
 
-    let setupCopyButton = (editor) => {
-        document.querySelector("#copy-button").addEventListener('click', (event) => {
-            event.preventDefault();
-            let value = editor.getValue();
-            copyToClipboard(value, () => {
-                notifyCopied();
-            },
-                () => {
-                    // nothing to do
-                });
-        });
-    };
+  let loadScrollBarSettings = () => {
+    let lastContent = Storehouse.getItem(
+      localStorageNamespace,
+      localStorageScrollBarKey
+    );
+    return lastContent;
+  };
 
-    // ----- local state -----
+  let saveScrollBarSettings = (settings) => {
+    let expiredAt = new Date(2099, 1, 1);
+    Storehouse.setItem(
+      localStorageNamespace,
+      localStorageScrollBarKey,
+      settings,
+      expiredAt
+    );
+  };
 
-    let loadLastContent = () => {
-        let lastContent = Storehouse.getItem(localStorageNamespace, localStorageKey);
-        return lastContent;
-    };
+  let loadThemeSettings = () => {
+    let themeSettings = Storehouse.getItem(
+      localStorageNamespace,
+      localStorageThemeKey
+    );
+    return themeSettings;
+  };
 
-    let saveLastContent = (content) => {
-        let expiredAt = new Date(2099, 1, 1);
-        Storehouse.setItem(localStorageNamespace, localStorageKey, content, expiredAt);
-    };
+  let saveThemeSettings = (settings) => {
+    let expiredAt = new Date(2099, 1, 1);
+    Storehouse.setItem(
+      localStorageNamespace,
+      localStorageThemeKey,
+      settings,
+      expiredAt
+    );
+  };
 
-    let loadScrollBarSettings = () => {
-        let lastContent = Storehouse.getItem(localStorageNamespace, localStorageScrollBarKey);
-        return lastContent;
-    };
+  // ----- theme management -----
 
-    let saveScrollBarSettings = (settings) => {
-        let expiredAt = new Date(2099, 1, 1);
-        Storehouse.setItem(localStorageNamespace, localStorageScrollBarKey, settings, expiredAt);
-    };
-
-    let setupDivider = () => {
-        let lastLeftRatio = 0.5;
-        const divider = document.getElementById('split-divider');
-        const leftPane = document.getElementById('edit');
-        const rightPane = document.getElementById('preview');
-        const container = document.getElementById('container');
-
-        let isDragging = false;
-
-        divider.addEventListener('mouseenter', () => {
-            divider.classList.add('hover');
-        });
-
-        divider.addEventListener('mouseleave', () => {
-            if (!isDragging) {
-                divider.classList.remove('hover');
-            }
-        });
-
-        divider.addEventListener('mousedown', () => {
-            isDragging = true;
-            divider.classList.add('active');
-            document.body.style.cursor = 'col-resize';
-        });
-
-        divider.addEventListener('dblclick', () => {
-            const containerRect = container.getBoundingClientRect();
-            const totalWidth = containerRect.width;
-            const dividerWidth = divider.offsetWidth;
-            const halfWidth = (totalWidth - dividerWidth) / 2;
-
-            leftPane.style.width = halfWidth + 'px';
-            rightPane.style.width = halfWidth + 'px';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            document.body.style.userSelect = 'none';
-            const containerRect = container.getBoundingClientRect();
-            const totalWidth = containerRect.width;
-            const offsetX = e.clientX - containerRect.left;
-            const dividerWidth = divider.offsetWidth;
-
-            // Prevent overlap or out-of-bounds
-            const minWidth = 100;
-            const maxWidth = totalWidth - minWidth - dividerWidth;
-            const leftWidth = Math.max(minWidth, Math.min(offsetX, maxWidth));
-            leftPane.style.width = leftWidth + 'px';
-            rightPane.style.width = (totalWidth - leftWidth - dividerWidth) + 'px';
-            lastLeftRatio = leftWidth / (totalWidth - dividerWidth);
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                divider.classList.remove('active');
-                divider.classList.remove('hover');
-                document.body.style.cursor = 'default';
-                document.body.style.userSelect = '';
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            const containerRect = container.getBoundingClientRect();
-            const totalWidth = containerRect.width;
-            const dividerWidth = divider.offsetWidth;
-            const availableWidth = totalWidth - dividerWidth;
-
-            const newLeft = availableWidth * lastLeftRatio;
-            const newRight = availableWidth * (1 - lastLeftRatio);
-
-            leftPane.style.width = newLeft + 'px';
-            rightPane.style.width = newRight + 'px';
-        });
-    };
-
-    // ----- entry point -----
-    let lastContent = loadLastContent();
-    let editor = setupEditor();
-    if (lastContent) {
-        presetValue(lastContent);
+  let applyTheme = (dark) => {
+    isDarkMode = dark;
+    if (dark) {
+      document.body.classList.add("dark-mode");
+      document.querySelector("#output").classList.add("dark-mode");
+      monaco.editor.setTheme("vs-dark");
     } else {
-        presetValue(defaultInput);
+      document.body.classList.remove("dark-mode");
+      document.querySelector("#output").classList.remove("dark-mode");
+      monaco.editor.setTheme("vs");
     }
-    setupResetButton();
-    setupCopyButton(editor);
+  };
 
-    let scrollBarSettings = loadScrollBarSettings() || false;
-    initScrollBarSync(scrollBarSettings);
+  let initThemeToggle = (settings) => {
+    let checkbox = document.querySelector("#theme-toggle-checkbox");
+    checkbox.checked = settings;
+    applyTheme(settings);
 
-    setupDivider();
+    checkbox.addEventListener("change", (event) => {
+      let checked = event.currentTarget.checked;
+      applyTheme(checked);
+      saveThemeSettings(checked);
+    });
+  };
+
+  let setupDivider = () => {
+    let lastLeftRatio = 0.5;
+    const divider = document.getElementById("split-divider");
+    const leftPane = document.getElementById("edit");
+    const rightPane = document.getElementById("preview");
+    const container = document.getElementById("container");
+
+    let isDragging = false;
+
+    divider.addEventListener("mouseenter", () => {
+      divider.classList.add("hover");
+    });
+
+    divider.addEventListener("mouseleave", () => {
+      if (!isDragging) {
+        divider.classList.remove("hover");
+      }
+    });
+
+    divider.addEventListener("mousedown", () => {
+      isDragging = true;
+      divider.classList.add("active");
+      document.body.style.cursor = "col-resize";
+    });
+
+    divider.addEventListener("dblclick", () => {
+      const containerRect = container.getBoundingClientRect();
+      const totalWidth = containerRect.width;
+      const dividerWidth = divider.offsetWidth;
+      const halfWidth = (totalWidth - dividerWidth) / 2;
+
+      leftPane.style.width = halfWidth + "px";
+      rightPane.style.width = halfWidth + "px";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      document.body.style.userSelect = "none";
+      const containerRect = container.getBoundingClientRect();
+      const totalWidth = containerRect.width;
+      const offsetX = e.clientX - containerRect.left;
+      const dividerWidth = divider.offsetWidth;
+
+      // Prevent overlap or out-of-bounds
+      const minWidth = 100;
+      const maxWidth = totalWidth - minWidth - dividerWidth;
+      const leftWidth = Math.max(minWidth, Math.min(offsetX, maxWidth));
+      leftPane.style.width = leftWidth + "px";
+      rightPane.style.width = totalWidth - leftWidth - dividerWidth + "px";
+      lastLeftRatio = leftWidth / (totalWidth - dividerWidth);
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        divider.classList.remove("active");
+        divider.classList.remove("hover");
+        document.body.style.cursor = "default";
+        document.body.style.userSelect = "";
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      const containerRect = container.getBoundingClientRect();
+      const totalWidth = containerRect.width;
+      const dividerWidth = divider.offsetWidth;
+      const availableWidth = totalWidth - dividerWidth;
+
+      const newLeft = availableWidth * lastLeftRatio;
+      const newRight = availableWidth * (1 - lastLeftRatio);
+
+      leftPane.style.width = newLeft + "px";
+      rightPane.style.width = newRight + "px";
+    });
+  };
+
+  // ----- entry point -----
+  let lastContent = loadLastContent();
+  let editor = setupEditor();
+  if (lastContent) {
+    presetValue(lastContent);
+  } else {
+    presetValue(defaultInput);
+  }
+  setupResetButton();
+  setupCopyButton(editor);
+
+  let scrollBarSettings = loadScrollBarSettings() || false;
+  initScrollBarSync(scrollBarSettings);
+
+  let themeSettings = loadThemeSettings() || false;
+  initThemeToggle(themeSettings);
+
+  setupDivider();
 };
 
 window.addEventListener("load", () => {
-    init();
+  init();
 });
