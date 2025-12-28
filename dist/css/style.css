@@ -31,7 +31,6 @@ a:link,
 a:visited,
 a:hover
 a:active {
-  color: #333;
   text-decoration: none;
 }
 
@@ -169,4 +168,40 @@ footer {
 
 .split-divider.active {
   background: #666;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] html, [data-theme="dark"] body {
+  background-color: #212830;
+  color: #e6edf3;
+}
+
+[data-theme="dark"] header {
+  background-color: #333;
+  color: #e6edf3;
+}
+
+[data-theme="dark"] header a:link, [data-theme="dark"] header a:hover, [data-theme="dark"] header a:visited {
+  color: #e6edf3;
+}
+
+[data-theme="dark"] #container {
+  background-color: #212830;
+  border-bottom: 1px solid #1f2d3a;
+}
+
+[data-theme="dark"] .split-divider {
+  background: #30363d;
+}
+
+[data-theme="dark"] .split-divider.hover {
+  background: #444c56;
+}
+
+[data-theme="dark"] .split-divider.active {
+  background: #768390;
+}
+
+[data-theme="dark"] footer {
+  background-color: #333;
 }
