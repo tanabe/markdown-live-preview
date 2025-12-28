@@ -1,12 +1,112 @@
+:root {
+  --bg-color: #fafafa;
+  --text-color: #24292e;
+  --header-bg: #3a3a3a;
+  --header-text: #f6f8fa;
+  --border-color: #e1e4e8;
+  --divider-color: #d1d5da;
+  --divider-hover: #959da5;
+  --divider-active: #6a737d;
+}
+
+[data-theme="dark"] {
+  --bg-color: #212121;
+  --text-color: #E8E8E8;
+  --header-bg: #1a1a1a;
+  --header-text: #E8E8E8;
+  --border-color: #555555;
+  --divider-color: #4a4a4a;
+  --divider-hover: #5a5a5a;
+  --divider-active: #6a6a6a;
+}
+
+/* Dark mode overrides for GitHub markdown CSS */
+[data-theme="dark"] .markdown-body {
+  color: #E8E8E8 !important;
+  background-color: #212121 !important;
+}
+
+[data-theme="dark"] #output {
+  background-color: #212121 !important;
+  color: #E8E8E8 !important;
+}
+
+/* Headings */
+[data-theme="dark"] .markdown-body h1,
+[data-theme="dark"] .markdown-body h2,
+[data-theme="dark"] .markdown-body h3,
+[data-theme="dark"] .markdown-body h4,
+[data-theme="dark"] .markdown-body h5,
+[data-theme="dark"] .markdown-body h6 {
+  color: #F5F5F5 !important;
+  border-color: #555555 !important;
+}
+
+/* Blockquotes */
+[data-theme="dark"] .markdown-body blockquote {
+  color: #B8B8B8 !important;
+  border-left-color: #555555 !important;
+}
+
+/* Code */
+[data-theme="dark"] .markdown-body code {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #F5F5F5 !important;
+}
+
+[data-theme="dark"] .markdown-body pre {
+  background-color: #1a1a1a !important;
+  border-color: #555555 !important;
+}
+
+[data-theme="dark"] .markdown-body pre code {
+  background-color: transparent !important;
+}
+
+/* Tables */
+[data-theme="dark"] .markdown-body table {
+  color: #E8E8E8 !important;
+}
+
+[data-theme="dark"] .markdown-body table th,
+[data-theme="dark"] .markdown-body table td {
+  border-color: #555555 !important;
+}
+
+[data-theme="dark"] .markdown-body table tr {
+  background-color: transparent !important;
+  border-color: #555555 !important;
+}
+
+[data-theme="dark"] .markdown-body table tr:nth-child(2n) {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+[data-theme="dark"] .markdown-body table th {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Links */
+[data-theme="dark"] .markdown-body a {
+  color: #58a6ff !important;
+}
+
+/* Horizontal rules */
+[data-theme="dark"] .markdown-body hr {
+  background-color: #555555 !important;
+  border-color: #555555 !important;
+}
+
+
 html, body {
-  color: #333;
+  color: var(--text-color);
   overflow-x: hidden;
   margin: 0;
   padding: 0;
   font-family: Helvetica, arial, freesans, clean, sans-serif;
   font-size: 1em;
   line-height: 1.5em;
-  background-color: #fff;
+  background-color: var(--bg-color);
   overscroll-behavior-y: none;
 }
 
@@ -31,7 +131,7 @@ a:link,
 a:visited,
 a:hover
 a:active {
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
 }
 
@@ -45,13 +145,13 @@ header {
   align-items: center;
   padding: 8px 16px;
   width: 100%;
-  background-color: #444;
+  background-color: var(--header-bg);
   font-size: 12px;
-  color: #fff;
+  color: var(--header-text);
 }
 
 header a:link, header a:hover, header a:visited, header a:active {
-  color: #fff;
+  color: var(--header-text);
 }
 
 header a:hover {
@@ -71,6 +171,14 @@ header a:hover {
 }
 
 #sync-button {
+    margin-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#theme-button {
     margin-left: 16px;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -103,8 +211,8 @@ footer {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: #fff;
-  color: #fff;
+  background-color: var(--bg-color);
+  color: var(--header-text);
   text-align: center;
   justify-content: center;
   align-items: center;
@@ -115,8 +223,8 @@ footer {
   overflow: hidden;
   width: 100%;
   margin: 0 auto;
-  background-color: #fff;
-  border-bottom: 1px solid #e8e8e8;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
 }
 
@@ -130,6 +238,8 @@ footer {
 
 #preview-wrapper {
   padding: 8px 16px 16px 16px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 .column {
@@ -143,6 +253,7 @@ footer {
 #preview.column {
   overflow-y: scroll;
   white-space: normal;
+  background-color: var(--bg-color);
 }
 
 .split-container {
@@ -158,15 +269,15 @@ footer {
 
 .split-divider {
   width: 5px;
-  background: #ccc;
+  background: var(--divider-color);
   cursor: col-resize;
   z-index: 1;
 }
 
 .split-divider.hover {
-  background: #999;
+  background: var(--divider-hover);
 }
 
 .split-divider.active {
-  background: #666;
+  background: var(--divider-active);
 }
