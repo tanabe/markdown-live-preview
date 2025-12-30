@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "http-server public",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve-dist": "http-server dist -p 5001 -c-1",
+    "build-and-serve": "npm run build && npm run serve-dist"
   },
   "repository": {
     "type": "git",

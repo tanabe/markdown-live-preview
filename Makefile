@@ -18,6 +18,14 @@ preview:
 dev:
 	npm run dev
 
+.PHONY: serve-dist
+serve-dist:
+	npm run serve-dist
+
+.PHONY: build-serve
+build-serve:
+	npm run build-and-serve
+
 .PHONY: deploy
 deploy:
 	firebase deploy
