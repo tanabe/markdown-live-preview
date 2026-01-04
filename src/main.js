@@ -1557,6 +1557,74 @@ ${content}
         }
     };
 
+    // ----- settings modal -----
+
+    let setupSettingsModal = () => {
+        const settingsBtn = document.querySelector('#settings-btn');
+        const modal = document.querySelector('#settings-modal');
+        const overlay = document.querySelector('#settings-modal-overlay');
+        const closeBtn = document.querySelector('#settings-close');
+
+        if (settingsBtn && modal) {
+            settingsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                modal.style.display = 'block';
+                if (overlay) overlay.style.display = 'block';
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                if (overlay) overlay.style.display = 'none';
+            });
+        }
+
+        // Close on overlay click
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                modal.style.display = 'none';
+                overlay.style.display = 'none';
+            });
+        }
+
+        // Close on clicking outside modal
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                if (overlay) overlay.style.display = 'none';
+            }
+        });
+
+        // Setup font size selector
+        const fontSizeDropdown = document.querySelector('#font-size-dropdown');
+        if (fontSizeDropdown) {
+            fontSizeDropdown.addEventListener('change', (e) => {
+                const size = parseInt(e.target.value);
+                editor.updateOptions({ fontSize: size });
+                showToast(`Font size: ${size}px`, 'info', 1500);
+            });
+        }
+
+        // Setup line numbers toggle
+        const lineNumbersCheckbox = document.querySelector('#line-numbers-checkbox');
+        if (lineNumbersCheckbox) {
+            lineNumbersCheckbox.addEventListener('change', (e) => {
+                editor.updateOptions({ lineNumbers: e.target.checked ? 'on' : 'off' });
+                showToast(e.target.checked ? 'Line numbers enabled' : 'Line numbers disabled', 'info', 1500);
+            });
+        }
+
+        // Setup word wrap toggle
+        const wordWrapCheckbox = document.querySelector('#word-wrap-checkbox');
+        if (wordWrapCheckbox) {
+            wordWrapCheckbox.addEventListener('change', (e) => {
+                editor.updateOptions({ wordWrap: e.target.checked ? 'on' : 'off' });
+                showToast(e.target.checked ? 'Word wrap enabled' : 'Word wrap disabled', 'info', 1500);
+            });
+        }
+    };
+
     // ----- theme switching -----
 
     let initThemeSelector = (savedTheme) => {
@@ -2525,6 +2593,7 @@ ${content}
     let darkModeSettings = loadDarkModeSettings() || false;
     initDarkMode(darkModeSettings);
 
+    setupSettingsModal();
     setupDivider();
     setupMobileUI();
 

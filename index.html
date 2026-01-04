@@ -1,743 +1,719 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta http-equiv="content-language" content="en">
-    <meta http-equiv="content-script-type" content="text/javascript">
-    <meta http-equiv="content-style-type" content="text/css">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="This is the online markdown editor with live preview.">
-    <meta name="theme-color" content="#444444">
+    <meta name="description" content="Premium Markdown Live Preview Editor - A professional-grade writing tool">
+    <meta name="theme-color" content="#5865f2">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MD Preview">
-
-    <link rel="stylesheet" type="text/css" href="/css/style.css?v=1.10.2">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MarkDraft">
+    
+    <title>MarkDraft - Premium Markdown Editor</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/premium-ui.css">
+    <link rel="stylesheet" href="/css/github-markdown-light.css">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="favicon.png">
-
-    <title>Markdown Live Preview</title>
+    
     <script type="module" src="/src/main.js"></script>
 </head>
-
-
-
-<body>
-
-
-<header class="command-center glass-morphism">
-    <!-- Identity Zone -->
-    <div class="cc-identity">
-        <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path
-                d="M3 3h18v18H3V3zm16.525 13.707c-.131-.821-.666-1.511-2.252-2.155-.552-.259-1.165-.438-1.349-.854-.068-.248-.083-.382-.036-.53.127-.434.57-.566.944-.498.241.055.465.197.606.489.641-.423.641-.423 1.092-.704-.167-.256-.252-.368-.363-.465-.487-.517-1.14-.655-2.201-.625-.337.068-.677.179-.957.339-.852.477-1.109 1.474-.773 2.337.339.889 1.673 1.372 2.412 1.793.729.451.661 1.195.119 1.541-.808.511-2.116.252-2.369-.52-.148-.334-.211-.451-.475-.932l-1.143.659c.155.378.248.555.435.786.933 1.133 3.266 1.472 4.556.615.12-.079.24-.159.36-.254.439-.348.712-.892.692-1.512-.075-.72-.386-1.04-.899-1.51zM9.927 9.996v4.007l-2.017-.004L7.927 9.996H6.003v-.001c-.021 3.173 0 6.347.012 9.52.171.04.337.054.501.054.593 0 1.235-.217 1.713-.561l.129-.095c.08-.058.164-.122.251-.194.081-.067.165-.14.25-.218.043-.04.087-.08.13-.122l.044-.042c.073-.07.147-.143.221-.218l.068-.069 1.745 1.686c.158.153.316.314.468.479l.063.068c.026.028.05.056.077.085.027.029.051.057.079.087.158.177.31.363.453.556.165.224.322.459.468.703h2.023V9.993H9.927z" />
+<body class="view-split">
+    
+    <!-- ==================== HEADER ==================== -->
+    <header class="premium-header" role="banner">
+        <!-- Brand -->
+        <div class="header-brand">
+            <div class="brand-logo">M</div>
+            <span class="brand-name">MarkDraft</span>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="header-tabs" id="tabs-list">
+            <button class="header-tab active" data-tab="1">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z"/>
+                </svg>
+                <span class="tab-name">Untitled.md</span>
+                <span class="tab-close" aria-label="Close tab">×</span>
+            </button>
+            <button class="header-tab-add" id="new-tab-button" aria-label="New tab">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 4a.5.5 0 01.5.5v3h3a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3A.5.5 0 018 4z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Actions -->
+        <div class="header-actions">
+            <!-- Search -->
+            <button class="header-btn icon-only" id="search-btn" title="Search (Ctrl+F)">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z"/>
+                </svg>
+            </button>
+            
+            <!-- Import -->
+            <button class="header-btn icon-only" id="import-button" title="Import File">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z"/>
+                    <path d="M7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z"/>
+                </svg>
+            </button>
+            
+            <!-- Help -->
+            <button class="header-btn icon-only" id="help-button" title="Help (Ctrl+H)">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z"/>
+                    <path d="M5.255 5.786a.237.237 0 00.241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 00.25.246h.811a.25.25 0 00.25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                </svg>
+            </button>
+            
+            <!-- View Mode Toggle -->
+            <div class="view-mode-toggle">
+                <button class="view-mode-btn" id="view-code" data-view="editor" title="Editor only">Write</button>
+                <button class="view-mode-btn active" id="view-split" data-view="split" title="Split view">Split</button>
+                <button class="view-mode-btn" id="view-preview" data-view="preview" title="Preview only">Preview</button>
+            </div>
+            
+            <!-- Theme Toggle -->
+            <button class="header-btn icon-only" id="dark-mode-toggle" title="Toggle theme">
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 11a3 3 0 100-6 3 3 0 000 6zm0 1a4 4 0 110-8 4 4 0 010 8zM8 0a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2A.5.5 0 018 0zm0 13a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2A.5.5 0 018 13zm8-5a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM3 8a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2A.5.5 0 013 8zm10.657-5.657a.5.5 0 010 .707l-1.414 1.415a.5.5 0 11-.707-.708l1.414-1.414a.5.5 0 01.707 0zm-9.193 9.193a.5.5 0 010 .707L3.05 13.657a.5.5 0 01-.707-.707l1.414-1.414a.5.5 0 01.707 0zm9.193 2.121a.5.5 0 01-.707 0l-1.414-1.414a.5.5 0 01.707-.707l1.414 1.414a.5.5 0 010 .707zM4.464 4.465a.5.5 0 01-.707 0L2.343 3.05a.5.5 0 11.707-.707l1.414 1.414a.5.5 0 010 .708z"/>
+                </svg>
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 16 16" fill="currentColor" style="display:none;">
+                    <path d="M6 .278a.768.768 0 01.08.858 7.208 7.208 0 00-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 01.81.316.733.733 0 01-.031.893A8.349 8.349 0 018.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 016 .278z"/>
+                </svg>
+            </button>
+            
+            <!-- Settings -->
+            <button class="header-btn icon-only" id="settings-btn" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 4.754a3.246 3.246 0 100 6.492 3.246 3.246 0 000-6.492zM5.754 8a2.246 2.246 0 114.492 0 2.246 2.246 0 01-4.492 0z"/>
+                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 01-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 01-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 01.52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 011.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 011.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 01.52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 01-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 01-1.255-.52l-.094-.319z"/>
+                </svg>
+            </button>
+            
+            <!-- Export -->
+            <div class="dropdown" id="export-dropdown-wrapper">
+                <button class="header-btn primary" id="export-btn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z"/>
+                        <path d="M7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z"/>
+                    </svg>
+                    <span>Export</span>
+                </button>
+                <div class="dropdown-menu" id="export-dropdown">
+                    <button class="dropdown-item" id="download-md-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5z"/>
+                        </svg>
+                        Download Markdown
+                    </button>
+                    <button class="dropdown-item" id="export-pdf-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M14 14V4.5L9.5 0H4a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2z"/>
+                        </svg>
+                        Export as PDF
+                    </button>
+                    <button class="dropdown-item" id="export-html-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 01.708-.708l3.5 3.5a.5.5 0 010 .708l-3.5 3.5a.5.5 0 01-.708-.708L13.293 8l-3.147-3.146z"/>
+                        </svg>
+                        Export as HTML
+                    </button>
+                    <button class="dropdown-item" id="export-docx-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z"/>
+                        </svg>
+                        Export as DOCX
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="copy-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"/>
+                            <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"/>
+                        </svg>
+                        Copy Markdown
+                    </button>
+                    <button class="dropdown-item" id="copy-html-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"/>
+                            <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"/>
+                        </svg>
+                        Copy as HTML
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" id="reset-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M11.534 7h3.932a.25.25 0 01.192.41l-1.966 2.36a.25.25 0 01-.384 0l-1.966-2.36a.25.25 0 01.192-.41zm-11 2h3.932a.25.25 0 00.192-.41L2.692 6.23a.25.25 0 00-.384 0L.342 8.59A.25.25 0 00.534 9z"/>
+                            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 11-.771-.636A6.002 6.002 0 0113.917 7H12.9A5.002 5.002 0 008 3zM3.1 9a5.002 5.002 0 008.757 2.182.5.5 0 11.771.636A6.002 6.002 0 012.083 9H3.1z"/>
+                        </svg>
+                        Reset Document
+                    </button>
+                </div>
+            </div>
+            
+            <!-- User Avatar -->
+            <div class="header-avatar" id="user-avatar"></div>
+        </div>
+    </header>
+    
+    <!-- ==================== TOOLBAR ==================== -->
+    <div class="premium-toolbar" id="toolbar" role="toolbar" aria-label="Formatting toolbar">
+        <!-- Text Formatting -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-bold" title="Bold (Ctrl+B)" aria-label="Bold">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 001.852-2.14c0-1.51-1.162-2.46-3.014-2.46H3.843V13H8.21zM5.908 4.674h1.696c.963 0 1.517.451 1.517 1.244 0 .834-.629 1.32-1.73 1.32H5.908V4.673zm0 6.788V8.598h1.73c1.217 0 1.88.492 1.88 1.415 0 .943-.643 1.449-1.832 1.449H5.907z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-italic" title="Italic (Ctrl+I)" aria-label="Italic">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M7.991 11.674L9.53 4.455c.123-.595.246-.71 1.347-.807l.11-.52H7.211l-.11.52c1.06.096 1.128.212 1.005.807L6.57 11.674c-.123.595-.246.71-1.346.806l-.11.52h3.774l.11-.52c-1.06-.095-1.129-.211-1.006-.806z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-strikethrough" title="Strikethrough" aria-label="Strikethrough">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M6.333 5.686c0 .31.083.581.27.814H5.166a2.776 2.776 0 01-.099-.76c0-1.627 1.436-2.768 3.48-2.768 1.969 0 3.39 1.175 3.445 2.85h-1.23c-.11-1.08-.964-1.743-2.25-1.743-1.23 0-2.18.602-2.18 1.607zm2.194 7.478c-2.153 0-3.589-1.107-3.705-2.81h1.23c.144 1.06 1.129 1.703 2.544 1.703 1.34 0 2.31-.705 2.31-1.675 0-.827-.547-1.374-1.914-1.675L8.046 8.5H1v-1h14v1h-3.504c.468.437.675.994.675 1.697 0 1.826-1.436 2.967-3.644 2.967z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Headings -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-h1" title="Heading 1" aria-label="Heading 1">H1</button>
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-h2" title="Heading 2" aria-label="Heading 2">H2</button>
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-h3" title="Heading 3" aria-label="Heading 3">H3</button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Insert -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-link" title="Insert Link (Ctrl+K)" aria-label="Insert Link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.715 6.542L3.343 7.914a3 3 0 104.243 4.243l1.828-1.829A3 3 0 008.586 5.5L8 6.086a1.001 1.001 0 00-.154.199 2 2 0 01.861 3.337L6.88 11.45a2 2 0 11-2.83-2.83l.793-.792a4.018 4.018 0 01-.128-1.287z"/>
+                    <path d="M6.586 4.672A3 3 0 007.414 9.5l.775-.776a2 2 0 01-.896-3.346L9.12 3.55a2 2 0 112.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 10-4.243-4.243L6.586 4.672z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-image" title="Insert Image" aria-label="Insert Image">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M6.002 5.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                    <path d="M2.002 1a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V3a2 2 0 00-2-2h-12zm12 1a1 1 0 011 1v6.5l-3.777-1.947a.5.5 0 00-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 00-.63.062L1.002 12V3a1 1 0 011-1h12z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-table" title="Insert Table" aria-label="Insert Table">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 2a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 001-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 001 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Code -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-code" title="Code Block" aria-label="Code Block">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 01.708-.708l3.5 3.5a.5.5 0 010 .708l-3.5 3.5a.5.5 0 01-.708-.708L13.293 8l-3.147-3.146z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-inline-code" title="Inline Code" aria-label="Inline Code">`</button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Lists -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-ul" title="Bullet List" aria-label="Bullet List">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5 11.5a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm-3 1a1 1 0 100-2 1 1 0 000 2zm0 4a1 1 0 100-2 1 1 0 000 2zm0 4a1 1 0 100-2 1 1 0 000 2z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-ol" title="Numbered List" aria-label="Numbered List">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5 11.5a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5z"/>
+                    <path d="M1.713 11.865v-.474H2c.217 0 .363-.137.363-.317 0-.185-.158-.31-.361-.31-.223 0-.367.152-.373.31h-.59c.016-.467.373-.787.986-.787.588-.002.954.291.957.703a.595.595 0 01-.492.594v.033a.615.615 0 01.569.631c.003.533-.502.8-1.051.8-.656 0-1-.37-1.008-.794h.582c.008.178.186.306.422.309.254 0 .424-.145.422-.35-.002-.195-.155-.348-.414-.348h-.3zm-.004-4.699h-.604v-.035c0-.408.295-.844.958-.844.583 0 .96.326.96.756 0 .389-.257.617-.476.848l-.537.572v.03h1.054V9H1.143v-.395l.957-.99c.138-.142.293-.304.293-.508 0-.18-.147-.32-.342-.32a.33.33 0 00-.342.338v.041zM2.564 5h-.635V2.924h-.031l-.598.42v-.567l.629-.443h.635V5z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-task" title="Task List" aria-label="Task List">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M14 1a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1h12zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z"/>
+                    <path d="M10.97 4.97a.75.75 0 011.071 1.05l-3.992 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 01.02-.022z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Block Elements -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-quote" title="Blockquote" aria-label="Blockquote">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M12 12a1 1 0 001-1V8.558a1 1 0 00-1-1h-1.388c0-.351.021-.703.062-1.054.062-.372.166-.703.31-.992.145-.29.331-.517.559-.683.227-.186.516-.279.868-.279V3c-.579 0-1.085.124-1.52.372a3.322 3.322 0 00-1.085.992 4.92 4.92 0 00-.62 1.458A7.712 7.712 0 009 7.558V11a1 1 0 001 1h2zm-6 0a1 1 0 001-1V8.558a1 1 0 00-1-1H4.612c0-.351.021-.703.062-1.054.062-.372.166-.703.31-.992.145-.29.331-.517.559-.683.227-.186.516-.279.868-.279V3c-.579 0-1.085.124-1.52.372a3.322 3.322 0 00-1.085.992 4.92 4.92 0 00-.62 1.458A7.712 7.712 0 003 7.558V11a1 1 0 001 1h2z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-hr" title="Horizontal Rule" aria-label="Horizontal Rule">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 8a.5.5 0 01.5-.5h15a.5.5 0 010 1H.5A.5.5 0 010 8z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Spacer -->
+        <div style="flex: 1;"></div>
+        
+        <!-- Tools -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-emoji" title="Insert Emoji" aria-label="Insert Emoji">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z"/>
+                    <path d="M4.285 9.567a.5.5 0 01.683.183A3.498 3.498 0 008 11.5a3.498 3.498 0 003.032-1.75.5.5 0 11.866.5A4.498 4.498 0 018 12.5a4.498 4.498 0 01-3.898-2.25.5.5 0 01.183-.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toc-button" title="Table of Contents" aria-label="Table of Contents">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M2 2.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2 2a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0 2a.5.5 0 01.5-.5h6a.5.5 0 010 1h-6a.5.5 0 01-.5-.5zm0 2a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm-2 2a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2 2a.5.5 0 01.5-.5h6a.5.5 0 010 1h-6a.5.5 0 01-.5-.5z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="lint-button" title="Lint Document" aria-label="Lint Document">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M10.97 4.97a.75.75 0 011.07 1.05l-3.99 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="stats-button" title="Statistics" aria-label="Statistics">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2zm-2-1a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1V2a1 1 0 00-1-1h-2zM6 7a1 1 0 011-1h2a1 1 0 011 1v7a1 1 0 01-1 1H7a1 1 0 01-1-1V7zm-5 4a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 01-1 1H2a1 1 0 01-1-1v-3z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Mode Tools -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="focus-button" title="Focus Mode" aria-label="Focus Mode">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M2 2v4.5H.5V1.5a.5.5 0 01.5-.5h5v1.5H2zm12 0h-4.5V.5h5.5a.5.5 0 01.5.5v5H14V2zM.5 10v5.5a.5.5 0 00.5.5h5v-1.5H2V10H.5zm13.5 4.5V10H15.5v5.5a.5.5 0 01-.5.5h-5v-1.5H14z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="typewriter-button" title="Typewriter Mode" aria-label="Typewriter Mode">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 10a1 1 0 011-1h14a1 1 0 110 2H1a1 1 0 01-1-1z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="fullscreen-button" title="Fullscreen" aria-label="Fullscreen">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M1.5 1a.5.5 0 00-.5.5v4a.5.5 0 01-1 0v-4A1.5 1.5 0 011.5 0h4a.5.5 0 010 1h-4zM10 .5a.5.5 0 01.5-.5h4A1.5 1.5 0 0116 1.5v4a.5.5 0 01-1 0v-4a.5.5 0 00-.5-.5h-4a.5.5 0 01-.5-.5zM.5 10a.5.5 0 01.5.5v4a.5.5 0 00.5.5h4a.5.5 0 010 1h-4A1.5 1.5 0 010 14.5v-4a.5.5 0 01.5-.5zm15 0a.5.5 0 01.5.5v4a1.5 1.5 0 01-1.5 1.5h-4a.5.5 0 010-1h4a.5.5 0 00.5-.5v-4a.5.5 0 01.5-.5z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <span class="toolbar-divider"></span>
+        
+        <!-- Templates & Snippets -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="templates-button" title="Templates" aria-label="Templates">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z"/>
+                    <path d="M4.5 12.5A.5.5 0 015 12h3a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 10h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm1.639-3.708l1.33.886 1.854-1.855a.25.25 0 01.289-.047l1.888.974V7.5a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V7s1.54-1.274 1.639-1.208zM6.25 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="goals-button" title="Writing Goals" aria-label="Writing Goals">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z"/>
+                    <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <main class="main-container" id="container">
+        
+        <!-- Document Outline (Left Sidebar) -->
+        <aside class="doc-outline hidden" id="doc-outline">
+            <div class="outline-header">
+                <span class="outline-title">Document Outline</span>
+            </div>
+            <nav class="outline-content" id="outline-content">
+                <!-- Generated by JS -->
+            </nav>
+        </aside>
+        
+        <!-- Editor Pane -->
+        <section class="editor-pane" id="edit">
+            <div class="editor-wrapper" id="editor-wrapper">
+                <div id="editor"></div>
+            </div>
+        </section>
+        
+        <!-- Split Divider -->
+        <div class="split-divider" id="split-divider"></div>
+        
+        <!-- Preview Pane -->
+        <section class="preview-pane" id="preview">
+            <div class="preview-wrapper" id="preview-wrapper">
+                <article class="preview-content markdown-body" id="output">
+                    <!-- Rendered Markdown -->
+                </article>
+            </div>
+            
+            <!-- TOC Sidebar (Right) -->
+            <aside class="toc-sidebar hidden" id="toc-sidebar">
+                <div class="toc-section-title">ON THIS PAGE</div>
+                <nav id="toc-content">
+                    <ul class="toc-list" id="toc-list">
+                        <!-- Generated by JS -->
+                    </ul>
+                </nav>
+            </aside>
+        </section>
+    </main>
+    
+    <!-- ==================== STATUS BAR ==================== -->
+    <footer class="premium-status-bar" role="contentinfo">
+        <div class="status-item" id="word-count">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M2.5 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h6a.5.5 0 000-1h-6z"/>
+            </svg>
+            <span>0 words</span>
+        </div>
+        <span id="word-count-header" class="hidden">0 words</span>
+        <div class="status-item" id="char-count">
+            <span>0 chars</span>
+        </div>
+        <span id="char-count-header" class="hidden">0 chars</span>
+        <div class="status-divider"></div>
+        <div class="status-item" id="reading-time">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z"/>
+                <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z"/>
+            </svg>
+            <span>0 min read</span>
+        </div>
+        <span id="reading-time-header" class="hidden">0 min read</span>
+        
+        <div class="status-spacer"></div>
+        
+        <div class="status-item" id="cursor-position">
+            <span>Ln 1, Col 1</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-saved" id="save-status">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M13.854 3.646a.5.5 0 010 .708l-7 7a.5.5 0 01-.708 0l-3.5-3.5a.5.5 0 11.708-.708L6.5 10.293l6.646-6.647a.5.5 0 01.708 0z"/>
+            </svg>
+            <span>All changes saved</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+            <span>UTF-8</span>
+        </div>
+        <div class="status-item">
+            <span>Markdown</span>
+        </div>
+        
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Menu">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5z"/>
+            </svg>
+        </button>
+    </footer>
+    
+    <!-- ==================== HIDDEN INPUTS ==================== -->
+    <input type="file" id="file-input" accept=".md,.markdown,.txt" style="display: none;">
+    <input type="file" id="image-input" accept="image/*" style="display: none;">
+    
+    <!-- Search Input (Hidden by default, toggled by search button) -->
+    <div class="search-overlay hidden" id="search-overlay">
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search in document...">
+            <button class="search-close" id="search-close">×</button>
+        </div>
+    </div>
+    
+    <!-- Autosave Indicator -->
+    <div class="autosave-indicator hidden" id="autosave-indicator">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M13.854 3.646a.5.5 0 010 .708l-7 7a.5.5 0 01-.708 0l-3.5-3.5a.5.5 0 11.708-.708L6.5 10.293l6.646-6.647a.5.5 0 01.708 0z"/>
         </svg>
-        <span class="brand-text">MD Preview</span>
+        <span>Saved</span>
     </div>
-
-    <!-- Search Zone -->
-    <div class="cc-search-wrapper">
-        <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-            <path
-                d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
-        </svg>
-        <input type="text" id="search-input" placeholder="Search preview..." title="Search in Preview">
-    </div>
-
-    <!-- Workspace & Actions Zone -->
-    <div class="cc-actions">
-        <!-- View Toggles -->
-        <div class="view-mode-group">
-            <button id="view-code" class="cc-btn icon-only" title="Code Only">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 01.708-.708l3.5 3.5a.5.5 0 010 .708l-3.5 3.5a.5.5 0 01-.708-.708L13.293 8l-3.147-3.146z" />
-                </svg>
-            </button>
-            <button id="view-split" class="cc-btn icon-only active" title="Split View">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M2 2h5v12H2V2zm7 0h5v12H9V2z" />
-                </svg>
-            </button>
-            <button id="view-preview" class="cc-btn icon-only" title="Preview Only">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 011.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0114.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 011.172 8z" />
-                    <path d="M8 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z" />
+    
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- ==================== MODALS ==================== -->
+    
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal-overlay"></div>
+    <div class="modal" id="settings-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Settings</h2>
+            <button class="modal-close" id="settings-close" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
                 </svg>
             </button>
         </div>
-
-        <div class="divider-vertical"></div>
-
-        <!-- Primary Actions -->
-        <button id="reset-button" class="cc-btn icon-only" title="Reset">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 3a5 5 0 00-4.546 2.914.5.5 0 01-.908-.418A6 6 0 1114 8a.5.5 0 01-1 0 5 5 0 00-5-5z" />
-                <path
-                    d="M8 4.466V.534a.25.25 0 00-.41-.192L4.23 3.308a.25.25 0 000 .384l3.36 2.966A.25.25 0 008 6.466v-2z" />
-            </svg>
-        </button>
-
-        <button id="dark-mode-toggle" class="cc-btn icon-only" title="Toggle Theme">
-            <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M8 11a3 3 0 100-6 3 3 0 000 6zm0 1a4 4 0 110-8 4 4 0 010 8zM8 0a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2A.5.5 0 018 0zm0 13a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2A.5.5 0 018 13zm8-5a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM3 8a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2A.5.5 0 013 8zm10.657-5.657a.5.5 0 010 .707l-1.414 1.415a.5.5 0 11-.707-.708l1.414-1.414a.5.5 0 01.707 0zm-9.193 9.193a.5.5 0 010 .707L3.05 13.657a.5.5 0 01-.707-.707l1.414-1.414a.5.5 0 01.707 0zm9.193 2.121a.5.5 0 01-.707 0l-1.414-1.414a.5.5 0 01.707-.707l1.414 1.414a.5.5 0 010 .707zM4.464 4.465a.5.5 0 01-.707 0L2.343 3.05a.5.5 0 11.707-.707l1.414 1.414a.5.5 0 010 .708z" />
-            </svg>
-            <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="display:none;">
-                <path
-                    d="M6 .278a.768.768 0 01.08.858 7.208 7.208 0 00-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 01.81.316.733.733 0 01-.031.893A8.349 8.349 0 018.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 016 .278z" />
-            </svg>
-        </button>
-
-        <button id="export-dropdown-btn" class="cc-btn primary" title="Export">
-            <span>Export</span>
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
-                <path d="M5 7L1 3h8L5 7z" />
-            </svg>
-        </button>
-        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-        </button>
-    </div>
-</header>
-
-<aside class="power-bar glass-morphism" id="tools-sidebar">
-    <div class="pb-tools">
-        <button id="templates-button" class="pb-btn" title="Templates">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M14 4.5V9h-1V4.5h-2A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v7H2V2a2 2 0 012-2h5.5L14 4.5z" />
-            </svg>
-        </button>
-        <button id="snippets-button" class="pb-btn" title="Snippets">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M5.5 0H14l.5.5v15l-.5.5H5.5l-.5-.5V.5l.5-.5zM6 15h7.5V1H6v14zm-1.5.5L4 15H1.5l-.5-.5v-11l.5-.5h4v1H2v10h2.5v.5z" />
-            </svg>
-        </button>
-        <button id="toc-button" class="pb-btn" title="Table of Contents">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M2 2.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0 4a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0 4a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0 4a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z" />
-            </svg>
-        </button>
-        <button id="stats-button" class="pb-btn" title="Statistics">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2zm-2-1a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1V2a1 1 0 00-1-1h-2zM6 7a1 1 0 011-1h2a1 1 0 011 1v7a1 1 0 01-1 1H7a1 1 0 01-1-1V7zm-5 4a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 01-1 1H2a1 1 0 01-1-1v-3z" />
-            </svg>
-        </button>
-        <button id="lint-button" class="pb-btn" title="Lint Document">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M8.982 1.566a1.13 1.13 0 00-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 01-1.1 0L7.1 5.995A.905.905 0 018 5zm.002 6a1 1 0 110 2 1 1 0 010-2z" />
-            </svg>
-        </button>
-        <button id="goals-button" class="pb-btn" title="Writing Goals">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M2.5.5A.5.5 0 013 0h10a.5.5 0 01.5.5c0 .538-.012 1.05-.034 1.536a3 3 0 11-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 01-.3.9H3a.5.5 0 01-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 11-1.132-5.89A33.076 33.076 0 012.5.5zm.099 2.54a2 2 0 00.72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 00.72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10c.161 0 .345-.01.547-.045.165-.029.333-.073.5-.133.33-.118.64-.287.91-.51.2-.163.37-.36.51-.586.22-.356.37-.771.44-1.225.055-.362.074-.736.046-1.11a15.078 15.078 0 00-.87-4.667A33.233 33.233 0 017.504 1h-4z" />
-            </svg>
-        </button>
-    </div>
-    <div class="pb-bottom">
-        <button id="settings-dropdown-btn" class="pb-btn" title="Settings">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M8 4.754a3.246 3.246 0 100 6.492 3.246 3.246 0 000-6.492zM5.754 8a2.246 2.246 0 114.492 0 2.246 2.246 0 01-4.492 0z" />
-                <path
-                    d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 01-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 01-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 01.52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 01-1.255-.52l-.094-.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 011.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 01.52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 01-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 01-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 002.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 001.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 00-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 00-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 00-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 001.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 003.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 002.692-1.115l.094-.319z" />
-            </svg>
-        </button>
-        <button id="help-button" class="pb-btn" title="Help & Shortcuts">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M16 8A8 8 0 110 8a8 8 0 0116 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 00.25.246h.811a.25.25 0 00.25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 00.241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z" />
-            </svg>
-        </button>
-    </div>
-</aside>
-
-<!-- Context Menus (Hidden by default, popped up by JS) -->
-<!-- Export Menu -->
-<div class="dropdown-menu" id="export-dropdown" style="display: none;">
-    <button id="download-md-button" class="dropdown-item">Download MD</button>
-    <button id="export-pdf-button" class="dropdown-item">Export PDF</button>
-    <button id="export-html-button" class="dropdown-item">Export HTML</button>
-    <button id="export-docx-button" class="dropdown-item">Export DOCX</button>
-</div>
-
-<!-- Snippets Menu -->
-<div id="snippets-dropdown" class="submenu" style="display:none;"></div>
-
-<!-- Settings Menu -->
-<div class="dropdown-menu dropdown-right" id="settings-dropdown" style="display: none;">
-    <div class="dropdown-section">
-        <span class="dropdown-label">Appearance</span>
-        <div class="dropdown-item toggle-item">
-            <span>Dark Mode</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="dark-mode-checkbox">
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-        <div class="dropdown-item theme-select-item">
-            <label for="theme-dropdown">Editor Theme</label>
-            <select id="theme-dropdown" class="mini-select">
-                <option value="vs">VS Light</option>
-                <option value="vs-dark">VS Dark</option>
-                <option value="hc-black">High Contrast</option>
-                <option value="dracula">Dracula</option>
-                <option value="solarized-dark">Solarized Dark</option>
-                <option value="solarized-light">Solarized Light</option>
-                <option value="github-dark">GitHub Dark</option>
-                <option value="github-light">GitHub Light</option>
-            </select>
-        </div>
-    </div>
-    <div class="dropdown-divider"></div>
-    <div class="dropdown-section">
-        <span class="dropdown-label">Editor</span>
-        <div class="dropdown-item toggle-item">
-            <span>Sync Scroll</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="sync-scroll-checkbox" checked>
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-        <button id="typewriter-button" class="dropdown-item">Typewriter Mode</button>
-        <button id="focus-button" class="dropdown-item">Focus Mode</button>
-        <button id="fullscreen-button" class="dropdown-item">Fullscreen</button>
-    </div>
-</div>
-
-
-<!-- Modals & Panels preserved -->
-<div id="goals-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-goals close-modal">&times;</span>
-        <h2>Writing Goals 🏆</h2>
-        <div class="goals-container">
-            <div class="goal-setting">
-                <label>Daily Target:</label>
-                <input type="number" id="daily-goal-input" value="500" min="100" step="50">
-                <span>words</span>
+        <div class="modal-body">
+            <div class="settings-section">
+                <h3 class="settings-title">Appearance</h3>
+                <div class="settings-item">
+                    <label>Dark Mode</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="dark-mode-checkbox">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <label for="theme-dropdown">Editor Theme</label>
+                    <select id="theme-dropdown" class="settings-select">
+                        <option value="vs">VS Light</option>
+                        <option value="vs-dark">VS Dark</option>
+                        <option value="dracula">Dracula</option>
+                        <option value="github-light">GitHub Light</option>
+                        <option value="github-dark">GitHub Dark</option>
+                        <option value="solarized-light">Solarized Light</option>
+                        <option value="solarized-dark">Solarized Dark</option>
+                    </select>
+                </div>
             </div>
-            <div class="streak-display">
-                <span id="streak-count">0</span> 🔥 Streak
+            <div class="settings-section">
+                <h3 class="settings-title">Editor</h3>
+                <div class="settings-item">
+                    <label>Font Size</label>
+                    <select id="font-size-dropdown" class="settings-select">
+                        <option value="12">12px</option>
+                        <option value="14" selected>14px</option>
+                        <option value="16">16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                    </select>
+                </div>
+                <div class="settings-item">
+                    <label>Line Numbers</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="line-numbers-checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <label>Word Wrap</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="word-wrap-checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h3 class="settings-title">Sync & Save</h3>
+                <div class="settings-item">
+                    <label>Scroll Sync</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sync-scroll-checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <label>Auto Save</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-save-checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
-        <div class="progress-section">
-            <div class="progress-bar-bg">
-                <div id="goal-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+    </div>
+    
+    <!-- Stats Modal -->
+    <div class="modal-overlay" id="stats-modal-overlay"></div>
+    <div class="modal" id="stats-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Document Statistics</h2>
+            <button class="modal-close" id="stats-close" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-words">0</div>
+                    <div class="stat-label">Words</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-chars">0</div>
+                    <div class="stat-label">Characters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-paragraphs">0</div>
+                    <div class="stat-label">Paragraphs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-sentences">0</div>
+                    <div class="stat-label">Sentences</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-headings">0</div>
+                    <div class="stat-label">Headings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-reading-time">0m</div>
+                    <div class="stat-label">Reading Time</div>
+                </div>
             </div>
-            <p id="goal-text">0 / 500 words</p>
         </div>
     </div>
-</div>
-
-<div id="lint-panel" class="lint-panel" style="display: none;">
-    <div class="lint-header">
-        <h3>Markdown Issues</h3>
-        <span class="close-lint">×</span>
+    
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="help-modal-overlay"></div>
+    <div class="modal" id="help-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Keyboard Shortcuts</h2>
+            <button class="modal-close close-modal" id="help-close" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="shortcuts-section">
+                <h4>File</h4>
+                <div class="shortcut-item"><span>Save</span><kbd>Ctrl+S</kbd></div>
+                <div class="shortcut-item"><span>Open</span><kbd>Ctrl+O</kbd></div>
+                <div class="shortcut-item"><span>Export PDF</span><kbd>Ctrl+P</kbd></div>
+            </div>
+            <div class="shortcuts-section">
+                <h4>Edit</h4>
+                <div class="shortcut-item"><span>Bold</span><kbd>Ctrl+B</kbd></div>
+                <div class="shortcut-item"><span>Italic</span><kbd>Ctrl+I</kbd></div>
+                <div class="shortcut-item"><span>Link</span><kbd>Ctrl+K</kbd></div>
+                <div class="shortcut-item"><span>Find</span><kbd>Ctrl+F</kbd></div>
+            </div>
+            <div class="shortcuts-section">
+                <h4>View</h4>
+                <div class="shortcut-item"><span>Toggle Dark Mode</span><kbd>Ctrl+D</kbd></div>
+                <div class="shortcut-item"><span>Focus Mode</span><kbd>Ctrl+Shift+F</kbd></div>
+                <div class="shortcut-item"><span>Help</span><kbd>Ctrl+H</kbd></div>
+            </div>
+        </div>
     </div>
-    <div id="lint-list"></div>
-</div>
+    
+    <!-- Goals Modal -->
+    <div class="modal-overlay" id="goals-modal-overlay"></div>
+    <div class="modal" id="goals-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Writing Goals</h2>
+            <button class="modal-close close-goals" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-item">
+                <label for="daily-goal-input">Daily Word Goal</label>
+                <input type="number" id="daily-goal-input" class="settings-input" min="0" value="500" placeholder="500">
+            </div>
+            <div class="goal-progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="goal-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="goal-text" id="goal-text">0 / 500 words</div>
+            </div>
+            <div class="streak-section">
+                <span class="streak-label">Current Streak:</span>
+                <span class="streak-count" id="streak-count">0 days</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Templates Modal -->
+    <div class="modal-overlay" id="templates-modal-overlay"></div>
+    <div class="modal modal-lg" id="templates-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Templates</h2>
+            <button class="modal-close close-templates" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="templates-grid" id="templates-grid">
+                <!-- Templates rendered by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lint Panel (Floating) -->
+    <div class="floating-panel hidden" id="lint-panel">
+        <div class="panel-header">
+            <h3 class="panel-title">Markdown Linter</h3>
+            <button class="panel-close close-lint" aria-label="Close">×</button>
+        </div>
+        <div class="panel-body">
+            <ul class="lint-list" id="lint-list"></ul>
+        </div>
+    </div>
+    
+    <!-- TOC Panel (Floating) -->
+    <div class="floating-panel hidden" id="toc-panel">
+        <div class="panel-header">
+            <h3 class="panel-title">Table of Contents</h3>
+            <button class="panel-close close-toc" aria-label="Close">×</button>
+        </div>
+        <div class="panel-body">
+            <ul class="toc-list" id="toc-list-panel"></ul>
+        </div>
+    </div>
+    
+    <!-- Snippets Dropdown -->
+    <div class="dropdown-menu snippets-dropdown hidden" id="snippets-dropdown">
+        <!-- Snippets rendered by JS -->
+    </div>
 
     <!-- Mobile Navigation Drawer -->
     <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
-    <aside class="mobile-nav-drawer" id="mobile-nav-drawer">
-        <div class="drawer-header">
-            <span class="drawer-title">Menu</span>
-            <button class="drawer-close" id="drawer-close">×</button>
+    <nav class="mobile-nav-drawer" id="mobile-nav-drawer">
+        <div class="mobile-nav-header">
+            <div class="brand-logo">M</div>
+            <span class="brand-name">MarkDraft</span>
         </div>
-        <div class="drawer-content">
-            <div class="drawer-section">
-                <span class="drawer-section-title">File</span>
-                <button class="drawer-item" data-action="reset">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M8 3a5 5 0 00-4.546 2.914.5.5 0 01-.908-.418A6 6 0 1114 8a.5.5 0 01-1 0 5 5 0 00-5-5z" />
-                        <path
-                            d="M8 4.466V.534a.25.25 0 00-.41-.192L4.23 3.308a.25.25 0 000 .384l3.36 2.966A.25.25 0 008 6.466v-2z" />
-                    </svg>
-                    Reset
-                </button>
-                <button class="drawer-item" data-action="import">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M8 5.5a.5.5 0 01.5.5v2.793l1.146-1.147a.5.5 0 01.708.708l-2 2a.5.5 0 01-.708 0l-2-2a.5.5 0 11.708-.708L7.5 8.793V6a.5.5 0 01.5-.5z" />
-                    </svg>
-                    Import File
-                </button>
-                <button class="drawer-item" data-action="copy-md">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" />
-                        <path
-                            d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" />
-                    </svg>
-                    Copy Markdown
-                </button>
-                <button class="drawer-item" data-action="copy-html">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M4.708 5.578L2.061 8.224l2.647 2.646-.708.708-3-3V7.87l3-3 .708.708zm7.292 5.646l2.646-2.647-2.646-2.647.708-.708 3 3v.708l-3 3-.708-.708z" />
-                    </svg>
-                    Copy HTML
-                </button>
-            </div>
-            <div class="drawer-section">
-                <span class="drawer-section-title">Export</span>
-                <button class="drawer-item" data-action="download-md">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5z" />
-                    </svg>
-                    Download MD
-                </button>
-                <button class="drawer-item" data-action="export-pdf">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M14 14V4.5L9.5 0H4a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2z" />
-                    </svg>
-                    Export PDF
-                </button>
-                <button class="drawer-item" data-action="export-html">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146z" />
-                    </svg>
-                    Export HTML
-                </button>
-                <button class="drawer-item" data-action="export-docx">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v9H2V2a2 2 0 012-2h5.5L14 4.5z" />
-                    </svg>
-                    Export DOCX
-                </button>
-            </div>
-            <div class="drawer-section">
-                <span class="drawer-section-title">Tools</span>
-                <button class="drawer-item" data-action="templates">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M14 4.5V9h-1V4.5h-2A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v7H2V2a2 2 0 012-2h5.5L14 4.5z" />
-                    </svg>
-                    Templates
-                </button>
-                <button class="drawer-item" data-action="toc">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M2 2.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z" />
-                    </svg>
-                    Table of Contents
-                </button>
-                <button class="drawer-item" data-action="lint">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M8.982 1.566a1.13 1.13 0 00-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z" />
-                    </svg>
-                    Lint Document
-                </button>
-                <button class="drawer-item" data-action="goals">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M2.5.5A.5.5 0 013 0h10a.5.5 0 01.5.5c0 .538-.012 1.05-.034 1.536a3 3 0 11-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 01-.3.9H3a.5.5 0 01-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 11-1.132-5.89A33.076 33.076 0 012.5.5z" />
-                    </svg>
-                    Writing Goals
-                </button>
-                <button class="drawer-item" data-action="stats">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z" />
-                    </svg>
-                    Statistics
-                </button>
-                <button class="drawer-item" data-action="help">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M16 8A8 8 0 110 8a8 8 0 0116 0z" />
-                    </svg>
-                    Help & Shortcuts
-                </button>
-            </div>
-            <div class="drawer-section">
-                <span class="drawer-section-title">Settings</span>
-                <div class="drawer-toggle-item">
-                    <span>Dark Mode</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="mobile-dark-mode-checkbox">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="drawer-toggle-item">
-                    <span>Sync Scroll</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="mobile-sync-scroll-checkbox" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Tab Bar -->
-    <div id="tab-bar-container" class="tab-bar-container">
-        <div id="tabs-list" class="tabs-list">
-            <!-- Tabs injected by JS -->
-        </div>
-        <button id="new-tab-button" class="new-tab-btn" title="New Tab">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M8 4a.5.5 0 01.5.5v3h3a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3A.5.5 0 018 4z" />
-            </svg>
-        </button>
-    </div>
-
-    <!-- Mobile View Tabs (for mobile only) -->
-    <div class="mobile-view-tabs" id="mobile-view-tabs">
-        <button class="mobile-view-tab active" data-view="editor">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 01.708-.708l3.5 3.5a.5.5 0 010 .708l-3.5 3.5a.5.5 0 01-.708-.708L13.293 8l-3.147-3.146z" />
-            </svg>
-            Editor
-        </button>
-        <button class="mobile-view-tab" data-view="preview">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                    d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 011.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0114.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 011.172 8z" />
-                <path d="M8 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z" />
-            </svg>
-            Preview
-        </button>
-    </div>
-
-    <!-- File input for importing -->
-    <input type="file" id="file-input" accept=".md,.markdown,.txt" style="display: none;">
-
-    <!-- Image file input -->
-    <input type="file" id="image-input" accept="image/*" style="display: none;">
-
-    <!-- Toast notifications container -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- Help modal -->
-    <div id="help-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Help & Shortcuts</h2>
-            <div class="help-section">
-                <h3>Keyboard Shortcuts</h3>
-                <ul>
-                    <li><kbd>Ctrl+S</kbd> / <kbd>Cmd+S</kbd> - Download as Markdown</li>
-                    <li><kbd>Ctrl+P</kbd> / <kbd>Cmd+P</kbd> - Export to PDF</li>
-                    <li><kbd>Ctrl+O</kbd> / <kbd>Cmd+O</kbd> - Import file</li>
-                    <li><kbd>Ctrl+H</kbd> / <kbd>Cmd+H</kbd> - Show/Hide help</li>
-                    <li><kbd>Ctrl+D</kbd> / <kbd>Cmd+D</kbd> - Toggle dark mode</li>
-                    <li><kbd>Ctrl+K</kbd> / <kbd>Cmd+K</kbd> - Clear/Reset</li>
-                </ul>
-            </div>
-            <div class="help-section">
-                <h3>Markdown Syntax Quick Reference</h3>
-                <table class="markdown-table">
-                    <tr>
-                        <th>Syntax</th>
-                        <th>Result</th>
-                    </tr>
-                    <tr>
-                        <td><code># Heading 1</code></td>
-                        <td>Large heading</td>
-                    </tr>
-                    <tr>
-                        <td><code>## Heading 2</code></td>
-                        <td>Medium heading</td>
-                    </tr>
-                    <tr>
-                        <td><code>**bold**</code></td>
-                        <td><strong>bold</strong></td>
-                    </tr>
-                    <tr>
-                        <td><code>*italic*</code></td>
-                        <td><em>italic</em></td>
-                    </tr>
-                    <tr>
-                        <td><code>[link](url)</code></td>
-                        <td>Link</td>
-                    </tr>
-                    <tr>
-                        <td><code>![alt](url)</code></td>
-                        <td>Image</td>
-                    </tr>
-                    <tr>
-                        <td><code>`code`</code></td>
-                        <td>Inline code</td>
-                    </tr>
-                    <tr>
-                        <td><code>- item</code></td>
-                        <td>Bullet list</td>
-                    </tr>
-                    <tr>
-                        <td><code>1. item</code></td>
-                        <td>Numbered list</td>
-                    </tr>
-                    <tr>
-                        <td><code>&gt; quote</code></td>
-                        <td>Blockquote</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="container" class="split-container">
-
-        <div id="edit" class="column editor-pane">
-            <div id="toolbar" class="editor-toolbar">
-                <!-- Text Formatting Group -->
-                <div class="toolbar-group" data-group="text">
-                    <button id="toolbar-bold" class="toolbar-btn" title="Bold (Ctrl+B)" aria-label="Bold">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M4 2h5.5c1.7 0 3 1.3 3 3 0 1-.5 1.9-1.3 2.5.9.6 1.5 1.6 1.5 2.7 0 1.9-1.5 3.8-3.7 3.8H4V2zm3 5.5h2c.8 0 1.5-.7 1.5-1.5S9.8 4.5 9 4.5H7v3zm0 6h2.5c1 0 2-.8 2-1.8s-1-1.7-2-1.7H7v3.5z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-italic" class="toolbar-btn" title="Italic (Ctrl+I)" aria-label="Italic">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M6 2h6v2H9.5l-2 8H10v2H4v-2h2.5l2-8H6V2z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-strikethrough" class="toolbar-btn" title="Strikethrough"
-                        aria-label="Strikethrough">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M8.5 7H14v2H2V7h5.5zM10 3.5c0-.8-.7-1.5-1.5-1.5h-3C4.7 2 4 2.7 4 3.5V5h2V4h3v2.3h2V3.5zM8.5 10H6v1.5c0 .8.7 1.5 1.5 1.5h3c.8 0 1.5-.7 1.5-1.5V10h-2v1H7v-1h1.5z" />
-                        </svg>
-                    </button>
-                </div>
-
-                <span class="toolbar-divider"></span>
-
-                <!-- Headings Group -->
-                <div class="toolbar-group" data-group="headings">
-                    <button id="toolbar-h1" class="toolbar-btn" title="Heading 1" aria-label="Heading 1">H1</button>
-                    <button id="toolbar-h2" class="toolbar-btn" title="Heading 2" aria-label="Heading 2">H2</button>
-                    <button id="toolbar-h3" class="toolbar-btn" title="Heading 3" aria-label="Heading 3">H3</button>
-                </div>
-
-                <span class="toolbar-divider"></span>
-
-                <!-- Insert Group -->
-                <div class="toolbar-group" data-group="insert">
-                    <button id="toolbar-link" class="toolbar-btn" title="Insert Link (Ctrl+K)" aria-label="Insert Link">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-image" class="toolbar-btn" title="Insert Image" aria-label="Insert Image">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M1.75 2.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h.94a.76.76 0 01.03-.03l6.077-6.078a1.75 1.75 0 012.412-.06L14.5 10.31V2.75a.25.25 0 00-.25-.25H1.75zm12.5 11H4.81l5.048-5.047a.25.25 0 01.344-.009l4.298 3.889v.917a.25.25 0 01-.25.25zm1.75-.25V2.75A1.75 1.75 0 0014.25 1H1.75A1.75 1.75 0 000 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0016 13.25zM5.5 6a.5.5 0 11-1 0 .5.5 0 011 0zM7 6a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-table" class="toolbar-btn" title="Insert Table" aria-label="Insert Table">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0114.25 16H1.75A1.75 1.75 0 010 14.25V1.75zm1.75-.25a.25.25 0 00-.25.25V5h5V1.5h-4.75zm5.5 0V5h7V1.75a.25.25 0 00-.25-.25h-6.75zM14.5 6.5h-7v3h7v-3zm0 4.5h-7v3.25c0 .138.112.25.25.25h6.75a.25.25 0 00.25-.25V11zM6.5 14.5v-3h-5v3.25c0 .138.112.25.25.25h4.75zm-5-4.5h5v-3h-5v3z" />
-                        </svg>
-                    </button>
-                </div>
-
-                <span class="toolbar-divider"></span>
-
-                <!-- Code Group -->
-                <div class="toolbar-group" data-group="code">
-                    <button id="toolbar-code" class="toolbar-btn" title="Code Block" aria-label="Code Block">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M4.72 3.22a.75.75 0 011.06 1.06L2.06 8l3.72 3.72a.75.75 0 11-1.06 1.06L.47 8.53a.75.75 0 010-1.06l4.25-4.25zm6.56 0a.75.75 0 10-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 101.06 1.06l4.25-4.25a.75.75 0 000-1.06l-4.25-4.25z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-inline-code" class="toolbar-btn toolbar-btn-text" title="Inline Code"
-                        aria-label="Inline Code">&lt;/&gt;</button>
-                </div>
-
-                <span class="toolbar-divider"></span>
-
-                <!-- Lists Group -->
-                <div class="toolbar-group" data-group="lists">
-                    <button id="toolbar-ul" class="toolbar-btn" title="Bullet List" aria-label="Bullet List">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-ol" class="toolbar-btn" title="Numbered List" aria-label="Numbered List">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M2.003 2.5a.5.5 0 00-.723-.447l-1.003.5a.5.5 0 00.446.895l.28-.14V6H.5a.5.5 0 000 1h2.006a.5.5 0 100-1h-.503V2.5zM5 3.25a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 3.25zm0 5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 8.25zm0 5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-task" class="toolbar-btn" title="Task List" aria-label="Task List">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M2 2.5a.5.5 0 01.5-.5h11a.5.5 0 01.5.5v11a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5v-11zm1 .5v10h10V3H3z" />
-                            <path
-                                d="M10.854 5.854a.5.5 0 00-.708-.708L7 8.293 5.854 7.146a.5.5 0 10-.708.708l1.5 1.5a.5.5 0 00.708 0l3.5-3.5z" />
-                        </svg>
-                    </button>
-                </div>
-
-                <span class="toolbar-divider"></span>
-
-                <!-- Block Elements -->
-                <div class="toolbar-group" data-group="blocks">
-                    <button id="toolbar-quote" class="toolbar-btn" title="Blockquote" aria-label="Blockquote">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" />
-                            <path
-                                d="M3.5 4h2v3.5H4a.5.5 0 00-.5.5v2a.5.5 0 001 0V8.5h1a.5.5 0 00.5-.5V4a.5.5 0 00-.5-.5h-2a.5.5 0 000 1zm6 0h2v3.5H10a.5.5 0 00-.5.5v2a.5.5 0 001 0V8.5h1a.5.5 0 00.5-.5V4a.5.5 0 00-.5-.5h-2a.5.5 0 000 1z" />
-                        </svg>
-                    </button>
-                    <button id="toolbar-emoji" class="toolbar-btn" title="Insert Emoji"
-                        aria-label="Insert Emoji">😊</button>
-                </div>
-            </div>
-            <div id="editor-wrapper">
-                <div id="editor"></div>
-            </div>
-        </div>
-
-        <div id="split-divider" class="split-divider"></div>
-
-        <div id="preview" class="column preview-pane">
-            <div id="toc-panel" class="toc-panel"></div>
-            <div id="preview-wrapper">
-                <div id="output" class="content markdown-body"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Floating Action Button -->
-    <div class="fab-container" id="fab-container">
-        <button class="fab-main" id="fab-main" aria-label="Quick actions">
-            <svg class="fab-icon-open" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            <svg class="fab-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-        </button>
-        <div class="fab-actions">
-            <button class="fab-action" data-action="copy-md" title="Copy Markdown">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" />
-                </svg>
+        <div class="mobile-nav-content">
+            <button class="mobile-nav-item" id="mobile-new-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 01.5.5v3h3a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3A.5.5 0 018 4z"/></svg>
+                New Document
             </button>
-            <button class="fab-action" data-action="download-md" title="Download">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M8.5 1a.5.5 0 01.5.5v11.793l3.146-3.147a.5.5 0 01.708.708l-4 4a.5.5 0 01-.708 0l-4-4a.5.5 0 01.708-.708L7.5 13.293V1.5a.5.5 0 01.5-.5z" />
-                </svg>
+            <button class="mobile-nav-item" id="mobile-import-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z"/><path d="M7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z"/></svg>
+                Import File
             </button>
-            <button class="fab-action" data-action="export-pdf" title="Export PDF">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M14 14V4.5L9.5 0H4a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2z" />
-                </svg>
+            <div class="mobile-nav-divider"></div>
+            <button class="mobile-nav-item" id="mobile-settings-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4.754a3.246 3.246 0 100 6.492 3.246 3.246 0 000-6.492z"/></svg>
+                Settings
+            </button>
+            <button class="mobile-nav-item" id="mobile-help-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z"/><path d="M5.255 5.786a.237.237 0 00.241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 00.25.246h.811a.25.25 0 00.25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/></svg>
+                Help
             </button>
         </div>
-    </div>
-
-    <footer>
-        <div id="stats-display" class="footer-stats">
-            <div class="stat-item" id="word-count">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z" />
-                </svg>
-                Words: 0
-            </div>
-            <div class="stat-item" id="char-count">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" />
-                </svg>
-                Chars: 0
-            </div>
-            <div class="stat-item" id="reading-time">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z" />
-                    <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z" />
-                </svg>
-                Reading: 0 min
-            </div>
-            <div class="spacer"></div>
-            <div id="autosave-indicator" class="autosave-status">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M10.97 4.97a.75.75 0 011.07 1.05l-3.99 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z" />
-                </svg>
-                Saved
-            </div>
-        </div>
-    </footer>
-
-    <!-- Stats Modal -->
-    <div id="stats-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📊 Document Statistics</h2>
-                <span class="close-modal close-stats">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-words">0</div>
-                        <div class="stat-label">Words</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-chars">0</div>
-                        <div class="stat-label">Characters</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-paragraphs">0</div>
-                        <div class="stat-label">Paragraphs</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-sentences">0</div>
-                        <div class="stat-label">Sentences</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-headings">0</div>
-                        <div class="stat-label">Headings</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-reading-time">0m</div>
-                        <div class="stat-label">Reading Time</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Templates Modal -->
-    <div id="templates-modal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h2>📋 Template Library</h2>
-                <span class="close-modal close-templates">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="templates-grid" class="templates-grid">
-                    <!-- Templates injected by JS -->
-                </div>
-            </div>
-        </div>
-    </div>
+    </nav>
 
 </body>
-
 </html>
