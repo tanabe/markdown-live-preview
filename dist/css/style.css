@@ -9577,3 +9577,160 @@ body.dark-mode .neumorphism-inset {
 */
 
 /* End of Enhanced UI CSS */
+/* ============================================
+   NEW HEADER STYLES (Grouped & Clean)
+   ============================================ */
+
+.brand {
+  font-weight: 700;
+  font-size: 16px;
+  margin-right: 16px;
+  color: var(--header-text);
+  letter-spacing: -0.5px;
+}
+
+.menu-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.header-action {
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.header-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.divider-vertical {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 8px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Sync Button Update */
+#sync-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 8px !important;
+}
+
+#sync-button label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+/* ============================================
+   STATUS BAR (Footer)
+   ============================================ */
+footer {
+  padding: 0 16px;
+  height: 28px;
+  background: var(--bg-tertiary); /* Distinct from editor bg */
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  z-index: 100;
+}
+
+#stats-display {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 16px;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  color: inherit;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+
+.spacer {
+  flex: 1;
+}
+
+#stats-button {
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+#stats-button:hover {
+  color: var(--text-primary);
+}
+
+/* Ensure editor/preview take remaining height */
+#container {
+  height: calc(100vh - 48px - 40px - 28px); /* Header - TabBar - Footer */
+}
+
+/* Override existing header inputs for cleaner look */
+header select {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+header input[type='text'] {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+header input[type='text']::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}

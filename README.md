@@ -58,6 +58,28 @@ Or using npm:
 $ npm run build
 ```
 
+## 🚀 Deployment
+
+### Deploy to Vercel
+
+The easiest way to deploy this application is using the [Vercel Platform](https://vercel.com/new).
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNir-Bhay%2Fmarkdown-live-preview)
+
+1. Push your code to a GitHub repository.
+2. Link the repository to your Vercel account.
+3. Vercel will automatically detect the **Vite** configuration and deploy the app.
+4. **Build Settings**:
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+
+### Configuration
+
+A `vercel.json` file is included to optimize performance with:
+- **Clean URLs** for a better user experience.
+- **Cache-Control Headers** for faster loading times of static assets.
+- **PWA Support** with optimized headers for the Service Worker.
+
 ## 💻 Local Development
 
 ```bash
