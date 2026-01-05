@@ -1,0 +1,16 @@
+# robots.txt for MarkDraft - Markdown Live Preview Editor
+# https://markups.vercel.app/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://markups.vercel.app/sitemap.xml
+
+# Crawl-delay (optional, be nice to crawlers)
+Crawl-delay: 1
+
+# Block access to development/internal paths (if any)
+Disallow: /api/
+Disallow: /_next/
+Disallow: /node_modules/
