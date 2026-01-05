@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="50%" style="stop-color:#161b22"/>
+      <stop offset="100%" style="stop-color:#0d1117"/>
+    </linearGradient>
+    <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#5865f2"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+  
+  <!-- Grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#21262d" stroke-width="1"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.5"/>
+  
+  <!-- Accent glow circles -->
+  <circle cx="150" cy="500" r="200" fill="#5865f2" opacity="0.1"/>
+  <circle cx="1050" cy="130" r="180" fill="#7c3aed" opacity="0.1"/>
+  
+  <!-- Logo container -->
+  <rect x="80" y="180" width="100" height="100" rx="20" fill="url(#accent-gradient)" filter="url(#glow)"/>
+  <text x="130" y="255" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="white" text-anchor="middle">M</text>
+  
+  <!-- Main title -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white">Markups</text>
+  
+  <!-- Tagline -->
+  <text x="80" y="330" font-family="Arial, sans-serif" font-size="32" fill="#8b949e">Free Online Markdown Editor with Live Preview</text>
+  
+  <!-- Feature badges -->
+  <g transform="translate(80, 380)">
+    <!-- Badge 1: Mermaid -->
+    <rect x="0" y="0" width="160" height="44" rx="22" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+    <text x="80" y="28" font-family="Arial, sans-serif" font-size="16" fill="#58a6ff" text-anchor="middle">📊 Mermaid</text>
+    
+    <!-- Badge 2: KaTeX -->
+    <rect x="180" y="0" width="140" height="44" rx="22" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+    <text x="250" y="28" font-family="Arial, sans-serif" font-size="16" fill="#a371f7" text-anchor="middle">∑ KaTeX</text>
+    
+    <!-- Badge 3: Export -->
+    <rect x="340" y="0" width="180" height="44" rx="22" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+    <text x="430" y="28" font-family="Arial, sans-serif" font-size="16" fill="#3fb950" text-anchor="middle">📄 PDF/HTML/DOCX</text>
+    
+    <!-- Badge 4: Privacy -->
+    <rect x="540" y="0" width="170" height="44" rx="22" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+    <text x="625" y="28" font-family="Arial, sans-serif" font-size="16" fill="#f0883e" text-anchor="middle">🔒 Privacy-First</text>
+  </g>
+  
+  <!-- Code preview mockup -->
+  <g transform="translate(700, 150)">
+    <!-- Editor window -->
+    <rect x="0" y="0" width="420" height="330" rx="12" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+    
+    <!-- Title bar -->
+    <rect x="0" y="0" width="420" height="40" rx="12" fill="#21262d"/>
+    <rect x="0" y="28" width="420" height="12" fill="#21262d"/>
+    
+    <!-- Window controls -->
+    <circle cx="20" cy="20" r="6" fill="#f85149"/>
+    <circle cx="44" cy="20" r="6" fill="#f0883e"/>
+    <circle cx="68" cy="20" r="6" fill="#3fb950"/>
+    
+    <!-- Tab -->
+    <rect x="100" y="8" width="120" height="26" rx="4" fill="#0d1117"/>
+    <text x="160" y="26" font-family="monospace" font-size="12" fill="#8b949e" text-anchor="middle">README.md</text>
+    
+    <!-- Markdown content -->
+    <text x="20" y="70" font-family="monospace" font-size="14" fill="#7ee787"># Welcome</text>
+    <text x="20" y="95" font-family="monospace" font-size="14" fill="#c9d1d9">Write **markdown** here</text>
+    <text x="20" y="120" font-family="monospace" font-size="14" fill="#c9d1d9">and see it rendered →</text>
+    <text x="20" y="160" font-family="monospace" font-size="14" fill="#79c0ff">```mermaid</text>
+    <text x="20" y="185" font-family="monospace" font-size="14" fill="#c9d1d9">graph LR</text>
+    <text x="20" y="210" font-family="monospace" font-size="14" fill="#c9d1d9">  A --> B</text>
+    <text x="20" y="235" font-family="monospace" font-size="14" fill="#79c0ff">```</text>
+    <text x="20" y="275" font-family="monospace" font-size="14" fill="#a371f7">$E = mc^2$</text>
+    
+    <!-- Divider line -->
+    <line x1="210" y1="50" x2="210" y2="320" stroke="#30363d" stroke-width="2"/>
+    
+    <!-- Preview side -->
+    <text x="230" y="70" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#c9d1d9">Welcome</text>
+    <text x="230" y="100" font-family="Arial, sans-serif" font-size="14" fill="#8b949e">Write </text>
+    <text x="265" y="100" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c9d1d9">markdown</text>
+    <text x="340" y="100" font-family="Arial, sans-serif" font-size="14" fill="#8b949e"> here</text>
+    
+    <!-- Mermaid diagram preview -->
+    <rect x="230" y="130" width="170" height="80" rx="8" fill="#0d1117"/>
+    <rect x="250" y="155" width="40" height="30" rx="4" fill="#5865f2"/>
+    <text x="270" y="175" font-family="Arial" font-size="12" fill="white" text-anchor="middle">A</text>
+    <line x1="290" y1="170" x2="330" y2="170" stroke="#5865f2" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="340" y="155" width="40" height="30" rx="4" fill="#5865f2"/>
+    <text x="360" y="175" font-family="Arial" font-size="12" fill="white" text-anchor="middle">B</text>
+    
+    <!-- Math preview -->
+    <text x="230" y="250" font-family="Times New Roman, serif" font-size="18" font-style="italic" fill="#c9d1d9">E = mc²</text>
+  </g>
+  
+  <!-- URL at bottom -->
+  <text x="600" y="580" font-family="Arial, sans-serif" font-size="24" fill="#5865f2" text-anchor="middle" filter="url(#glow)">markups.vercel.app</text>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#5865f2"/>
+    </marker>
+  </defs>
+</svg>

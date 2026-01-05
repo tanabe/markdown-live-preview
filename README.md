@@ -1,17 +1,17 @@
 <div align="center">
 
-# ✨ Markdown Live Preview
+# ✨ Markups
 
-**A powerful, feature-rich markdown editor with real-time preview**
+**A powerful, free online markdown editor with real-time preview**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNir-Bhay%2Fmarkdown-live-preview)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Monaco Editor](https://img.shields.io/badge/Monaco%20Editor-0.52-007ACC?logo=visual-studio-code&logoColor=white)](https://microsoft.github.io/monaco-editor/)
 
-[Live Demo](https://markdownlivepreview.com) • [Report Bug](https://github.com/Nir-Bhay/markdown-live-preview/issues) • [Request Feature](https://github.com/Nir-Bhay/markdown-live-preview/issues)
+[🌐 Live Demo](https://markups.vercel.app) • [🐛 Report Bug](https://github.com/Nir-Bhay/markdown-live-preview/issues) • [💡 Request Feature](https://github.com/Nir-Bhay/markdown-live-preview/issues)
 
-![Markdown Live Preview Screenshot](https://via.placeholder.com/800x450/1e293b/ffffff?text=Markdown+Live+Preview)
+![Markups Screenshot](public/image/og-image.svg)
 
 </div>
 

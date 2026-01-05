@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> Configuration file for AI coding agents working on this project.
+> Configuration file for AI coding agents working on **Markups** - Free Online Markdown Editor.
 
 ## Commands
 
@@ -14,6 +14,7 @@
 ## Architecture
 
 **Frontend-only** Vite + vanilla JavaScript application.
+**Live URL**: https://markups.vercel.app/
 
 ### Entry Points
 - `index.html` — Main HTML file

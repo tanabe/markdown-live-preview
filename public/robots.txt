@@ -1,4 +1,4 @@
-# robots.txt for MarkDraft - Markdown Live Preview Editor
+# robots.txt for Markups - Online Markdown Editor
 # https://markups.vercel.app/
 
 User-agent: *

@@ -1,15 +1,22 @@
 {
-  "name": "MarkDraft - Markdown Editor",
-  "short_name": "MarkDraft",
+  "name": "Markups - Markdown Editor",
+  "short_name": "Markups",
   "description": "Free online Markdown editor with live preview, Mermaid diagrams, KaTeX math, syntax highlighting, and export to PDF/HTML/DOCX. Privacy-focused, no login required.",
   "start_url": "/",
   "id": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "background_color": "#0d1117",
   "theme_color": "#5865f2",
   "orientation": "any",
-  "categories": ["productivity", "utilities", "developer tools"],
+  "categories": [
+    "productivity",
+    "utilities",
+    "developer tools"
+  ],
   "lang": "en-US",
   "dir": "ltr",
   "scope": "/",
