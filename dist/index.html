@@ -1,381 +1,1735 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta http-equiv="content-language" content="en">
-    <meta http-equiv="content-script-type" content="text/javascript">
-    <meta http-equiv="content-style-type" content="text/css">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="This is the online markdown editor with live preview.">
-    <meta name="theme-color" content="#444444">
+    <meta name="description" content="Premium Markdown Live Preview Editor - A professional-grade writing tool">
+    <meta name="theme-color" content="#5865f2">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MD Preview">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MarkDraft">
 
-    <link rel="stylesheet" type="text/css" href="/css/style.css?v=1.10.2">
+    <title>MarkDraft - Premium Markdown Editor</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Material Symbols for Export Modal -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/premium-ui.css">
+    <link rel="stylesheet" href="/css/github-markdown-light.css">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="favicon.png">
-
-    <title>Markdown Live Preview</title>
-  <script type="module" crossorigin src="/assets/index-BHgJBL5N.js"></script>
+
+  <script type="module" crossorigin src="/assets/index-BZroTGgD.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/monaco-editor-DmA9JB1O.js">
   <link rel="stylesheet" crossorigin href="/assets/monaco-editor-D6kYW_CN.css">
   <link rel="stylesheet" crossorigin href="/assets/index-B9WpDNyT.css">
 </head>
 
+<body class="view-split">
 
-
-<body>
-
-    <header>
-        <div id="menu-items">
-            <div class="brand">Markdown Live Preview</div>
-            
-            <!-- File Menu -->
-            <div class="dropdown-container">
-                <button class="menu-btn">File ▼</button>
-                <div class="dropdown-content">
-                    <div id="reset-button" class="dropdown-item"><span class="dropdown-icon">🔄</span> Reset</div>
-                    <div id="import-button" class="dropdown-item"><span class="dropdown-icon">📂</span> Import MD</div>
-                    <div id="download-md-button" class="dropdown-item"><span class="dropdown-icon">⬇️</span> Download MD</div>
-                    <div id="export-pdf-button" class="dropdown-item"><span class="dropdown-icon">📄</span> Export PDF</div>
-                    <div id="export-html-button" class="dropdown-item"><span class="dropdown-icon">🌐</span> Export HTML</div>
-                    <div id="export-docx-button" class="dropdown-item"><span class="dropdown-icon">📝</span> Export DOCX</div>
-                </div>
-            </div>
-
-            <!-- Edit/Copy Menu -->
-            <div class="dropdown-container">
-                <button class="menu-btn">Edit ▼</button>
-                <div class="dropdown-content">
-                    <div id="copy-button" class="dropdown-item"><span class="dropdown-icon">📋</span> Copy Markdown</div>
-                    <div id="copy-html-button" class="dropdown-item"><span class="dropdown-icon">code</span> Copy HTML</div>
-                </div>
-            </div>
-
-            <!-- View/Tools Menu -->
-            <div class="dropdown-container">
-                <button class="menu-btn">View ▼</button>
-                <div class="dropdown-content">
-                    <div id="toc-button" class="dropdown-item"><span class="dropdown-icon">📑</span> Table of Contents</div>
-                    <div id="fullscreen-button" class="dropdown-item"><span class="dropdown-icon">⛶</span> Fullscreen</div>
-                    <div id="focus-button" class="dropdown-item"><span class="dropdown-icon">🎯</span> Focus Mode</div>
-                    <div id="typewriter-button" class="dropdown-item"><span class="dropdown-icon">⌨️</span> Typewriter Mode</div>
-                </div>
-            </div>
-
-            <div id="templates-button" class="header-action" title="Templates">📋 Templates</div>
-            
-            <div id="snippets-button" class="dropdown-container">
-                <button class="menu-btn">Snippets ▼</button>
-                <div id="snippets-dropdown" class="dropdown-content">
-                    <!-- Snippets injected by JS -->
-                </div>
-            </div>
-
-            <div class="divider-vertical"></div>
-
-            <div id="sync-button" title="Sync Scroll"><input type="checkbox" id="sync-scroll-checkbox"><label for="sync-scroll-checkbox">Sync</label></div>
-            
-            <div id="theme-selector">
-                <select id="theme-dropdown">
-                    <option value="vs">Light Theme</option>
-                    <option value="vs-dark">Dark Theme</option>
-                    <option value="hc-black">High Contrast</option>
-                    <option value="dracula">Dracula</option>
-                    <option value="solarized-dark">Solarized Dark</option>
-                    <option value="solarized-light">Solarized Light</option>
-                    <option value="github-dark">GitHub Dark</option>
-                    <option value="github-light">GitHub Light</option>
-                </select>
-            </div>
-
-            <div id="view-options" class="view-options">
-                <button id="view-code" title="Code Only">Code</button>
-                <button id="view-split" class="active" title="Split View">Split</button>
-                <button id="view-preview" title="Preview Only">Preview</button>
-            </div>
-
-            <div id="search-container">
-                <input type="text" id="search-input" placeholder="Search..." title="Search in Preview">
-            </div>
-
-            <button id="lint-button" title="Toggle Linting Panel" class="icon-btn">⚠️</button>
-            <button id="goals-button" title="Writing Goals" class="icon-btn">🏆</button>
-            <button id="help-button" title="Help" class="icon-btn">❓</button>
+    <!-- ==================== HEADER ==================== -->
+    <header class="premium-header" role="banner">
+        <!-- Brand -->
+        <div class="header-brand">
+            <div class="brand-logo">M</div>
+            <span class="brand-name">MarkDraft</span>
         </div>
 
-        <!-- Modals -->
-        <div id="goals-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-goals close-modal">&times;</span>
-                <h2>Writing Goals 🏆</h2>
-                <div class="goals-container">
-                    <div class="goal-setting">
-                        <label>Daily Target:</label>
-                        <input type="number" id="daily-goal-input" value="500" min="100" step="50">
-                        <span>words</span>
-                    </div>
-                    <div class="streak-display">
-                        <span id="streak-count">0</span> 🔥 Streak
-                    </div>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-bar-bg">
-                        <div id="goal-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
-                    </div>
-                    <p id="goal-text">0 / 500 words</p>
-                </div>
-            </div>
+        <!-- Tabs -->
+        <div class="header-tabs" id="tabs-list">
+            <button class="header-tab active" data-tab="1">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z" />
+                </svg>
+                <span class="tab-name">Untitled.md</span>
+                <span class="tab-close" aria-label="Close tab">×</span>
+            </button>
+            <button class="header-tab-add" id="new-tab-button" aria-label="New tab">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M8 4a.5.5 0 01.5.5v3h3a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3A.5.5 0 018 4z" />
+                </svg>
+            </button>
         </div>
-        <div id="lint-panel" class="lint-panel" style="display: none;">
-            <div class="lint-header">
-                <h3>Markdown Issues</h3>
-                <span class="close-lint">×</span>
+
+        <!-- Actions -->
+        <div class="header-actions">
+            <!-- Search -->
+            <button class="header-btn icon-with-label" id="search-btn" title="Search (Ctrl+F)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span class="btn-label">Search</span>
+            </button>
+
+            <!-- Import -->
+            <button class="header-btn icon-with-label" id="import-button" title="Import File">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span class="btn-label">Upload</span>
+            </button>
+
+            <!-- Help -->
+            <button class="header-btn icon-with-label" id="help-button" title="Help (Ctrl+H)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span class="btn-label">Help</span>
+            </button>
+
+            <!-- View Mode Toggle -->
+            <div class="view-mode-toggle">
+                <button class="view-mode-btn" id="view-code" data-view="editor" title="Editor only">Write</button>
+                <button class="view-mode-btn active" id="view-split" data-view="split" title="Split view">Split</button>
+                <button class="view-mode-btn" id="view-preview" data-view="preview"
+                    title="Preview only">Preview</button>
             </div>
-            <div id="lint-list"></div>
+
+            <!-- Theme Toggle -->
+            <button class="header-btn icon-with-label" id="dark-mode-toggle" title="Toggle theme">
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <span class="btn-label">Theme</span>
+            </button>
+
+            <!-- Settings -->
+            <button class="header-btn icon-with-label" id="settings-btn" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+                <span class="btn-label">Settings</span>
+            </button>
+
+            <!-- Export -->
+            <button class="header-btn primary icon-with-label" id="export-btn" title="Export Document (Ctrl+Shift+E)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span class="btn-label">Export</span>
+            </button>
         </div>
     </header>
 
-    <!-- Tab Bar -->
-    <div id="tab-bar-container" class="tab-bar-container">
-        <div id="tabs-list" class="tabs-list">
-            <!-- Tabs injected by JS -->
+    <!-- ==================== TOOLBAR ==================== -->
+    <div class="premium-toolbar" id="toolbar" role="toolbar" aria-label="Formatting toolbar">
+        <!-- Text Formatting -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-bold" title="Bold (Ctrl+B)" aria-label="Bold">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 001.852-2.14c0-1.51-1.162-2.46-3.014-2.46H3.843V13H8.21zM5.908 4.674h1.696c.963 0 1.517.451 1.517 1.244 0 .834-.629 1.32-1.73 1.32H5.908V4.673zm0 6.788V8.598h1.73c1.217 0 1.88.492 1.88 1.415 0 .943-.643 1.449-1.832 1.449H5.907z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-italic" title="Italic (Ctrl+I)" aria-label="Italic">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M7.991 11.674L9.53 4.455c.123-.595.246-.71 1.347-.807l.11-.52H7.211l-.11.52c1.06.096 1.128.212 1.005.807L6.57 11.674c-.123.595-.246.71-1.346.806l-.11.52h3.774l.11-.52c-1.06-.095-1.129-.211-1.006-.806z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-strikethrough" title="Strikethrough" aria-label="Strikethrough">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M6.333 5.686c0 .31.083.581.27.814H5.166a2.776 2.776 0 01-.099-.76c0-1.627 1.436-2.768 3.48-2.768 1.969 0 3.39 1.175 3.445 2.85h-1.23c-.11-1.08-.964-1.743-2.25-1.743-1.23 0-2.18.602-2.18 1.607zm2.194 7.478c-2.153 0-3.589-1.107-3.705-2.81h1.23c.144 1.06 1.129 1.703 2.544 1.703 1.34 0 2.31-.705 2.31-1.675 0-.827-.547-1.374-1.914-1.675L8.046 8.5H1v-1h14v1h-3.504c.468.437.675.994.675 1.697 0 1.826-1.436 2.967-3.644 2.967z" />
+                </svg>
+            </button>
         </div>
-        <button id="new-tab-button" title="New Tab">+</button>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Headings -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-h1" title="Heading 1"
+                aria-label="Heading 1">H1</button>
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-h2" title="Heading 2"
+                aria-label="Heading 2">H2</button>
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-h3" title="Heading 3"
+                aria-label="Heading 3">H3</button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Insert -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-link" title="Insert Link (Ctrl+K)" aria-label="Insert Link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M4.715 6.542L3.343 7.914a3 3 0 104.243 4.243l1.828-1.829A3 3 0 008.586 5.5L8 6.086a1.001 1.001 0 00-.154.199 2 2 0 01.861 3.337L6.88 11.45a2 2 0 11-2.83-2.83l.793-.792a4.018 4.018 0 01-.128-1.287z" />
+                    <path
+                        d="M6.586 4.672A3 3 0 007.414 9.5l.775-.776a2 2 0 01-.896-3.346L9.12 3.55a2 2 0 112.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 10-4.243-4.243L6.586 4.672z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-image" title="Insert Image" aria-label="Insert Image">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M6.002 5.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                    <path
+                        d="M2.002 1a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V3a2 2 0 00-2-2h-12zm12 1a1 1 0 011 1v6.5l-3.777-1.947a.5.5 0 00-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 00-.63.062L1.002 12V3a1 1 0 011-1h12z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-table" title="Insert Table" aria-label="Insert Table">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M0 2a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 001-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 001 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z" />
+                </svg>
+            </button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Code -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-code" title="Code Block" aria-label="Code Block">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 01.708-.708l3.5 3.5a.5.5 0 010 .708l-3.5 3.5a.5.5 0 01-.708-.708L13.293 8l-3.147-3.146z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn toolbar-btn-text" id="toolbar-inline-code" title="Inline Code"
+                aria-label="Inline Code">`</button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Lists -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-ul" title="Bullet List" aria-label="Bullet List">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M5 11.5a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm-3 1a1 1 0 100-2 1 1 0 000 2zm0 4a1 1 0 100-2 1 1 0 000 2zm0 4a1 1 0 100-2 1 1 0 000 2z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-ol" title="Numbered List" aria-label="Numbered List">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M5 11.5a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5z" />
+                    <path
+                        d="M1.713 11.865v-.474H2c.217 0 .363-.137.363-.317 0-.185-.158-.31-.361-.31-.223 0-.367.152-.373.31h-.59c.016-.467.373-.787.986-.787.588-.002.954.291.957.703a.595.595 0 01-.492.594v.033a.615.615 0 01.569.631c.003.533-.502.8-1.051.8-.656 0-1-.37-1.008-.794h.582c.008.178.186.306.422.309.254 0 .424-.145.422-.35-.002-.195-.155-.348-.414-.348h-.3zm-.004-4.699h-.604v-.035c0-.408.295-.844.958-.844.583 0 .96.326.96.756 0 .389-.257.617-.476.848l-.537.572v.03h1.054V9H1.143v-.395l.957-.99c.138-.142.293-.304.293-.508 0-.18-.147-.32-.342-.32a.33.33 0 00-.342.338v.041zM2.564 5h-.635V2.924h-.031l-.598.42v-.567l.629-.443h.635V5z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-task" title="Task List" aria-label="Task List">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M14 1a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1h12zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" />
+                    <path
+                        d="M10.97 4.97a.75.75 0 011.071 1.05l-3.992 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 01.02-.022z" />
+                </svg>
+            </button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Block Elements -->
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="toolbar-quote" title="Blockquote" aria-label="Blockquote">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M12 12a1 1 0 001-1V8.558a1 1 0 00-1-1h-1.388c0-.351.021-.703.062-1.054.062-.372.166-.703.31-.992.145-.29.331-.517.559-.683.227-.186.516-.279.868-.279V3c-.579 0-1.085.124-1.52.372a3.322 3.322 0 00-1.085.992 4.92 4.92 0 00-.62 1.458A7.712 7.712 0 009 7.558V11a1 1 0 001 1h2zm-6 0a1 1 0 001-1V8.558a1 1 0 00-1-1H4.612c0-.351.021-.703.062-1.054.062-.372.166-.703.31-.992.145-.29.331-.517.559-.683.227-.186.516-.279.868-.279V3c-.579 0-1.085.124-1.52.372a3.322 3.322 0 00-1.085.992 4.92 4.92 0 00-.62 1.458A7.712 7.712 0 003 7.558V11a1 1 0 001 1h2z" />
+                </svg>
+            </button>
+            <button class="toolbar-btn" id="toolbar-hr" title="Horizontal Rule" aria-label="Horizontal Rule">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 8a.5.5 0 01.5-.5h15a.5.5 0 010 1H.5A.5.5 0 010 8z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Spacer -->
+        <div style="flex: 1;"></div>
+
+        <!-- Tools -->
+        <div class="toolbar-group">
+            <!-- Emoji -->
+            <button class="toolbar-btn" id="toolbar-emoji" title="Insert Emoji" aria-label="Insert Emoji">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </svg>
+            </button>
+            <!-- Table of Contents -->
+            <button class="toolbar-btn" id="toc-button" title="Table of Contents" aria-label="Toggle Outline">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+            </button>
+            <!-- Scroll Sync -->
+            <button class="toolbar-btn" id="scroll-sync-button" title="Scroll Sync" aria-label="Toggle Scroll Sync">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                    <polyline points="7 23 3 19 7 15"></polyline>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                </svg>
+            </button>
+            <!-- Spell Check / Lint -->
+            <button class="toolbar-btn" id="lint-button" title="Check Spelling" aria-label="Lint Document">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </button>
+            <!-- Statistics -->
+            <button class="toolbar-btn" id="stats-button" title="Statistics" aria-label="Statistics">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+            </button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Mode Tools -->
+        <div class="toolbar-group">
+            <!-- Focus Mode -->
+            <button class="toolbar-btn" id="focus-button" title="Focus Mode" aria-label="Focus Mode">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 3h4M3 5v4M19 3h-4M21 5v4M5 21h4M3 19v-4M19 21h-4M21 19v-4"></path>
+                </svg>
+            </button>
+            <!-- Typewriter Mode -->
+            <button class="toolbar-btn" id="typewriter-button" title="Typewriter Mode" aria-label="Typewriter Mode">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                </svg>
+            </button>
+            <!-- Fullscreen -->
+            <button class="toolbar-btn" id="fullscreen-button" title="Fullscreen" aria-label="Fullscreen">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+            </button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <!-- Templates & Snippets -->
+        <div class="toolbar-group">
+            <!-- Templates -->
+            <button class="toolbar-btn" id="templates-button" title="Templates" aria-label="Templates">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </button>
+            <!-- Writing Goals -->
+            <button class="toolbar-btn" id="goals-button" title="Writing Goals" aria-label="Writing Goals">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </button>
+        </div>
     </div>
 
-    <!-- File input for importing -->
-    <input type="file" id="file-input" accept=".md,.markdown,.txt" style="display: none;">
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <main class="main-container" id="container">
 
-    <!-- Image file input -->
-    <input type="file" id="image-input" accept="image/*" style="display: none;">
-
-    <!-- Toast notifications container -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- Help modal -->
-    <div id="help-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Help & Shortcuts</h2>
-            <div class="help-section">
-                <h3>Keyboard Shortcuts</h3>
-                <ul>
-                    <li><kbd>Ctrl+S</kbd> / <kbd>Cmd+S</kbd> - Download as Markdown</li>
-                    <li><kbd>Ctrl+P</kbd> / <kbd>Cmd+P</kbd> - Export to PDF</li>
-                    <li><kbd>Ctrl+O</kbd> / <kbd>Cmd+O</kbd> - Import file</li>
-                    <li><kbd>Ctrl+H</kbd> / <kbd>Cmd+H</kbd> - Show/Hide help</li>
-                    <li><kbd>Ctrl+D</kbd> / <kbd>Cmd+D</kbd> - Toggle dark mode</li>
-                    <li><kbd>Ctrl+K</kbd> / <kbd>Cmd+K</kbd> - Clear/Reset</li>
+        <!-- Document Outline (Left Sidebar) -->
+        <aside class="doc-outline" id="doc-outline">
+            <div class="outline-header">
+                <span class="outline-title">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                            d="M2 2.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2 2a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0 2a.5.5 0 01.5-.5h6a.5.5 0 010 1h-6a.5.5 0 01-.5-.5zm0 2a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5z" />
+                    </svg>
+                    Table of Contents
+                </span>
+                <button class="outline-close" id="outline-close" title="Close Outline" aria-label="Close Outline">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                            d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="outline-scroll-indicator" id="outline-scroll-indicator">
+                <div class="scroll-progress"></div>
+            </div>
+            <nav class="outline-content" id="outline-content">
+                <div class="outline-empty" id="outline-empty">
+                    <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor" opacity="0.3">
+                        <path
+                            d="M14 1a1 1 0 011 1v12a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1h12zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" />
+                        <path
+                            d="M3 3.5a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zM3 6a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5A.5.5 0 013 6z" />
+                    </svg>
+                    <p>No headings found</p>
+                    <small>Add headings to your document to see the outline</small>
+                </div>
+                <ul class="outline-list" id="outline-list">
+                    <!-- Generated by JS -->
                 </ul>
-            </div>
-            <div class="help-section">
-                <h3>Markdown Syntax Quick Reference</h3>
-                <table class="markdown-table">
-                    <tr>
-                        <th>Syntax</th>
-                        <th>Result</th>
-                    </tr>
-                    <tr>
-                        <td><code># Heading 1</code></td>
-                        <td>Large heading</td>
-                    </tr>
-                    <tr>
-                        <td><code>## Heading 2</code></td>
-                        <td>Medium heading</td>
-                    </tr>
-                    <tr>
-                        <td><code>**bold**</code></td>
-                        <td><strong>bold</strong></td>
-                    </tr>
-                    <tr>
-                        <td><code>*italic*</code></td>
-                        <td><em>italic</em></td>
-                    </tr>
-                    <tr>
-                        <td><code>[link](url)</code></td>
-                        <td>Link</td>
-                    </tr>
-                    <tr>
-                        <td><code>![alt](url)</code></td>
-                        <td>Image</td>
-                    </tr>
-                    <tr>
-                        <td><code>`code`</code></td>
-                        <td>Inline code</td>
-                    </tr>
-                    <tr>
-                        <td><code>- item</code></td>
-                        <td>Bullet list</td>
-                    </tr>
-                    <tr>
-                        <td><code>1. item</code></td>
-                        <td>Numbered list</td>
-                    </tr>
-                    <tr>
-                        <td><code>&gt; quote</code></td>
-                        <td>Blockquote</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
+            </nav>
+        </aside>
 
-    <div id="container" class="split-container">
-
-        <div id="edit" class="column editor-pane">
-            <div id="toolbar" class="editor-toolbar">
-                <button id="toolbar-bold" class="toolbar-btn" title="Bold (Ctrl+B)">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M4 2h5.5c1.7 0 3 1.3 3 3 0 1-.5 1.9-1.3 2.5.9.6 1.5 1.6 1.5 2.7 0 1.9-1.5 3.8-3.7 3.8H4V2zm3 5.5h2c.8 0 1.5-.7 1.5-1.5S9.8 4.5 9 4.5H7v3zm0 6h2.5c1 0 2-.8 2-1.8s-1-1.7-2-1.7H7v3.5z" />
-                    </svg>
-                </button>
-                <button id="toolbar-italic" class="toolbar-btn" title="Italic (Ctrl+I)">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M6 2h6v2H9.5l-2 8H10v2H4v-2h2.5l2-8H6V2z" />
-                    </svg>
-                </button>
-                <button id="toolbar-strikethrough" class="toolbar-btn" title="Strikethrough">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M8.5 7H14v2H2V7h5.5zM10 3.5c0-.8-.7-1.5-1.5-1.5h-3C4.7 2 4 2.7 4 3.5V5h2V4h3v2.3h2V3.5zM8.5 10H6v1.5c0 .8.7 1.5 1.5 1.5h3c.8 0 1.5-.7 1.5-1.5V10h-2v1H7v-1h1.5z" />
-                    </svg>
-                </button>
-                <span class="toolbar-divider"></span>
-                <button id="toolbar-h1" class="toolbar-btn" title="Heading 1">H1</button>
-                <button id="toolbar-h2" class="toolbar-btn" title="Heading 2">H2</button>
-                <button id="toolbar-h3" class="toolbar-btn" title="Heading 3">H3</button>
-                <span class="toolbar-divider"></span>
-                <button id="toolbar-link" class="toolbar-btn" title="Insert Link">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" />
-                    </svg>
-                </button>
-                <button id="toolbar-image" class="toolbar-btn" title="Insert Image">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M1.75 2.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h.94a.76.76 0 01.03-.03l6.077-6.078a1.75 1.75 0 012.412-.06L14.5 10.31V2.75a.25.25 0 00-.25-.25H1.75zm12.5 11H4.81l5.048-5.047a.25.25 0 01.344-.009l4.298 3.889v.917a.25.25 0 01-.25.25zm1.75-.25V2.75A1.75 1.75 0 0014.25 1H1.75A1.75 1.75 0 000 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0016 13.25zM5.5 6a.5.5 0 11-1 0 .5.5 0 011 0zM7 6a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                </button>
-                <button id="toolbar-code" class="toolbar-btn" title="Code Block">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M4.72 3.22a.75.75 0 011.06 1.06L2.06 8l3.72 3.72a.75.75 0 11-1.06 1.06L.47 8.53a.75.75 0 010-1.06l4.25-4.25zm6.56 0a.75.75 0 10-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 101.06 1.06l4.25-4.25a.75.75 0 000-1.06l-4.25-4.25z" />
-                    </svg>
-                </button>
-                <button id="toolbar-inline-code" class="toolbar-btn" title="Inline Code">`code`</button>
-                <span class="toolbar-divider"></span>
-                <button id="toolbar-ul" class="toolbar-btn" title="Bullet List">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z" />
-                    </svg>
-                </button>
-                <button id="toolbar-ol" class="toolbar-btn" title="Numbered List">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M2.003 2.5a.5.5 0 00-.723-.447l-1.003.5a.5.5 0 00.446.895l.28-.14V6H.5a.5.5 0 000 1h2.006a.5.5 0 100-1h-.503V2.5zM5 3.25a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 3.25zm0 5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 8.25zm0 5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75zM.924 10.32l.003-.004a.851.851 0 01.144-.153A.66.66 0 011.5 10c.195 0 .306.068.374.146a.57.57 0 01.128.376c0 .453-.269.682-.8 1.078l-.035.025C.692 11.98 0 12.495 0 13.5a.5.5 0 00.5.5h2.003a.5.5 0 000-1H1.146c.132-.197.351-.372.654-.597l.047-.035c.47-.35 1.156-.858 1.156-1.845 0-.365-.118-.744-.377-1.038-.268-.303-.658-.484-1.126-.484-.48 0-.84.202-1.068.392a1.858 1.858 0 00-.348.384l-.007.011-.002.004-.001.002-.001.001a.5.5 0 00.851.525zM.5 10.055l-.427-.26.427.26z" />
-                    </svg>
-                </button>
-                <button id="toolbar-task" class="toolbar-btn" title="Task List">☐</button>
-                <button id="toolbar-quote" class="toolbar-btn" title="Blockquote">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M1.75 2.5h12.5a.25.25 0 01.25.25v10.5a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25V2.75a.25.25 0 01.25-.25zm12.5-1.5H1.75A1.75 1.75 0 000 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0016 13.25V2.75A1.75 1.75 0 0014.25 1zM4.5 5.5a.5.5 0 00-1 0v5a.5.5 0 001 0v-5z" />
-                    </svg>
-                </button>
-                <button id="toolbar-table" class="toolbar-btn" title="Insert Table">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0114.25 16H1.75A1.75 1.75 0 010 14.25V1.75zm1.75-.25a.25.25 0 00-.25.25V5h5V1.5h-4.75zm5.5 0V5h7V1.75a.25.25 0 00-.25-.25h-6.75zM14.5 6.5h-7v3h7v-3zm0 4.5h-7v3.25c0 .138.112.25.25.25h6.75a.25.25 0 00.25-.25V11zM6.5 14.5v-3h-5v3.25c0 .138.112.25.25.25h4.75zm-5-4.5h5v-3h-5v3z" />
-                    </svg>
-                </button>
-                <span class="toolbar-divider"></span>
-                <button id="toolbar-emoji" class="toolbar-btn" title="Insert Emoji">😊</button>
-            </div>
-            <div id="editor-wrapper">
+        <!-- Editor Pane -->
+        <section class="editor-pane" id="edit">
+            <div class="editor-wrapper" id="editor-wrapper">
                 <div id="editor"></div>
             </div>
+        </section>
+
+        <!-- Split Divider -->
+        <div class="split-divider" id="split-divider"></div>
+
+        <!-- Preview Pane -->
+        <section class="preview-pane" id="preview">
+            <div class="preview-wrapper" id="preview-wrapper">
+                <article class="preview-content markdown-body" id="output">
+                    <!-- Rendered Markdown -->
+                </article>
+            </div>
+
+            <!-- TOC Sidebar (Right) -->
+            <aside class="toc-sidebar" id="toc-sidebar">
+                <div class="toc-header">
+                    <div class="toc-section-title">ON THIS PAGE</div>
+                    <button class="toc-close-btn" id="toc-close-btn" title="Hide table of contents">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <path
+                                d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+                        </svg>
+                    </button>
+                </div>
+                <nav id="toc-content">
+                    <ul class="toc-list" id="toc-list">
+                        <!-- Generated by JS -->
+                    </ul>
+                </nav>
+            </aside>
+        </section>
+
+        <!-- Floating Edit Button (visible in preview mode) -->
+        <button class="floating-edit-btn" id="floating-edit-btn" title="Switch to Edit mode">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M12.854.146a.5.5 0 00-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 000-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 016 13.5V13h-.5a.5.5 0 01-.5-.5V12h-.5a.5.5 0 01-.5-.5V11h-.5a.5.5 0 01-.5-.5V10h-.5a.499.499 0 01-.175-.032l-.179.178a.5.5 0 00-.11.168l-2 5a.5.5 0 00.65.65l5-2a.5.5 0 00.168-.11l.178-.178z" />
+            </svg>
+            <span>Edit</span>
+        </button>
+
+        <!-- Floating TOC Button (mobile only - visible in preview mode) -->
+        <button class="floating-toc-btn" id="floating-toc-btn" title="Table of Contents">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M2 2.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5V3a.5.5 0 00-.5-.5H2zM2 6.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5V7a.5.5 0 00-.5-.5H2zM1.5 11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5H2a.5.5 0 01-.5-.5v-1zM5 3a.5.5 0 000 1h9a.5.5 0 000-1H5zM5 7a.5.5 0 000 1h9a.5.5 0 000-1H5zM5 11a.5.5 0 000 1h9a.5.5 0 000-1H5z" />
+            </svg>
+        </button>
+
+        <!-- Mobile TOC Overlay -->
+        <div class="mobile-toc-overlay" id="mobile-toc-overlay"></div>
+    </main>
+
+    <!-- ==================== STATUS BAR ==================== -->
+    <footer class="premium-status-bar" role="contentinfo">
+        <div class="status-item" id="word-count">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M2.5 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h11a.5.5 0 000-1h-11zm0 3a.5.5 0 000 1h6a.5.5 0 000-1h-6z" />
+            </svg>
+            <span>0 words</span>
+        </div>
+        <span id="word-count-header" class="hidden">0 words</span>
+        <div class="status-item" id="char-count">
+            <span>0 chars</span>
+        </div>
+        <span id="char-count-header" class="hidden">0 chars</span>
+        <div class="status-divider"></div>
+        <div class="status-item" id="reading-time">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z" />
+                <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z" />
+            </svg>
+            <span>0 min read</span>
+        </div>
+        <span id="reading-time-header" class="hidden">0 min read</span>
+
+        <div class="status-spacer"></div>
+
+        <div class="status-item" id="cursor-position">
+            <span>Ln 1, Col 1</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-saved" id="save-status">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M13.854 3.646a.5.5 0 010 .708l-7 7a.5.5 0 01-.708 0l-3.5-3.5a.5.5 0 11.708-.708L6.5 10.293l6.646-6.647a.5.5 0 01.708 0z" />
+            </svg>
+            <span>All changes saved</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+            <span>UTF-8</span>
+        </div>
+        <div class="status-item">
+            <span>Markdown</span>
         </div>
 
-        <div id="split-divider" class="split-divider"></div>
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Menu">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M2.5 12a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" />
+            </svg>
+        </button>
+    </footer>
 
-        <div id="preview" class="column preview-pane">
-            <div id="toc-panel" class="toc-panel"></div>
-            <div id="preview-wrapper">
-                <div id="output" class="content markdown-body"></div>
-            </div>
+    <!-- ==================== HIDDEN INPUTS ==================== -->
+    <input type="file" id="file-input" accept=".md,.markdown,.txt" style="display: none;">
+    <input type="file" id="image-input" accept="image/*" style="display: none;">
+
+    <!-- Search Input (Hidden by default, toggled by search button) -->
+    <div class="search-overlay hidden" id="search-overlay">
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search in document...">
+            <button class="search-close" id="search-close">×</button>
         </div>
     </div>
 
-    <footer>
-        <div id="stats-display">
-            <div class="stat-item" id="word-count">Words: 0</div>
-            <div class="stat-item" id="char-count">Chars: 0</div>
-            <div class="stat-item" id="reading-time">Reading: 0 min</div>
-            <div class="spacer"></div>
-            <div id="autosave-indicator">✓ Saved</div>
-            <div class="stat-item" id="stats-button" role="button">📊 More Stats</div>
-        </div>
-    </footer>
+    <!-- Autosave Indicator -->
+    <div class="autosave-indicator hidden" id="autosave-indicator">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+            <path
+                d="M13.854 3.646a.5.5 0 010 .708l-7 7a.5.5 0 01-.708 0l-3.5-3.5a.5.5 0 11.708-.708L6.5 10.293l6.646-6.647a.5.5 0 01.708 0z" />
+        </svg>
+        <span>Saved</span>
+    </div>
 
-    <!-- Stats Modal -->
-    <div id="stats-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📊 Document Statistics</h2>
-                <span class="close-modal close-stats">&times;</span>
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Premium Settings Modal -->
+    <div class="settings-modal-overlay" id="settings-modal-overlay"></div>
+    <div class="settings-modal" id="settings-modal">
+        <!-- Settings Sidebar -->
+        <div class="settings-sidebar">
+            <div class="settings-sidebar-header">
+                <div class="settings-app-icon"></div>
+                <div class="settings-app-info">
+                    <span class="settings-app-title">Settings</span>
+                    <span class="settings-app-subtitle">Markdown Pro</span>
+                </div>
             </div>
-            <div class="modal-body">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-words">0</div>
-                        <div class="stat-label">Words</div>
+            <nav class="settings-nav">
+                <button class="settings-nav-item active" data-tab="general">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>General</span>
+                </button>
+                <button class="settings-nav-item" data-tab="editor">
+                    <span class="material-symbols-outlined">edit_note</span>
+                    <span>Editor</span>
+                </button>
+                <button class="settings-nav-item" data-tab="preview">
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span>Preview</span>
+                </button>
+                <button class="settings-nav-item" data-tab="themes">
+                    <span class="material-symbols-outlined">palette</span>
+                    <span>Themes</span>
+                </button>
+                <button class="settings-nav-item" data-tab="keyboard">
+                    <span class="material-symbols-outlined">keyboard</span>
+                    <span>Keyboard</span>
+                </button>
+                <button class="settings-nav-item" data-tab="about">
+                    <span class="material-symbols-outlined">info</span>
+                    <span>About</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+            <div class="settings-content-header">
+                <div class="settings-content-title">
+                    <h2 id="settings-panel-title">General Settings</h2>
+                    <p id="settings-panel-description">Configure your general preferences and application behavior.</p>
+                </div>
+                <button class="settings-close-btn" id="settings-close" aria-label="Close settings">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="settings-content-body custom-scrollbar">
+                <!-- General Tab -->
+                <div class="settings-tab-panel active" id="settings-tab-general">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">dark_mode</span>
+                            Appearance
+                        </h3>
+                        <div class="settings-group">
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Dark Mode</span>
+                                    <span class="settings-toggle-desc">Switch between light and dark interface</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="dark-mode-checkbox">
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Auto Save</span>
+                                    <span class="settings-toggle-desc">Automatically save your work</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="auto-save-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Scroll Sync</span>
+                                    <span class="settings-toggle-desc">Synchronize editor and preview scroll</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="sync-scroll-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Editor Tab -->
+                <div class="settings-tab-panel" id="settings-tab-editor">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">text_fields</span>
+                            Typography
+                        </h3>
+                        <div class="settings-grid">
+                            <div class="settings-field">
+                                <label class="settings-field-label">Font Family</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="font-family-dropdown" class="settings-select">
+                                        <option value="JetBrains Mono" selected>JetBrains Mono</option>
+                                        <option value="Fira Code">Fira Code</option>
+                                        <option value="Consolas">Consolas</option>
+                                        <option value="Monaco">Monaco</option>
+                                        <option value="Source Code Pro">Source Code Pro</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="settings-field-label">Font Size</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="font-size-dropdown" class="settings-select">
+                                        <option value="12">12px</option>
+                                        <option value="14" selected>14px</option>
+                                        <option value="16">16px</option>
+                                        <option value="18">18px</option>
+                                        <option value="20">20px</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="settings-field-label">Line Height</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="line-height-dropdown" class="settings-select">
+                                        <option value="1.2">1.2 (Compact)</option>
+                                        <option value="1.4">1.4 (Standard)</option>
+                                        <option value="1.6" selected>1.6 (Relaxed)</option>
+                                        <option value="1.8">1.8 (Loose)</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="settings-field-label">Tab Size</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="tab-size-dropdown" class="settings-select">
+                                        <option value="2" selected>2 Spaces</option>
+                                        <option value="4">4 Spaces</option>
+                                        <option value="8">8 Spaces</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">toggle_on</span>
+                            Behavior
+                        </h3>
+                        <div class="settings-group">
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Word Wrap</span>
+                                    <span class="settings-toggle-desc">Wrap long lines to fit the viewport</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="word-wrap-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Line Numbers</span>
+                                    <span class="settings-toggle-desc">Show line numbers in the gutter</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="line-numbers-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Minimap</span>
+                                    <span class="settings-toggle-desc">Display a miniature overview of the code</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="minimap-checkbox">
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Bracket Matching</span>
+                                    <span class="settings-toggle-desc">Highlight matching brackets when cursor is
+                                        near</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="bracket-matching-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Preview Tab -->
+                <div class="settings-tab-panel" id="settings-tab-preview">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">article</span>
+                            Preview Options
+                        </h3>
+                        <div class="settings-group">
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Live Preview</span>
+                                    <span class="settings-toggle-desc">Update preview as you type</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="live-preview-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Syntax Highlighting</span>
+                                    <span class="settings-toggle-desc">Highlight code blocks in preview</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="syntax-highlight-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Math Rendering (KaTeX)</span>
+                                    <span class="settings-toggle-desc">Render LaTeX math equations</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="math-rendering-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Mermaid Diagrams</span>
+                                    <span class="settings-toggle-desc">Render Mermaid diagram blocks</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="mermaid-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Themes Tab -->
+                <div class="settings-tab-panel" id="settings-tab-themes">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">light_mode</span>
+                            Light Themes
+                        </h3>
+                        <div class="theme-grid">
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="vs" class="theme-radio">
+                                <div class="theme-preview theme-preview-vs-light"></div>
+                                <span class="theme-name">VS Light</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="github-light" class="theme-radio">
+                                <div class="theme-preview theme-preview-github-light"></div>
+                                <span class="theme-name">GitHub Light</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="solarized-light" class="theme-radio">
+                                <div class="theme-preview theme-preview-solarized-light"></div>
+                                <span class="theme-name">Solarized Light</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">dark_mode</span>
+                            Dark Themes
+                        </h3>
+                        <div class="theme-grid">
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="vs-dark" class="theme-radio">
+                                <div class="theme-preview theme-preview-vs-dark"></div>
+                                <span class="theme-name">VS Dark</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="github-dark" class="theme-radio">
+                                <div class="theme-preview theme-preview-github-dark"></div>
+                                <span class="theme-name">GitHub Dark</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="dracula" class="theme-radio">
+                                <div class="theme-preview theme-preview-dracula"></div>
+                                <span class="theme-name">Dracula</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="solarized-dark" class="theme-radio">
+                                <div class="theme-preview theme-preview-solarized-dark"></div>
+                                <span class="theme-name">Solarized Dark</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Keyboard Tab -->
+                <div class="settings-tab-panel" id="settings-tab-keyboard">
+                    <div class="shortcuts-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="shortcuts-search-input" placeholder="Search shortcuts...">
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-chars">0</div>
-                        <div class="stat-label">Characters</div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">folder_open</span>
+                            File Operations
+                        </h3>
+                        <div class="shortcuts-list">
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Save Document</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>S</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Import File</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>O</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Export as PDF</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>P</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Open Export Modal</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>E</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">format_paint</span>
+                            Formatting
+                        </h3>
+                        <div class="shortcuts-list">
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Bold Text</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>B</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Italic Text</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>I</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Insert Link</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>K</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Heading 1</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>1</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Heading 2</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>2</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Heading 3</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>3</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">window</span>
+                            View & Navigation
+                        </h3>
+                        <div class="shortcuts-list">
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Toggle Split View</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>\</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Focus Mode</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>F</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Fullscreen</span>
+                                <div class="shortcut-keys">
+                                    <kbd>F11</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Show Help</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>H</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- About Tab -->
+                <div class="settings-tab-panel" id="settings-tab-about">
+                    <div class="about-header">
+                        <div class="about-logo">
+                            <span class="material-symbols-outlined">description</span>
+                        </div>
+                        <h3 class="about-title">Markdown Live Preview</h3>
+                        <span class="about-version">Version 2.0.0</span>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-paragraphs">0</div>
-                        <div class="stat-label">Paragraphs</div>
+
+                    <div class="about-cards">
+                        <a href="https://github.com" class="about-card" target="_blank">
+                            <div class="about-card-icon about-card-icon-blue">
+                                <span class="material-symbols-outlined">code</span>
+                            </div>
+                            <div class="about-card-content">
+                                <h4>GitHub Repository</h4>
+                                <p>View source code and contribute</p>
+                            </div>
+                        </a>
+                        <a href="#" class="about-card">
+                            <div class="about-card-icon about-card-icon-purple">
+                                <span class="material-symbols-outlined">menu_book</span>
+                            </div>
+                            <div class="about-card-content">
+                                <h4>Documentation</h4>
+                                <p>Learn how to use all features</p>
+                            </div>
+                        </a>
+                        <a href="#" class="about-card">
+                            <div class="about-card-icon about-card-icon-green">
+                                <span class="material-symbols-outlined">bug_report</span>
+                            </div>
+                            <div class="about-card-content">
+                                <h4>Report an Issue</h4>
+                                <p>Found a bug? Let us know</p>
+                            </div>
+                        </a>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-sentences">0</div>
-                        <div class="stat-label">Sentences</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-headings">0</div>
-                        <div class="stat-label">Headings</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-reading-time">0m</div>
-                        <div class="stat-label">Reading Time</div>
+
+                    <div class="about-footer">
+                        <p class="about-credits">Built with ❤️ using Monaco Editor, Marked, and Prism.js</p>
+                        <p class="about-license">MIT License © 2024</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Footer -->
+            <div class="settings-footer">
+                <button class="settings-btn settings-btn-secondary" id="settings-reset-btn">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Reset to Defaults
+                </button>
+                <button class="settings-btn settings-btn-primary" id="settings-save-btn">
+                    <span class="material-symbols-outlined">check</span>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div class="modal-overlay" id="stats-modal-overlay"></div>
+    <div class="modal" id="stats-modal">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <h2 class="modal-title">Document Statistics</h2>
+            </div>
+            <button class="modal-close" id="stats-close" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 7V4h16v3"></path>
+                            <path d="M9 20h6"></path>
+                            <path d="M12 4v16"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="stat-words">0</div>
+                    <div class="stat-label">Words</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                            <line x1="9" y1="20" x2="15" y2="20"></line>
+                            <line x1="12" y1="4" x2="12" y2="20"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="stat-chars">0</div>
+                    <div class="stat-label">Characters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="17" y1="10" x2="3" y2="10"></line>
+                            <line x1="21" y1="6" x2="3" y2="6"></line>
+                            <line x1="21" y1="14" x2="3" y2="14"></line>
+                            <line x1="17" y1="18" x2="3" y2="18"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="stat-paragraphs">0</div>
+                    <div class="stat-label">Paragraphs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="stat-sentences">0</div>
+                    <div class="stat-label">Sentences</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 12h8"></path>
+                            <path d="M4 18h12"></path>
+                            <path d="M4 6h16"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="stat-headings">0</div>
+                    <div class="stat-label">Headings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="stat-reading-time">0m</div>
+                    <div class="stat-label">Reading Time</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary" id="stats-close-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="help-modal-overlay"></div>
+    <div class="modal modal-lg" id="help-modal">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                    <path d="M6 8h.001"></path>
+                    <path d="M10 8h.001"></path>
+                    <path d="M14 8h.001"></path>
+                    <path d="M18 8h.001"></path>
+                    <path d="M8 12h.001"></path>
+                    <path d="M12 12h.001"></path>
+                    <path d="M16 12h.001"></path>
+                    <path d="M7 16h10"></path>
+                </svg>
+                <h2 class="modal-title">Keyboard Shortcuts</h2>
+            </div>
+            <button class="modal-close close-modal" id="help-close" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="shortcuts-grid">
+                <div class="shortcuts-section">
+                    <h4>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        File & Export
+                    </h4>
+                    <div class="shortcut-item"><span>Save Markdown</span><kbd>Ctrl+S</kbd></div>
+                    <div class="shortcut-item"><span>Open File</span><kbd>Ctrl+O</kbd></div>
+                    <div class="shortcut-item"><span>Export PDF</span><kbd>Ctrl+P</kbd></div>
+                    <div class="shortcut-item"><span>Export HTML</span><kbd>Ctrl+Shift+E</kbd></div>
+                    <div class="shortcut-item"><span>Print</span><kbd>Ctrl+Shift+P</kbd></div>
+                </div>
+                <div class="shortcuts-section">
+                    <h4>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit
+                    </h4>
+                    <div class="shortcut-item"><span>Bold</span><kbd>Ctrl+B</kbd></div>
+                    <div class="shortcut-item"><span>Italic</span><kbd>Ctrl+I</kbd></div>
+                    <div class="shortcut-item"><span>Link</span><kbd>Ctrl+K</kbd></div>
+                    <div class="shortcut-item"><span>Find</span><kbd>Ctrl+F</kbd></div>
+                </div>
+                <div class="shortcuts-section">
+                    <h4>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        View
+                    </h4>
+                    <div class="shortcut-item"><span>Toggle Theme</span><kbd>Ctrl+D</kbd></div>
+                    <div class="shortcut-item"><span>Focus Mode</span><kbd>Ctrl+Shift+F</kbd></div>
+                    <div class="shortcut-item"><span>Help</span><kbd>Ctrl+H</kbd></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary close-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Goals Modal -->
+    <div class="modal-overlay" id="goals-modal-overlay"></div>
+    <div class="modal" id="goals-modal">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                </svg>
+                <h2 class="modal-title">Writing Goals</h2>
+            </div>
+            <button class="modal-close close-goals" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="goal-input-group">
+                <label for="daily-goal-input">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20V10"></path>
+                        <path d="M18 20V4"></path>
+                        <path d="M6 20v-4"></path>
+                    </svg>
+                    Daily Word Goal
+                </label>
+                <input type="number" id="daily-goal-input" class="settings-input" min="0" value="500" placeholder="500">
+            </div>
+            <div class="goal-progress-section">
+                <div class="progress-info">
+                    <span class="progress-label">Today's Progress</span>
+                    <span class="progress-percent" id="goal-percent">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="goal-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="goal-text" id="goal-text">0 / 500 words</div>
+            </div>
+            <div class="streak-card">
+                <div class="streak-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                </div>
+                <div class="streak-info">
+                    <span class="streak-label">Current Streak</span>
+                    <span class="streak-count" id="streak-count">0 days</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary close-goals">Cancel</button>
+            <button class="modal-btn primary" id="save-goals-btn">Save Goal</button>
         </div>
     </div>
 
     <!-- Templates Modal -->
-    <div id="templates-modal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h2>📋 Template Library</h2>
-                <span class="close-modal close-templates">&times;</span>
+    <div class="modal-overlay" id="templates-modal-overlay"></div>
+    <div class="modal modal-lg" id="templates-modal">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <h2 class="modal-title">Templates</h2>
             </div>
-            <div class="modal-body">
-                <div id="templates-grid" class="templates-grid">
-                    <!-- Templates injected by JS -->
+            <button class="modal-close close-templates" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-description">Choose a template to quickly start your document</p>
+            <div class="templates-grid" id="templates-grid">
+                <!-- Templates rendered by JS -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary close-templates">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Lint Panel (Floating) -->
+    <div class="floating-panel hidden" id="lint-panel">
+        <div class="panel-header">
+            <h3 class="panel-title">Markdown Linter</h3>
+            <button class="panel-close close-lint" aria-label="Close">×</button>
+        </div>
+        <div class="panel-body">
+            <ul class="lint-list" id="lint-list"></ul>
+        </div>
+    </div>
+
+    <!-- TOC Panel (Floating) -->
+    <div class="floating-panel hidden" id="toc-panel">
+        <div class="panel-header">
+            <h3 class="panel-title">Table of Contents</h3>
+            <button class="panel-close close-toc" aria-label="Close">×</button>
+        </div>
+        <div class="panel-body">
+            <ul class="toc-list" id="toc-list-panel"></ul>
+        </div>
+    </div>
+
+    <!-- ==================== EXPORT MODAL ==================== -->
+    <div class="export-modal-overlay" id="export-modal-overlay"></div>
+    <div class="export-modal" id="export-modal">
+        <!-- Header -->
+        <div class="export-modal-header">
+            <h2 class="export-modal-title">Export Document</h2>
+            <button class="export-modal-close" id="export-modal-close" aria-label="Close">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="export-loading-overlay hidden" id="export-loading-overlay">
+            <div class="export-loading-content">
+                <div class="export-loading-spinner"></div>
+                <div class="export-loading-text" id="export-loading-text">Generating your file...</div>
+                <div class="export-loading-progress-container">
+                    <div class="export-loading-progress-bar" id="export-loading-progress-bar"></div>
                 </div>
             </div>
         </div>
+
+        <!-- Content -->
+        <div class="export-modal-content">
+            <!-- Sidebar - Format Selection -->
+            <div class="export-sidebar">
+                <p class="export-section-label">File Formats</p>
+                <button class="export-format-btn" data-format="markdown">
+                    <span class="material-symbols-outlined">download</span>
+                    <span class="btn-text">Markdown</span>
+                </button>
+                <button class="export-format-btn active" data-format="pdf">
+                    <span class="material-symbols-outlined filled">picture_as_pdf</span>
+                    <span class="btn-text">PDF</span>
+                </button>
+                <button class="export-format-btn" data-format="html">
+                    <span class="material-symbols-outlined">html</span>
+                    <span class="btn-text">HTML</span>
+                </button>
+                <button class="export-format-btn" data-format="docx">
+                    <span class="material-symbols-outlined">description</span>
+                    <span class="btn-text">DOCX</span>
+                </button>
+                <button class="export-format-btn" data-format="txt">
+                    <span class="material-symbols-outlined">text_snippet</span>
+                    <span class="btn-text">Text</span>
+                </button>
+                <button class="export-format-btn" data-format="png">
+                    <span class="material-symbols-outlined">image</span>
+                    <span class="btn-text">Image</span>
+                </button>
+
+                <hr class="export-divider">
+
+                <p class="export-section-label">Actions</p>
+                <button class="export-format-btn" data-format="print">
+                    <span class="material-symbols-outlined">print</span>
+                    <span class="btn-text">Print</span>
+                </button>
+                <button class="export-format-btn" data-format="copy-md">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">Copy MD</span>
+                </button>
+                <button class="export-format-btn" data-format="copy-html">
+                    <span class="material-symbols-outlined">code</span>
+                    <span class="btn-text">Copy HTML</span>
+                </button>
+
+                <div class="export-sidebar-footer">
+                    <button class="export-format-btn danger" data-format="reset">
+                        <span class="material-symbols-outlined">restart_alt</span>
+                        <span class="btn-text">Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Preview Area -->
+            <div class="export-preview-area">
+                <!-- Options Toolbar -->
+                <div class="export-options-bar">
+                    <!-- PDF Options -->
+                    <div class="export-options pdf-options" id="pdf-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Paper Size</label>
+                            <select class="export-select" id="export-paper-size">
+                                <option value="a4">A4 (210 x 297 mm)</option>
+                                <option value="letter" selected>US Letter</option>
+                                <option value="legal">Legal</option>
+                                <option value="tabloid">Tabloid</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Orientation</label>
+                            <select class="export-select" id="export-orientation">
+                                <option value="portrait" selected>Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-page-numbers" checked>
+                            <label for="export-page-numbers">Page Numbers</label>
+                        </div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-header-footer">
+                            <label for="export-header-footer">Header & Footer</label>
+                        </div>
+                    </div>
+
+                    <!-- HTML Options -->
+                    <div class="export-options html-options hidden" id="html-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Theme</label>
+                            <select class="export-select" id="export-html-theme">
+                                <option value="light" selected>Default (Light)</option>
+                                <option value="dark">Dark Mode</option>
+                                <option value="system">System Preference</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-include-css" checked>
+                            <label for="export-include-css">Include CSS</label>
+                        </div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-minify-html">
+                            <label for="export-minify-html">Minify HTML</label>
+                        </div>
+                    </div>
+
+                    <!-- Text Options -->
+                    <div class="export-options txt-options hidden" id="txt-options">
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-word-wrap" checked>
+                            <label for="export-word-wrap">Word Wrap</label>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-frontmatter">
+                            <label for="export-frontmatter">Include Frontmatter</label>
+                        </div>
+                    </div>
+
+                    <!-- PNG Options -->
+                    <div class="export-options png-options hidden" id="png-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Image Width</label>
+                            <input type="text" class="export-input" id="export-image-width" value="1200 px">
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Resolution</label>
+                            <select class="export-select" id="export-resolution">
+                                <option value="1">@1x (Standard)</option>
+                                <option value="2" selected>@2x (Retina)</option>
+                                <option value="3">@3x (High Res)</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-transparent-bg">
+                            <label for="export-transparent-bg">Transparent Background</label>
+                        </div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-include-shadow" checked>
+                            <label for="export-include-shadow">Include Shadow</label>
+                        </div>
+                    </div>
+
+                    <!-- Print Options -->
+                    <div class="export-options print-options hidden" id="print-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Paper Size</label>
+                            <select class="export-select" id="print-paper-size">
+                                <option value="letter">Letter</option>
+                                <option value="a4" selected>A4</option>
+                                <option value="legal">Legal</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Orientation</label>
+                            <select class="export-select" id="print-orientation">
+                                <option value="portrait" selected>Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Margins</label>
+                            <select class="export-select" id="print-margins">
+                                <option value="default" selected>Default</option>
+                                <option value="none">None</option>
+                                <option value="narrow">Narrow</option>
+                                <option value="moderate">Moderate</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Scale</label>
+                            <select class="export-select" id="print-scale">
+                                <option value="fit" selected>Fit to page</option>
+                                <option value="actual">Actual size</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Markdown/DOCX Options (minimal) -->
+                    <div class="export-options markdown-options hidden" id="markdown-options">
+                        <div class="export-option-info">
+                            <span class="material-symbols-outlined">info</span>
+                            Markdown will be downloaded as-is with no modifications.
+                        </div>
+                    </div>
+
+                    <div class="export-options docx-options hidden" id="docx-options">
+                        <div class="export-option-info">
+                            <span class="material-symbols-outlined">info</span>
+                            Document will be exported in Microsoft Word compatible format.
+                        </div>
+                    </div>
+
+                    <div class="export-preview-label-container">
+                        <div class="export-preview-label" id="preview-label">Previewing 1 of 1 pages</div>
+                        <button class="export-refresh-btn" id="export-refresh-btn" title="Refresh Preview">
+                            <span class="material-symbols-outlined">refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Container -->
+                <div class="export-preview-container">
+                    <!-- PDF/Print Preview -->
+                    <div class="export-preview pdf-preview" id="pdf-preview">
+                        <div class="export-page" id="export-page">
+                            <div class="page-header">
+                                <span class="page-filename" id="page-filename">Untitled.md</span>
+                                <span class="page-date" id="page-date"></span>
+                            </div>
+                            <div class="page-content" id="export-page-content">
+                                <!-- Content rendered here -->
+                            </div>
+                            <div class="page-footer">
+                                <span class="page-number">Page 1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HTML Preview -->
+                    <div class="export-preview html-preview hidden" id="html-preview">
+                        <div class="browser-chrome">
+                            <div class="browser-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <div class="browser-url">
+                                <span class="material-symbols-outlined">lock</span>
+                                <span id="browser-url-text">file:///Documents/Untitled.html</span>
+                            </div>
+                        </div>
+                        <div class="browser-content" id="html-preview-content">
+                            <!-- Content rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Text Preview -->
+                    <div class="export-preview txt-preview hidden" id="txt-preview">
+                        <div class="txt-content" id="txt-preview-content">
+                            <!-- Plain text content here -->
+                        </div>
+                    </div>
+
+                    <!-- PNG Preview -->
+                    <div class="export-preview png-preview hidden" id="png-preview">
+                        <div class="png-container" id="png-container">
+                            <div class="png-content" id="png-preview-content">
+                                <!-- Image preview content here -->
+                            </div>
+                        </div>
+                        <div class="png-zoom-controls">
+                            <button class="zoom-btn" id="zoom-in-btn" title="Zoom In">
+                                <span class="material-symbols-outlined">zoom_in</span>
+                            </button>
+                            <button class="zoom-btn" id="zoom-out-btn" title="Zoom Out">
+                                <span class="material-symbols-outlined">zoom_out</span>
+                            </button>
+                            <button class="zoom-btn" id="zoom-fit-btn" title="Fit to Screen">
+                                <span class="material-symbols-outlined">fit_screen</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="export-modal-footer">
+            <div class="export-file-info">
+                Estimated file size: <span class="export-file-size" id="export-file-size">--</span>
+            </div>
+            <div class="export-actions">
+                <button class="export-btn secondary" id="export-cancel-btn">Cancel</button>
+                <button class="export-btn primary" id="export-confirm-btn">
+                    <span class="material-symbols-outlined" id="export-btn-icon">download</span>
+                    <span id="export-btn-text">Export PDF</span>
+                </button>
+            </div>
+        </div>
     </div>
+
+    <!-- Snippets Dropdown -->
+    <div class="dropdown-menu snippets-dropdown hidden" id="snippets-dropdown">
+        <!-- Snippets rendered by JS -->
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    <nav class="mobile-nav-drawer" id="mobile-nav-drawer">
+        <div class="mobile-nav-header">
+            <div class="brand-logo">M</div>
+            <span class="brand-name">MarkDraft</span>
+        </div>
+        <div class="mobile-nav-content">
+            <button class="mobile-nav-item" id="mobile-new-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M8 4a.5.5 0 01.5.5v3h3a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3A.5.5 0 018 4z" />
+                </svg>
+                New Document
+            </button>
+            <button class="mobile-nav-item" id="mobile-import-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z" />
+                    <path
+                        d="M7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z" />
+                </svg>
+                Import File
+            </button>
+            <div class="mobile-nav-divider"></div>
+            <button class="mobile-nav-item" id="mobile-settings-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 4.754a3.246 3.246 0 100 6.492 3.246 3.246 0 000-6.492z" />
+                </svg>
+                Settings
+            </button>
+            <button class="mobile-nav-item" id="mobile-help-btn">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z" />
+                    <path
+                        d="M5.255 5.786a.237.237 0 00.241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 00.25.246h.811a.25.25 0 00.25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z" />
+                </svg>
+                Help
+            </button>
+        </div>
+    </nav>
 
 </body>
 

@@ -4,6 +4,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import 'github-markdown-css/github-markdown-light.css';
 import html2pdf from 'html2pdf.js';
+import html2canvas from 'html2canvas';
 
 // Monaco Editor Worker Setup
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
@@ -69,21 +70,30 @@ const APP_CONFIG = {
     SERVICE_WORKER_UPDATE_INTERVAL_MS: 30 * 60 * 1000 // 30 minutes
 };
 
-const init = () => {
-    // Define custom themes first (will be called after function is defined below)
-    let hasEdited = false;
-    let scrollBarSync = false;
-    let darkMode = false;
-    let currentTheme = 'vs';
+// Global state and constants
+let editor;
+let hasEdited = false;
+let scrollBarSync = false;
+let darkMode = false;
+let currentTheme = 'vs';
 
-    const localStorageNamespace = 'com.markdownlivepreview';
-    const localStorageKey = 'last_state';
-    const localStorageScrollBarKey = 'scroll_bar_settings';
-    const localStorageDarkModeKey = 'dark_mode_settings';
-    const localStorageThemeKey = 'theme_settings';
-    const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
-    // default template
-    const defaultInput = `# Markdown Live Preview
+let goalsData = {
+    dailyTarget: 500,
+    streak: 0,
+    lastGoalDate: null,
+    history: {}
+};
+
+const localStorageNamespace = 'com.markdownlivepreview';
+const localStorageKey = 'last_state';
+const localStorageScrollBarKey = 'scroll_bar_settings';
+const localStorageDarkModeKey = 'dark_mode_settings';
+const localStorageThemeKey = 'theme_settings';
+const localStorageDocsKey = 'docs';
+const localStorageGoalsKey = 'writing_goals';
+const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
+// default template
+const defaultInput = `# Markdown Live Preview
 
 <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=6AD3F7&center=true&vCenter=true&multiline=true&repeat=true&width=600&height=100&lines=%F0%9F%9A%80+Building+Next-Gen+Digital+Experiences;%F0%9F%92%BB+React+%7C+Node.js+%7C+React+Native+%7C+Three.js;%F0%9F%8E%AF+397%2B+Commits+%7C+76%2B+Repositories" alt="Typing SVG" /></a>
 
@@ -176,302 +186,384 @@ $$
 $$
 `;
 
-    // ----- Tabs System -----
-    let documents = [];
-    let activeDocId = null;
-    const localStorageDocsKey = 'docs';
+// ----- Tabs System -----
+let documents = [];
+let activeDocId = null;
 
-    let initTabs = () => {
-        const savedDocs = Storehouse.getItem(localStorageNamespace, localStorageDocsKey);
+let initTabs = () => {
+    const savedDocs = Storehouse.getItem(localStorageNamespace, localStorageDocsKey);
 
-        if (savedDocs && savedDocs.length > 0) {
-            documents = savedDocs;
-            activeDocId = documents[0].id; // Default to first if state lost
-            // Try to find last active? For now, first is fine or maybe store activeId
-        } else {
-            // Migration or init
-            const oldContent = loadLastContent() || defaultInput;
-            const newDoc = {
-                id: Date.now().toString(),
-                title: 'Untitled',
-                content: oldContent,
-                lastModified: Date.now()
-            };
-            documents = [newDoc];
-            activeDocId = newDoc.id;
-        }
-
-        renderTabs();
-        loadActiveDocument();
-
-        // Setup New Tab button
-        const newTabBtn = document.getElementById('new-tab-button');
-        if (newTabBtn) newTabBtn.addEventListener('click', () => addNewTab());
-    };
-
-    let renderTabs = () => {
-        const tabsList = document.getElementById('tabs-list');
-        if (!tabsList) return;
-        tabsList.innerHTML = '';
-
-        documents.forEach(doc => {
-            const tab = document.createElement('div');
-            tab.className = `tab-item ${doc.id === activeDocId ? 'active' : ''}`;
-            tab.innerHTML = `
-                <span class="tab-title">${doc.title}</span>
-                <span class="tab-close" title="Close Tab">×</span>
-            `;
-
-            tab.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('tab-close')) {
-                    switchTab(doc.id);
-                }
-            });
-
-            tab.querySelector('.tab-close').addEventListener('click', (e) => {
-                e.stopPropagation();
-                closeTab(doc.id);
-            });
-
-            tabsList.appendChild(tab);
-        });
-    };
-
-    let addNewTab = () => {
-        // saveCurrentDoc(); // Auto-save happens on change anyway
-
+    if (savedDocs && savedDocs.length > 0) {
+        documents = savedDocs;
+        activeDocId = documents[0].id; // Default to first if state lost
+        // Try to find last active? For now, first is fine or maybe store activeId
+    } else {
+        // Migration or init
+        const oldContent = loadLastContent() || defaultInput;
         const newDoc = {
             id: Date.now().toString(),
             title: 'Untitled',
-            content: '',
+            content: oldContent,
             lastModified: Date.now()
         };
-        documents.push(newDoc);
-        switchTab(newDoc.id);
+        documents = [newDoc];
+        activeDocId = newDoc.id;
+    }
+
+    renderTabs();
+    loadActiveDocument();
+
+    // Setup New Tab button
+    const newTabBtn = document.getElementById('new-tab-button');
+    if (newTabBtn) newTabBtn.addEventListener('click', () => addNewTab());
+
+    // Setup mouse wheel horizontal scroll for tabs
+    setupTabsWheelScroll();
+};
+
+// Mouse wheel horizontal scroll for tabs
+let setupTabsWheelScroll = () => {
+    const tabsList = document.getElementById('tabs-list');
+    if (!tabsList) return;
+
+    tabsList.addEventListener('wheel', (e) => {
+        // Prevent vertical scroll, enable horizontal scroll with mouse wheel
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            tabsList.scrollLeft += e.deltaY * 0.8; // Smooth multiplier
+        }
+    }, { passive: false });
+};
+
+// Rename tab functionality
+let startRenameTab = (docId, tabNameElement) => {
+    const doc = documents.find(d => d.id === docId);
+    if (!doc) return;
+
+    const currentName = doc.title;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentName;
+    input.className = 'tab-rename-input';
+
+    // Replace tab name with input
+    tabNameElement.style.display = 'none';
+    tabNameElement.parentNode.insertBefore(input, tabNameElement.nextSibling);
+    input.focus();
+    input.select();
+
+    const finishRename = () => {
+        const newName = input.value.trim() || 'Untitled';
+        doc.title = newName.replace(/\.md$/i, '').substring(0, 30); // Remove .md if user typed it, limit length
+        saveDocsToStorage();
+        renderTabs();
     };
 
-    let switchTab = (id) => {
-        if (id === activeDocId) return;
+    input.addEventListener('blur', finishRename);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            input.blur();
+        } else if (e.key === 'Escape') {
+            input.value = currentName; // Restore original name
+            input.blur();
+        }
+    });
 
-        // Save current before switching? Done by onDidChangeModelContent
-        activeDocId = id;
+    // Prevent click from bubbling to tab
+    input.addEventListener('click', (e) => e.stopPropagation());
+};
+
+let renderTabs = () => {
+    const tabsList = document.getElementById('tabs-list');
+    if (!tabsList) return;
+
+    // Keep the "Add Tab" button
+    const addBtn = document.getElementById('new-tab-button');
+    tabsList.innerHTML = '';
+
+    documents.forEach(doc => {
+        const tab = document.createElement('button');
+        tab.className = `header-tab ${doc.id === activeDocId ? 'active' : ''}`;
+        tab.dataset.docId = doc.id;
+        tab.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z" />
+                </svg>
+                <span class="tab-name">${doc.title}.md</span>
+                <span class="tab-close" aria-label="Close tab" title="Close tab">×</span>
+            `;
+
+        // Single click to switch tab
+        tab.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('tab-close') && !e.target.classList.contains('tab-rename-input')) {
+                switchTab(doc.id);
+            }
+        });
+
+        // Double-click to rename
+        const tabName = tab.querySelector('.tab-name');
+        tabName.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            startRenameTab(doc.id, tabName);
+        });
+
+        // Close button
+        tab.querySelector('.tab-close').addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeTab(doc.id);
+        });
+
+        tabsList.appendChild(tab);
+    });
+
+    if (addBtn) tabsList.appendChild(addBtn);
+};
+
+let addNewTab = () => {
+    // saveCurrentDoc(); // Auto-save happens on change anyway
+
+    const newDoc = {
+        id: Date.now().toString(),
+        title: 'Untitled',
+        content: '',
+        lastModified: Date.now()
+    };
+    documents.push(newDoc);
+    switchTab(newDoc.id);
+};
+
+let switchTab = (id) => {
+    if (id === activeDocId) return;
+
+    // Save current before switching? Done by onDidChangeModelContent
+    activeDocId = id;
+    renderTabs();
+    loadActiveDocument();
+};
+
+let closeTab = (id) => {
+    if (documents.length <= 1) {
+        showToast('Cannot close the last tab', 'warning');
+        return;
+    }
+
+    if (confirm('Are you sure you want to close this tab?')) {
+        const index = documents.findIndex(d => d.id === id);
+
+        // If closing active tab, switch to another
+        if (id === activeDocId) {
+            const newIndex = index === 0 ? 1 : index - 1;
+            activeDocId = documents[newIndex].id; // Set new active
+            // loadActiveDocument happens after render
+        }
+
+        documents = documents.filter(d => d.id !== id);
+        saveDocsToStorage();
+
         renderTabs();
         loadActiveDocument();
-    };
+    }
+};
 
-    let closeTab = (id) => {
-        if (documents.length <= 1) {
-            showToast('Cannot close the last tab', 'warning');
+let saveCurrentDoc = () => {
+    const content = editor.getValue();
+    const docIndex = documents.findIndex(d => d.id === activeDocId);
+
+    if (docIndex !== -1) {
+        documents[docIndex].content = content;
+        documents[docIndex].lastModified = Date.now();
+
+        // Auto update title from first H1
+        const firstLine = content.split('\n')[0];
+        if (firstLine && firstLine.startsWith('# ')) {
+            documents[docIndex].title = firstLine.substring(2).trim().substring(0, 20);
+        } else {
+            documents[docIndex].title = 'Untitled';
+        }
+
+        saveDocsToStorage();
+        renderTabs(); // Refresh titles
+        showAutosaveIndicator();
+    }
+};
+
+let loadActiveDocument = () => {
+    const doc = documents.find(d => d.id === activeDocId);
+    if (doc) {
+        // Prevent triggering save loop if possible, or accept it
+        // editor.setValue triggers onDidChangeModelContent
+        // We can set a temporary flag to ignore save? 
+        // For simplicity, let it save (no change to content)
+        const current = editor.getValue();
+        if (current !== doc.content) {
+            editor.setValue(doc.content);
+            editor.setScrollTop(0);
+        }
+    }
+};
+
+let saveDocsToStorage = () => {
+    const expiredAt = new Date(2099, 1, 1);
+    Storehouse.setItem(localStorageNamespace, localStorageDocsKey, documents, expiredAt);
+};
+
+let setupEditor = () => {
+    editor = monaco.editor.create(document.querySelector('#editor'), {
+        fontSize: 16,
+        language: 'markdown',
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        scrollbar: {
+            vertical: 'visible',
+            horizontal: 'visible'
+        },
+        wordWrap: 'on',
+        hover: { enabled: false },
+        quickSuggestions: false,
+        suggestOnTriggerCharacters: false,
+        folding: false
+    });
+
+    editor.onDidChangeModelContent(() => {
+        let changed = editor.getValue() != defaultInput;
+        if (changed) {
+            hasEdited = true;
+        }
+        let value = editor.getValue();
+        convert(value);
+        saveCurrentDoc();
+        updateStats(value);
+    });
+
+    // Scroll sync flag to prevent infinite loops
+    let isScrollSyncing = false;
+
+    editor.onDidScrollChange((e) => {
+        if (!scrollBarSync || isScrollSyncing) {
             return;
         }
 
-        if (confirm('Are you sure you want to close this tab?')) {
-            const index = documents.findIndex(d => d.id === id);
+        isScrollSyncing = true;
+        // Use .preview-wrapper as it's the scrollable element (not #preview which has overflow: hidden)
+        const previewElement = document.querySelector('.preview-wrapper');
 
-            // If closing active tab, switch to another
-            if (id === activeDocId) {
-                const newIndex = index === 0 ? 1 : index - 1;
-                activeDocId = documents[newIndex].id; // Set new active
-                // loadActiveDocument happens after render
-            }
+        // Get editor scroll metrics
+        const scrollTop = editor.getScrollTop();
+        const scrollHeight = editor.getScrollHeight();
+        const viewportHeight = editor.getLayoutInfo().height;
 
-            documents = documents.filter(d => d.id !== id);
-            saveDocsToStorage();
+        // Calculate scroll ratio (0 to 1)
+        const maxScrollTop = Math.max(0, scrollHeight - viewportHeight);
+        const scrollRatio = maxScrollTop > 0 ? scrollTop / maxScrollTop : 0;
 
-            renderTabs();
-            loadActiveDocument();
+        // Apply ratio to preview
+        const previewMaxScroll = Math.max(0, previewElement.scrollHeight - previewElement.clientHeight);
+        const targetY = previewMaxScroll * scrollRatio;
+
+        previewElement.scrollTop = targetY;
+
+        // Reset flag after a short delay
+        setTimeout(() => { isScrollSyncing = false; }, 50);
+    });
+
+    // Add preview-to-editor scroll sync
+    // Use .preview-wrapper as it's the scrollable element
+    const previewElement = document.querySelector('.preview-wrapper');
+    previewElement.addEventListener('scroll', () => {
+        // Update outline scroll progress
+        updateOutlineScrollProgress();
+        updateActiveOutlineItem();
+
+        if (!scrollBarSync || isScrollSyncing) {
+            return;
         }
-    };
 
-    let saveCurrentDoc = () => {
-        const content = editor.getValue();
-        const docIndex = documents.findIndex(d => d.id === activeDocId);
+        isScrollSyncing = true;
 
-        if (docIndex !== -1) {
-            documents[docIndex].content = content;
-            documents[docIndex].lastModified = Date.now();
+        // Get preview scroll metrics
+        const scrollTop = previewElement.scrollTop;
+        const maxScrollTop = Math.max(0, previewElement.scrollHeight - previewElement.clientHeight);
+        const scrollRatio = maxScrollTop > 0 ? scrollTop / maxScrollTop : 0;
 
-            // Auto update title from first H1
-            const firstLine = content.split('\n')[0];
-            if (firstLine && firstLine.startsWith('# ')) {
-                documents[docIndex].title = firstLine.substring(2).trim().substring(0, 20);
-            } else {
-                documents[docIndex].title = 'Untitled';
-            }
+        // Apply ratio to editor
+        const editorMaxScroll = Math.max(0, editor.getScrollHeight() - editor.getLayoutInfo().height);
+        const targetY = editorMaxScroll * scrollRatio;
 
-            saveDocsToStorage();
-            renderTabs(); // Refresh titles
-            showAutosaveIndicator();
+        editor.setScrollTop(targetY);
+
+        // Reset flag after a short delay
+        setTimeout(() => { isScrollSyncing = false; }, 50);
+    });
+
+    // Typewriter Mode: Center cursor + Update cursor position in status bar
+    editor.onDidChangeCursorPosition((e) => {
+        // Update status bar cursor position
+        const cursorPosEl = document.getElementById('cursor-position');
+        if (cursorPosEl) {
+            const pos = e.position;
+            cursorPosEl.querySelector('span').textContent = `Ln ${pos.lineNumber}, Col ${pos.column}`;
         }
-    };
 
-    let loadActiveDocument = () => {
-        const doc = documents.find(d => d.id === activeDocId);
-        if (doc) {
-            // Prevent triggering save loop if possible, or accept it
-            // editor.setValue triggers onDidChangeModelContent
-            // We can set a temporary flag to ignore save? 
-            // For simplicity, let it save (no change to content)
-            const current = editor.getValue();
-            if (current !== doc.content) {
-                editor.setValue(doc.content);
-                editor.setScrollTop(0);
+        if (isTypewriterMode) {
+            editor.revealLineInCenter(e.position.lineNumber);
+        }
+    });
+
+    return editor;
+};
+
+// Configure marked with syntax highlighting
+marked.use(markedHighlight({
+    langPrefix: 'language-',
+    highlight(code, lang) {
+        if (lang && Prism.languages[lang]) {
+            try {
+                return Prism.highlight(code, Prism.languages[lang], lang);
+            } catch (e) {
+                console.warn('Prism highlighting failed:', e);
             }
         }
-    };
+        return code;
+    }
+}));
 
-    let saveDocsToStorage = () => {
-        const expiredAt = new Date(2099, 1, 1);
-        Storehouse.setItem(localStorageNamespace, localStorageDocsKey, documents, expiredAt);
-    };
+// Configure marked with KaTeX
+marked.use(markedKatex({
+    throwOnError: false,
+    output: 'html' // or 'mathml'
+}));
 
-    let setupEditor = () => {
-        let editor = monaco.editor.create(document.querySelector('#editor'), {
-            fontSize: 16,
-            language: 'markdown',
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            scrollbar: {
-                vertical: 'visible',
-                horizontal: 'visible'
-            },
-            wordWrap: 'on',
-            hover: { enabled: false },
-            quickSuggestions: false,
-            suggestOnTriggerCharacters: false,
-            folding: false
-        });
+// Configure GFM Extensions
+marked.use(markedAlert());
+marked.use(markedFootnote());
 
-        editor.onDidChangeModelContent(() => {
-            let changed = editor.getValue() != defaultInput;
-            if (changed) {
-                hasEdited = true;
-            }
-            let value = editor.getValue();
-            convert(value);
-            saveCurrentDoc();
-            updateStats(value);
-        });
+// Slugify function for heading IDs
+let slugify = (text) => {
+    return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+};
 
-        // Scroll sync flag to prevent infinite loops
-        let isScrollSyncing = false;
+// Track headings for TOC
+let tocItems = [];
 
-        editor.onDidScrollChange((e) => {
-            if (!scrollBarSync || isScrollSyncing) {
-                return;
-            }
+// Custom renderer for headings with anchor links
+const renderer = new marked.Renderer();
+renderer.heading = function (text, level) {
+    // Handle marked v15+ where text is an object with text property
+    const headingText = typeof text === 'object' ? text.text : text;
+    const headingLevel = typeof text === 'object' ? text.depth : level;
+    const slug = slugify(headingText);
 
-            isScrollSyncing = true;
-            const previewElement = document.querySelector('#preview');
+    // Store for TOC
+    tocItems.push({ text: headingText, level: headingLevel, slug });
 
-            // Get editor scroll metrics
-            const scrollTop = editor.getScrollTop();
-            const scrollHeight = editor.getScrollHeight();
-            const viewportHeight = editor.getLayoutInfo().height;
-
-            // Calculate scroll ratio (0 to 1)
-            const maxScrollTop = Math.max(0, scrollHeight - viewportHeight);
-            const scrollRatio = maxScrollTop > 0 ? scrollTop / maxScrollTop : 0;
-
-            // Apply ratio to preview
-            const previewMaxScroll = Math.max(0, previewElement.scrollHeight - previewElement.clientHeight);
-            const targetY = previewMaxScroll * scrollRatio;
-
-            previewElement.scrollTop = targetY;
-
-            // Reset flag after a short delay
-            setTimeout(() => { isScrollSyncing = false; }, 50);
-        });
-
-        // Add preview-to-editor scroll sync
-        const previewElement = document.querySelector('#preview');
-        previewElement.addEventListener('scroll', () => {
-            // Update outline scroll progress
-            updateOutlineScrollProgress();
-            updateActiveOutlineItem();
-
-            if (!scrollBarSync || isScrollSyncing) {
-                return;
-            }
-
-            isScrollSyncing = true;
-
-            // Get preview scroll metrics
-            const scrollTop = previewElement.scrollTop;
-            const maxScrollTop = Math.max(0, previewElement.scrollHeight - previewElement.clientHeight);
-            const scrollRatio = maxScrollTop > 0 ? scrollTop / maxScrollTop : 0;
-
-            // Apply ratio to editor
-            const editorMaxScroll = Math.max(0, editor.getScrollHeight() - editor.getLayoutInfo().height);
-            const targetY = editorMaxScroll * scrollRatio;
-
-            editor.setScrollTop(targetY);
-
-            // Reset flag after a short delay
-            setTimeout(() => { isScrollSyncing = false; }, 50);
-        });
-
-        // Typewriter Mode: Center cursor
-        editor.onDidChangeCursorPosition((e) => {
-            if (isTypewriterMode) {
-                editor.revealLineInCenter(e.position.lineNumber);
-            }
-        });
-
-        return editor;
-    };
-
-    // Configure marked with syntax highlighting
-    marked.use(markedHighlight({
-        langPrefix: 'language-',
-        highlight(code, lang) {
-            if (lang && Prism.languages[lang]) {
-                try {
-                    return Prism.highlight(code, Prism.languages[lang], lang);
-                } catch (e) {
-                    console.warn('Prism highlighting failed:', e);
-                }
-            }
-            return code;
-        }
-    }));
-
-    // Configure marked with KaTeX
-    marked.use(markedKatex({
-        throwOnError: false,
-        output: 'html' // or 'mathml'
-    }));
-
-    // Configure GFM Extensions
-    marked.use(markedAlert());
-    marked.use(markedFootnote());
-
-    // Slugify function for heading IDs
-    let slugify = (text) => {
-        return text
-            .toLowerCase()
-            .trim()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/[\s_-]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-    };
-
-    // Track headings for TOC
-    let tocItems = [];
-
-    // Custom renderer for headings with anchor links
-    const renderer = new marked.Renderer();
-    renderer.heading = function (text, level) {
-        // Handle marked v15+ where text is an object with text property
-        const headingText = typeof text === 'object' ? text.text : text;
-        const headingLevel = typeof text === 'object' ? text.depth : level;
-        const slug = slugify(headingText);
-
-        // Store for TOC
-        tocItems.push({ text: headingText, level: headingLevel, slug });
-
-        return `
+    return `
             <h${headingLevel} id="${slug}" class="heading-anchor">
                 ${headingText}
                 <a href="#${slug}" class="anchor-link" aria-label="Link to ${headingText}">
@@ -481,145 +573,211 @@ $$
                 </a>
             </h${headingLevel}>
         `;
-    };
-    marked.use({ renderer });
+};
+marked.use({ renderer });
 
-    // Generate TOC HTML
-    let generateTOC = () => {
-        if (tocItems.length === 0) return '';
+// Generate TOC HTML
+let generateTOC = () => {
+    if (tocItems.length === 0) return '';
 
-        let tocHtml = '<nav class="toc-nav"><h4 class="toc-title">📑 Table of Contents</h4><ul class="toc-list">';
-        tocItems.forEach((item) => {
-            const indent = (item.level - 1) * 16;
-            tocHtml += `<li class="toc-item toc-level-${item.level}" style="padding-left: ${indent}px;">
+    let tocHtml = '<nav class="toc-nav"><h4 class="toc-title">📑 Table of Contents</h4><ul class="toc-list">';
+    tocItems.forEach((item) => {
+        const indent = (item.level - 1) * 16;
+        tocHtml += `<li class="toc-item toc-level-${item.level}" style="padding-left: ${indent}px;">
                 <a href="#${item.slug}" class="toc-link">${item.text}</a>
             </li>`;
-        });
-        tocHtml += '</ul></nav>';
-        return tocHtml;
-    };
+    });
+    tocHtml += '</ul></nav>';
+    return tocHtml;
+};
 
-    // Update TOC panel
-    let updateTOC = () => {
-        const tocPanel = document.getElementById('toc-panel');
-        if (tocPanel) {
-            tocPanel.innerHTML = generateTOC();
-        }
+// Update TOC panel
+let updateTOC = () => {
+    const tocPanel = document.getElementById('toc-panel');
+    if (tocPanel) {
+        tocPanel.innerHTML = generateTOC();
+    }
 
-        // Also update the left sidebar outline
-        updateOutline();
-    };
+    // Also update the left sidebar outline
+    updateOutline();
 
-    // Update Document Outline (left sidebar)
-    let updateOutline = () => {
-        const outlineList = document.getElementById('outline-list');
-        const outlineEmpty = document.getElementById('outline-empty');
-        const outputElement = document.querySelector('#output');
+    // Also update the right TOC sidebar
+    updateRightTOC();
+};
 
-        if (!outlineList || !outputElement) return;
+// Update Right TOC Sidebar (preview mode)
+let updateRightTOC = () => {
+    const tocList = document.getElementById('toc-list');
+    const outputElement = document.querySelector('#output');
 
-        // Find all headings in the preview
-        const headings = outputElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    if (!tocList || !outputElement) return;
 
-        // Clear existing items
-        outlineList.innerHTML = '';
+    // Find all headings in the preview
+    const headings = outputElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
-        if (headings.length === 0) {
-            // Show empty state
-            if (outlineEmpty) outlineEmpty.style.display = 'flex';
-            outlineList.style.display = 'none';
-            return;
-        }
+    // Clear existing items
+    tocList.innerHTML = '';
 
-        // Hide empty state, show list
-        if (outlineEmpty) outlineEmpty.style.display = 'none';
-        outlineList.style.display = 'block';
+    if (headings.length === 0) {
+        tocList.innerHTML = '<li class="toc-empty">No headings found</li>';
+        return;
+    }
 
-        headings.forEach((heading, index) => {
-            const level = parseInt(heading.tagName.charAt(1));
-            const text = heading.textContent.trim();
-            const id = heading.id || `heading-${index}`;
+    headings.forEach((heading, index) => {
+        const level = parseInt(heading.tagName.charAt(1));
+        const text = heading.textContent.trim();
+        const id = heading.id || `heading-${index}`;
 
-            // Ensure heading has an ID for navigation
-            if (!heading.id) heading.id = id;
+        // Ensure heading has an ID for navigation
+        if (!heading.id) heading.id = id;
 
-            const li = document.createElement('li');
-            const item = document.createElement('a');
-            item.className = `outline-item level-${level}`;
-            item.textContent = text;
-            item.href = `#${id}`;
-            item.setAttribute('data-heading-id', id);
+        const li = document.createElement('li');
+        li.className = `toc-item level-${level}`;
 
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
+        const link = document.createElement('a');
+        link.className = 'toc-link';
+        link.textContent = text;
+        link.href = `#${id}`;
+        link.setAttribute('data-heading-id', id);
 
-                // Remove active from all items
-                outlineList.querySelectorAll('.outline-item').forEach(el => el.classList.remove('active'));
-                item.classList.add('active');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
 
-                // Scroll to heading in preview
-                heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
+            // Remove active from all items
+            tocList.querySelectorAll('.toc-link').forEach(el => el.classList.remove('active'));
+            link.classList.add('active');
 
-            li.appendChild(item);
-            outlineList.appendChild(li);
-        });
+            // Scroll to heading in preview
+            heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Update scroll indicator
-        updateOutlineScrollProgress();
-    };
-
-    // Update scroll progress in outline
-    let updateOutlineScrollProgress = () => {
-        const previewWrapper = document.querySelector('#preview-wrapper');
-        const progressBar = document.querySelector('.outline-scroll-indicator .scroll-progress');
-
-        if (!previewWrapper || !progressBar) return;
-
-        const scrollTop = previewWrapper.scrollTop;
-        const scrollHeight = previewWrapper.scrollHeight - previewWrapper.clientHeight;
-        const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-
-        progressBar.style.width = `${Math.min(100, progress)}%`;
-    };
-
-    // Update active item in outline based on scroll position
-    let updateActiveOutlineItem = () => {
-        const previewElement = document.querySelector('#preview');
-        const outlineList = document.getElementById('outline-list');
-        const outputElement = document.querySelector('#output');
-
-        if (!previewElement || !outlineList || !outputElement) return;
-
-        const headings = outputElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        if (headings.length === 0) return;
-
-        const scrollTop = previewElement.scrollTop;
-        const threshold = 100; // Offset from top
-
-        let activeHeading = null;
-
-        // Find the heading that's currently visible at the top
-        headings.forEach(heading => {
-            const rect = heading.getBoundingClientRect();
-            const containerRect = previewElement.getBoundingClientRect();
-            const relativeTop = rect.top - containerRect.top;
-
-            if (relativeTop <= threshold) {
-                activeHeading = heading;
+            // Close TOC sidebar on mobile after clicking
+            if (window.innerWidth <= 768) {
+                const tocSidebar = document.querySelector('.toc-sidebar');
+                const mobileOverlay = document.querySelector('#mobile-toc-overlay');
+                if (tocSidebar) {
+                    tocSidebar.classList.remove('visible');
+                    tocSidebar.classList.add('hidden');
+                }
+                if (mobileOverlay) {
+                    mobileOverlay.classList.remove('active');
+                }
             }
         });
 
-        // Update active class in outline
-        if (activeHeading) {
-            outlineList.querySelectorAll('.outline-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.getAttribute('data-heading-id') === activeHeading.id) {
-                    item.classList.add('active');
-                }
-            });
+        li.appendChild(link);
+        tocList.appendChild(li);
+    });
+};
+
+// Update Document Outline (left sidebar)
+let updateOutline = () => {
+    const outlineList = document.getElementById('outline-list');
+    const outlineEmpty = document.getElementById('outline-empty');
+    const outputElement = document.querySelector('#output');
+
+    if (!outlineList || !outputElement) return;
+
+    // Find all headings in the preview
+    const headings = outputElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    // Clear existing items
+    outlineList.innerHTML = '';
+
+    if (headings.length === 0) {
+        // Show empty state
+        if (outlineEmpty) outlineEmpty.style.display = 'flex';
+        outlineList.style.display = 'none';
+        return;
+    }
+
+    // Hide empty state, show list
+    if (outlineEmpty) outlineEmpty.style.display = 'none';
+    outlineList.style.display = 'block';
+
+    headings.forEach((heading, index) => {
+        const level = parseInt(heading.tagName.charAt(1));
+        const text = heading.textContent.trim();
+        const id = heading.id || `heading-${index}`;
+
+        // Ensure heading has an ID for navigation
+        if (!heading.id) heading.id = id;
+
+        const li = document.createElement('li');
+        const item = document.createElement('a');
+        item.className = `outline-item level-${level}`;
+        item.textContent = text;
+        item.href = `#${id}`;
+        item.setAttribute('data-heading-id', id);
+
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Remove active from all items
+            outlineList.querySelectorAll('.outline-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+
+            // Scroll to heading in preview
+            heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        li.appendChild(item);
+        outlineList.appendChild(li);
+    });
+
+    // Update scroll indicator
+    updateOutlineScrollProgress();
+};
+
+// Update scroll progress in outline
+let updateOutlineScrollProgress = () => {
+    const previewWrapper = document.querySelector('#preview-wrapper');
+    const progressBar = document.querySelector('.outline-scroll-indicator .scroll-progress');
+
+    if (!previewWrapper || !progressBar) return;
+
+    const scrollTop = previewWrapper.scrollTop;
+    const scrollHeight = previewWrapper.scrollHeight - previewWrapper.clientHeight;
+    const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+    progressBar.style.width = `${Math.min(100, progress)}%`;
+};
+
+// Update active item in outline based on scroll position
+let updateActiveOutlineItem = () => {
+    const previewElement = document.querySelector('#preview');
+    const outlineList = document.getElementById('outline-list');
+    const outputElement = document.querySelector('#output');
+
+    if (!previewElement || !outlineList || !outputElement) return;
+
+    const headings = outputElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    if (headings.length === 0) return;
+
+    const scrollTop = previewElement.scrollTop;
+    const threshold = 100; // Offset from top
+
+    let activeHeading = null;
+
+    // Find the heading that's currently visible at the top
+    headings.forEach(heading => {
+        const rect = heading.getBoundingClientRect();
+        const containerRect = previewElement.getBoundingClientRect();
+        const relativeTop = rect.top - containerRect.top;
+
+        if (relativeTop <= threshold) {
+            activeHeading = heading;
         }
-    };
+    });
+
+    // Update active class in outline
+    if (activeHeading) {
+        outlineList.querySelectorAll('.outline-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-heading-id') === activeHeading.id) {
+                item.classList.add('active');
+            }
+        });
+    }
 };
 
 let setupGoals = () => {
@@ -628,29 +786,53 @@ let setupGoals = () => {
 
     const btn = document.getElementById('goals-button');
     const modal = document.getElementById('goals-modal');
-    const closeBtn = document.querySelector('.close-goals');
+    const overlay = document.getElementById('goals-modal-overlay');
+    const closeBtns = document.querySelectorAll('.close-goals');
+    const saveBtn = document.getElementById('save-goals-btn');
     const input = document.getElementById('daily-goal-input');
+
+    const openModal = () => {
+        modal.style.display = 'block';
+        if (overlay) overlay.style.display = 'block';
+        updateGoalProgress(editor.getValue());
+    };
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+        if (overlay) overlay.style.display = 'none';
+    };
 
     if (input) {
         input.value = goalsData.dailyTarget;
         input.addEventListener('change', (e) => {
-            goalsData.dailyTarget = parseInt(e.target.value);
+            goalsData.dailyTarget = parseInt(e.target.value) || 500;
             saveGoals();
             updateGoalProgress(editor.getValue());
         });
     }
 
     if (btn) {
-        btn.addEventListener('click', () => {
-            modal.style.display = 'block';
-            updateGoalProgress(editor.getValue());
+        btn.addEventListener('click', openModal);
+    }
+
+    // All close buttons
+    closeBtns.forEach(closeBtn => {
+        closeBtn.addEventListener('click', closeModal);
+    });
+
+    // Save button
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            goalsData.dailyTarget = parseInt(input?.value) || 500;
+            saveGoals();
+            closeModal();
+            showToast('Goals saved!', 'success');
         });
     }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+    // Click overlay to close
+    if (overlay) {
+        overlay.addEventListener('click', closeModal);
     }
 
     // Listen for content changes
@@ -715,27 +897,40 @@ let setupLinter = () => {
     const lintPanel = document.getElementById('lint-panel');
     const closeBtn = document.querySelector('.close-lint');
 
-    if (lintBtn) {
+    const openPanel = () => {
+        lintPanel.classList.remove('hidden');
+        lintBtn?.classList.add('active');
+        runLinter();
+    };
+
+    const closePanel = () => {
+        lintPanel.classList.add('hidden');
+        lintBtn?.classList.remove('active');
+    };
+
+    if (lintBtn && lintPanel) {
         lintBtn.addEventListener('click', () => {
-            const isHidden = lintPanel.style.display === 'none';
-            lintPanel.style.display = isHidden ? 'flex' : 'none';
-            lintBtn.classList.toggle('active', isHidden);
-            if (isHidden) runLinter(); // Run when opening
+            const isHidden = lintPanel.classList.contains('hidden');
+            if (isHidden) {
+                openPanel();
+            } else {
+                closePanel();
+            }
         });
     }
 
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            lintPanel.style.display = 'none';
-            if (lintBtn) lintBtn.classList.remove('active');
-        });
+        closeBtn.addEventListener('click', closePanel);
     }
 
     // Run linter on change (debounced)
     editor.onDidChangeModelContent(() => {
         clearTimeout(linterDebounceTimer);
         linterDebounceTimer = setTimeout(() => {
-            runLinter();
+            // Only run if panel is visible
+            if (lintPanel && !lintPanel.classList.contains('hidden')) {
+                runLinter();
+            }
         }, 1000);
     });
 };
@@ -814,11 +1009,23 @@ let updateLintUI = (issues) => {
     if (!list) return;
     list.innerHTML = '';
 
+    // Remove existing badge
+    if (btn) {
+        const existingBadge = btn.querySelector('.badge');
+        if (existingBadge) existingBadge.remove();
+    }
+
     if (issues.length === 0) {
-        list.innerHTML = '<div style="padding:16px; color:var(--success-color); text-align:center;">✨ No issues found!</div>';
-        if (btn) btn.textContent = '✅ Lint';
+        list.innerHTML = '<div style="padding:16px; color:var(--accent-success); text-align:center;"><svg width="20" height="20" style="margin-bottom:8px; display:block; margin:0 auto 8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>No issues found!</div>';
     } else {
-        if (btn) btn.textContent = `⚠️ Lint (${issues.length})`;
+        // Add badge to button
+        if (btn) {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = issues.length > 99 ? '99+' : issues.length;
+            btn.appendChild(badge);
+        }
+
         issues.forEach(issue => {
             const item = document.createElement('div');
             item.className = 'lint-item';
@@ -852,12 +1059,66 @@ let updateEditorMarkers = (issues) => {
 let currentSearchQuery = '';
 
 let setupSearch = () => {
+    const searchBtn = document.getElementById('search-btn');
+    const searchOverlay = document.getElementById('search-overlay');
     const searchInput = document.getElementById('search-input');
-    if (!searchInput) return;
+    const searchClose = document.getElementById('search-close');
 
+    if (!searchBtn || !searchOverlay || !searchInput) {
+        console.warn('Search elements not found');
+        return;
+    }
+
+    // Toggle search overlay on button click
+    searchBtn.addEventListener('click', () => {
+        searchOverlay.classList.toggle('hidden');
+        if (!searchOverlay.classList.contains('hidden')) {
+            searchInput.focus();
+            searchInput.select();
+        }
+    });
+
+    // Close search overlay
+    if (searchClose) {
+        searchClose.addEventListener('click', () => {
+            searchOverlay.classList.add('hidden');
+            currentSearchQuery = '';
+            searchInput.value = '';
+            convert(editor.getValue()); // Re-render without highlights
+        });
+    }
+
+    // Handle search input
     searchInput.addEventListener('input', (e) => {
         currentSearchQuery = e.target.value;
         convert(editor.getValue());
+    });
+
+    // Handle Enter key to find next
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchOverlay.classList.add('hidden');
+            currentSearchQuery = '';
+            searchInput.value = '';
+            convert(editor.getValue());
+        }
+        if (e.key === 'Enter') {
+            // Scroll to first match
+            const firstMatch = document.querySelector('.search-highlight');
+            if (firstMatch) {
+                firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+
+    // Keyboard shortcut Ctrl+F
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchOverlay.classList.remove('hidden');
+            searchInput.focus();
+            searchInput.select();
+        }
     });
 };
 
@@ -1041,13 +1302,22 @@ let showToast = (message, type = 'info', duration = 3000) => {
 let copyToClipboard = (text, successHandler, errorHandler) => {
     navigator.clipboard.writeText(text).then(
         () => {
-            successHandler();
+            if (successHandler) successHandler();
         },
 
         () => {
-            errorHandler();
+            if (errorHandler) errorHandler();
         }
     );
+};
+
+let copyMarkdownToClipboard = () => {
+    const mdContent = editor.getValue();
+    copyToClipboard(mdContent, () => {
+        showToast('Markdown copied to clipboard!', 'success');
+    }, () => {
+        showToast('Failed to copy Markdown', 'error');
+    });
 };
 
 let notifyCopied = () => {
@@ -1118,28 +1388,47 @@ let updateStats = (text) => {
 let setupStatsButton = () => {
     const statsBtn = document.querySelector("#stats-button");
     const modal = document.querySelector("#stats-modal");
-    const closeBtn = modal.querySelector(".close-modal");
+    const overlay = document.querySelector("#stats-modal-overlay");
+    const closeBtn = modal?.querySelector("#stats-close");
+    const closeBtnFooter = modal?.querySelector("#stats-close-btn");
+
+    const openModal = () => {
+        if (modal) modal.style.display = "block";
+        if (overlay) overlay.style.display = "block";
+        // Force update stats when opening
+        const text = editor.getValue();
+        updateStats(text);
+    };
+
+    const closeModal = () => {
+        if (modal) modal.style.display = "none";
+        if (overlay) overlay.style.display = "none";
+    };
 
     if (statsBtn) {
         statsBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            modal.style.display = "block";
-
-            // Force update stats when opening
-            const text = editor.getValue();
-            updateStats(text);
+            openModal();
         });
     }
 
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = "none";
-        });
+        closeBtn.addEventListener('click', closeModal);
     }
 
+    if (closeBtnFooter) {
+        closeBtnFooter.addEventListener('click', closeModal);
+    }
+
+    // Click overlay to close
+    if (overlay) {
+        overlay.addEventListener('click', closeModal);
+    }
+
+    // Click outside modal to close
     window.addEventListener('click', (event) => {
         if (event.target === modal) {
-            modal.style.display = "none";
+            closeModal();
         }
     });
 };
@@ -1255,8 +1544,19 @@ Wrap up your thoughts.
 let setupTemplatesButton = () => {
     const templatesBtn = document.querySelector("#templates-button");
     const modal = document.querySelector("#templates-modal");
-    const closeBtn = modal.querySelector(".close-templates");
+    const overlay = document.querySelector("#templates-modal-overlay");
+    const closeBtns = document.querySelectorAll(".close-templates");
     const grid = document.querySelector("#templates-grid");
+
+    const openModal = () => {
+        if (modal) modal.style.display = "block";
+        if (overlay) overlay.style.display = "block";
+    };
+
+    const closeModal = () => {
+        if (modal) modal.style.display = "none";
+        if (overlay) overlay.style.display = "none";
+    };
 
     // Populate grid once
     if (grid && grid.children.length === 0) {
@@ -1273,7 +1573,7 @@ let setupTemplatesButton = () => {
                 if (confirm('This will overwrite your current editor content. Continue?')) {
                     editor.setValue(template.content);
                     editor.revealPosition({ lineNumber: 1, column: 1 });
-                    modal.style.display = "none";
+                    closeModal();
                     showToast(`Template "${template.title}" loaded!`, 'success');
                 }
             });
@@ -1285,19 +1585,24 @@ let setupTemplatesButton = () => {
     if (templatesBtn) {
         templatesBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            modal.style.display = "block";
+            openModal();
         });
     }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = "none";
-        });
+    // All close buttons
+    closeBtns.forEach(closeBtn => {
+        closeBtn.addEventListener('click', closeModal);
+    });
+
+    // Click overlay to close
+    if (overlay) {
+        overlay.addEventListener('click', closeModal);
     }
 
+    // Click outside modal to close
     window.addEventListener('click', (event) => {
         if (event.target === modal) {
-            modal.style.display = "none";
+            closeModal();
         }
     });
 };
@@ -1397,53 +1702,66 @@ let setupSnippetsButton = () => {
 // ----- download utils -----
 
 let downloadMarkdown = () => {
-    let content = editor.getValue();
-    let blob = new Blob([content], { type: 'text/markdown' });
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement('a');
+    const content = editor.getValue();
+    const filename = getExportFilename('md');
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = url;
-    a.download = 'document.md';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Markdown file downloaded successfully!', 'success');
+    showToast(`Downloaded: ${filename}`, 'success');
 };
 
 let exportToPDF = () => {
     showToast('Generating PDF...', 'info', 2000);
     const element = document.querySelector('#output');
+    const filename = getExportFilename('pdf');
     const options = {
-        margin: 1,
-        filename: 'document.pdf',
+        margin: [0.75, 0.75, 0.75, 0.75],
+        filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
             scale: 2,
             useCORS: true,
-            logging: false
+            logging: false,
+            letterRendering: true
         },
         jsPDF: {
             unit: 'in',
             format: 'letter',
             orientation: 'portrait'
-        }
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
     html2pdf().set(options).from(element).save().then(() => {
-        showToast('PDF exported successfully!', 'success');
+        showToast(`PDF exported: ${filename}`, 'success');
     }).catch(() => {
         showToast('Failed to export PDF', 'error');
     });
 };
 
 let exportToHTML = () => {
+    const title = getActiveDocTitle();
+    const filename = getExportFilename('html');
     const html = `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Exported Document</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
+    body {
+        background: #ffffff;
+        color: #24292e;
+    }
     .markdown-body {
         box-sizing: border-box;
         min-width: 200px;
@@ -1456,10 +1774,44 @@ let exportToHTML = () => {
             padding: 15px;
         }
     }
+    @media print {
+        .markdown-body {
+            max-width: none;
+            padding: 20px;
+        }
+    }
+    pre {
+        background: #2d2d2d;
+        border-radius: 6px;
+        padding: 16px;
+        overflow-x: auto;
+    }
+    code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid #dfe2e5;
+        padding: 8px 12px;
+    }
+    blockquote {
+        border-left: 4px solid #dfe2e5;
+        padding-left: 16px;
+        color: #6a737d;
+        margin: 16px 0;
+    }
 </style>
 </head>
 <body class="markdown-body">
 ${document.getElementById('output').innerHTML}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"><\/script>
 </body>
 </html>`;
 
@@ -1467,35 +1819,1122 @@ ${document.getElementById('output').innerHTML}
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'document.html';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('HTML exported successfully!', 'success');
+    showToast(`HTML exported: ${filename}`, 'success');
 };
 
 let exportToDOCX = () => {
+    const title = getActiveDocTitle();
+    const filename = getExportFilename('doc');
     const content = document.getElementById('output').innerHTML;
     const html = `<!DOCTYPE html>
 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head><meta charset='utf-8'><title>Export Document</title></head><body>
+<head>
+<meta charset='utf-8'>
+<title>${title}</title>
+<style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.6; }
+    h1 { font-size: 24pt; color: #333; }
+    h2 { font-size: 18pt; color: #444; }
+    h3 { font-size: 14pt; color: #555; }
+    pre, code { font-family: Consolas, monospace; background: #f4f4f4; padding: 2px 4px; }
+    pre { padding: 10px; border: 1px solid #ddd; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    blockquote { border-left: 3px solid #ccc; padding-left: 10px; color: #666; }
+</style>
+</head>
+<body>
 ${content}
-</body></html>`;
+</body>
+</html>`;
 
     const blob = new Blob([html], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'document.doc';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('DOCX (Compat) exported successfully!', 'success');
+    showToast(`DOCX exported: ${filename}`, 'success');
+};
+
+// Export as Plain Text
+let exportToTXT = () => {
+    const content = editor.getValue();
+    // Strip markdown syntax for plain text
+    const plainText = content
+        .replace(/^#{1,6}\s+/gm, '')  // Remove headings
+        .replace(/\*\*(.+?)\*\*/g, '$1')  // Remove bold
+        .replace(/\*(.+?)\*/g, '$1')  // Remove italic
+        .replace(/~~(.+?)~~/g, '$1')  // Remove strikethrough
+        .replace(/`{3}[\s\S]*?`{3}/g, '')  // Remove code blocks
+        .replace(/`(.+?)`/g, '$1')  // Remove inline code
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1')  // Remove links, keep text
+        .replace(/!\[.*?\]\(.+?\)/g, '')  // Remove images
+        .replace(/^[-*+]\s+/gm, '• ')  // Convert bullets
+        .replace(/^\d+\.\s+/gm, '')  // Remove numbered list markers
+        .replace(/^>\s+/gm, '')  // Remove blockquotes
+        .replace(/^---+$/gm, '────────────────')  // Convert horizontal rules
+        .trim();
+
+    const filename = getExportFilename('txt');
+    const blob = new Blob([plainText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Text exported: ${filename}`, 'success');
+};
+
+// Export as PNG Image
+let exportToPNG = () => {
+    showToast('Generating image...', 'info', 2000);
+    const element = document.querySelector('#output');
+
+    html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = getExportFilename('png');
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Image exported successfully!', 'success');
+    }).catch(() => {
+        showToast('Failed to export image', 'error');
+    });
+};
+
+// Print document
+let printDocument = () => {
+    const content = document.getElementById('output').innerHTML;
+    const title = getActiveDocTitle();
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${title}</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
+            <style>
+                body { padding: 20px; }
+                .markdown-body { max-width: 800px; margin: 0 auto; }
+                @media print {
+                    body { padding: 0; }
+                    .markdown-body { max-width: none; }
+                }
+            </style>
+        </head>
+        <body class="markdown-body">
+            ${content}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+};
+
+// Helper: Get active document title
+let getActiveDocTitle = () => {
+    const doc = documents.find(d => d.id === activeDocId);
+    return doc ? doc.title : 'Untitled';
+};
+
+// Helper: Generate export filename with extension
+let getExportFilename = (ext) => {
+    const title = getActiveDocTitle();
+    // Sanitize filename: remove invalid characters
+    const sanitized = title.replace(/[<>:"/\\|?*]/g, '').trim() || 'document';
+    return `${sanitized}.${ext}`;
 };
 
 let setupAdditionalExportButtons = () => {
     const btnHtml = document.getElementById('export-html-button');
     const btnDocx = document.getElementById('export-docx-button');
+    const btnTxt = document.getElementById('export-txt-button');
+    const btnPng = document.getElementById('export-png-button');
+    const btnPrint = document.getElementById('print-button');
+
     if (btnHtml) btnHtml.addEventListener('click', (e) => { e.preventDefault(); exportToHTML(); });
     if (btnDocx) btnDocx.addEventListener('click', (e) => { e.preventDefault(); exportToDOCX(); });
+    if (btnTxt) btnTxt.addEventListener('click', (e) => { e.preventDefault(); exportToTXT(); });
+    if (btnPng) btnPng.addEventListener('click', (e) => { e.preventDefault(); exportToPNG(); });
+    if (btnPrint) btnPrint.addEventListener('click', (e) => { e.preventDefault(); printDocument(); });
+};
+
+// ==================== EXPORT MODAL ====================
+let currentExportFormat = 'pdf';
+let exportModalZoom = 0.9;
+
+let setupExportModal = () => {
+    const modal = document.getElementById('export-modal');
+    const overlay = document.getElementById('export-modal-overlay');
+    const closeBtn = document.getElementById('export-modal-close');
+    const cancelBtn = document.getElementById('export-cancel-btn');
+    const confirmBtn = document.getElementById('export-confirm-btn');
+    const formatBtns = document.querySelectorAll('.export-format-btn');
+    const headerExportBtn = document.getElementById('export-btn');
+
+    if (!modal) return;
+
+    // Header Export button opens the modal
+    headerExportBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openExportModal();
+    });
+
+    // Format button click handlers
+    formatBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const format = btn.dataset.format;
+            if (!format) return;
+
+            // Handle immediate actions
+            if (format === 'copy-md') {
+                copyMarkdownToClipboard();
+                return;
+            }
+            if (format === 'copy-html') {
+                copyHTMLToClipboard();
+                return;
+            }
+            if (format === 'reset') {
+                closeExportModal();
+                reset();
+                return;
+            }
+
+            // Set active format
+            formatBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentExportFormat = format;
+
+            updateExportUI(format);
+            updateExportPreview(format);
+        });
+    });
+
+    // Close handlers
+    const closeHandler = () => {
+        closeExportModal();
+    };
+
+    closeBtn?.addEventListener('click', closeHandler);
+    cancelBtn?.addEventListener('click', closeHandler);
+    overlay?.addEventListener('click', closeHandler);
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeExportModal();
+        }
+    });
+
+    // Confirm button
+    confirmBtn?.addEventListener('click', () => {
+        executeExport(currentExportFormat);
+        closeExportModal();
+    });
+
+    // Zoom controls for PNG
+    document.getElementById('zoom-in-btn')?.addEventListener('click', () => {
+        exportModalZoom = Math.min(exportModalZoom + 0.1, 1.5);
+        updateZoom();
+    });
+
+    document.getElementById('zoom-out-btn')?.addEventListener('click', () => {
+        exportModalZoom = Math.max(exportModalZoom - 0.1, 0.5);
+        updateZoom();
+    });
+
+    document.getElementById('zoom-fit-btn')?.addEventListener('click', () => {
+        exportModalZoom = 0.9;
+        updateZoom();
+    });
+
+    // Auto-update preview when options change
+    setupExportOptionListeners();
+};
+
+let updateZoom = () => {
+    const pngContainer = document.getElementById('png-container');
+    if (pngContainer) {
+        pngContainer.style.transform = `scale(${exportModalZoom})`;
+    }
+};
+
+// Setup listeners for all export options to auto-update preview
+let setupExportOptionListeners = () => {
+    // PDF options
+    const pdfOptions = ['export-paper-size', 'export-orientation', 'export-page-numbers', 'export-header-footer'];
+    pdfOptions.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => {
+                if (currentExportFormat === 'pdf') {
+                    updateExportPreview('pdf');
+                    estimateFileSize('pdf');
+                }
+            });
+        }
+    });
+
+    // HTML options
+    const htmlOptions = ['export-html-theme', 'export-include-css', 'export-minify-html'];
+    htmlOptions.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => {
+                if (currentExportFormat === 'html') {
+                    updateExportPreview('html');
+                    estimateFileSize('html');
+                }
+            });
+        }
+    });
+
+    // PNG options
+    const pngOptions = ['export-image-width', 'export-resolution', 'export-transparent-bg', 'export-include-shadow'];
+    pngOptions.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const eventType = el.type === 'text' ? 'input' : 'change';
+            el.addEventListener(eventType, () => {
+                if (currentExportFormat === 'png') {
+                    updateExportPreview('png');
+                    estimateFileSize('png');
+                }
+            });
+        }
+    });
+
+    // TXT options
+    const txtOptions = ['export-word-wrap', 'export-frontmatter'];
+    txtOptions.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => {
+                if (currentExportFormat === 'txt') {
+                    updateExportPreview('txt');
+                    estimateFileSize('txt');
+                }
+            });
+        }
+    });
+
+    // Print options
+    const printOptions = ['print-paper-size', 'print-orientation', 'print-margins', 'print-scale'];
+    printOptions.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => {
+                if (currentExportFormat === 'print') {
+                    updateExportPreview('print');
+                }
+            });
+        }
+    });
+
+    // Refresh button
+    document.getElementById('export-refresh-btn')?.addEventListener('click', () => {
+        updateExportPreview(currentExportFormat);
+        estimateFileSize(currentExportFormat);
+        showToast('Preview refreshed!', 'info', 1500);
+    });
+};
+
+let openExportModal = () => {
+    const modal = document.getElementById('export-modal');
+    const overlay = document.getElementById('export-modal-overlay');
+
+    if (!modal || !overlay) return;
+
+    // Reset loading state
+    const loadingOverlay = document.getElementById('export-loading-overlay');
+    if (loadingOverlay) loadingOverlay.classList.add('hidden');
+
+    // Set default format to PDF
+    currentExportFormat = 'pdf';
+    document.querySelectorAll('.export-format-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.format === 'pdf');
+    });
+
+    updateExportUI('pdf');
+    updateExportPreview('pdf');
+
+    // Show modal
+    modal.classList.add('active');
+    overlay.classList.add('active');
+};
+
+let closeExportModal = () => {
+    const modal = document.getElementById('export-modal');
+    const overlay = document.getElementById('export-modal-overlay');
+    const loadingOverlay = document.getElementById('export-loading-overlay');
+
+    modal?.classList.remove('active');
+    overlay?.classList.remove('active');
+    loadingOverlay?.classList.add('hidden');
+};
+
+let updateExportUI = (format) => {
+    // Hide all option panels
+    document.querySelectorAll('.export-options').forEach(el => el.classList.add('hidden'));
+
+    // Hide all previews
+    document.querySelectorAll('.export-preview').forEach(el => el.classList.add('hidden'));
+
+    // Show relevant options
+    const optionsId = `${format}-options`;
+    document.getElementById(optionsId)?.classList.remove('hidden');
+
+    // Update button text and icon
+    const btnText = document.getElementById('export-btn-text');
+    const btnIcon = document.getElementById('export-btn-icon');
+    const previewLabel = document.getElementById('preview-label');
+
+    const formatConfig = {
+        pdf: { text: 'Export PDF', icon: 'picture_as_pdf', label: 'Previewing 1 of 1 pages' },
+        html: { text: 'Export HTML', icon: 'html', label: 'HTML Preview' },
+        markdown: { text: 'Download Markdown', icon: 'download', label: 'Markdown file' },
+        docx: { text: 'Export DOCX', icon: 'description', label: 'Word Document' },
+        txt: { text: 'Export Text', icon: 'text_snippet', label: 'Plain Text Preview' },
+        png: { text: 'Export Image', icon: 'image', label: 'Image Preview' },
+        print: { text: 'Print Document', icon: 'print', label: 'Print Preview' }
+    };
+
+    const config = formatConfig[format] || formatConfig.pdf;
+    if (btnText) btnText.textContent = config.text;
+    if (btnIcon) btnIcon.textContent = config.icon;
+    if (previewLabel) previewLabel.textContent = config.label;
+
+    // Estimate file size
+    estimateFileSize(format);
+};
+
+let updateExportPreview = (format) => {
+    const content = document.getElementById('output').innerHTML;
+    const title = getActiveDocTitle();
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    // Update filename and date
+    const filenameEl = document.getElementById('page-filename');
+    const dateEl = document.getElementById('page-date');
+    const urlEl = document.getElementById('browser-url-text');
+
+    if (filenameEl) filenameEl.textContent = `${title}.md`;
+    if (dateEl) dateEl.textContent = today;
+    if (urlEl) urlEl.textContent = `file:///Documents/${title}.html`;
+
+    // Get PDF/Print options
+    const showPageNumbers = document.getElementById('export-page-numbers')?.checked ?? true;
+    const showHeaderFooter = document.getElementById('export-header-footer')?.checked ?? false;
+
+    // Show appropriate preview
+    if (format === 'pdf' || format === 'print') {
+        document.getElementById('pdf-preview')?.classList.remove('hidden');
+        const pageContent = document.getElementById('export-page-content');
+        const pageFooter = document.querySelector('.page-footer');
+        const pageHeader = document.querySelector('.page-header');
+
+        if (pageContent) {
+            pageContent.innerHTML = `<div class="markdown-body">${content}</div>`;
+        }
+
+        // Toggle page number visibility
+        if (pageFooter) {
+            pageFooter.style.display = showPageNumbers ? 'flex' : 'none';
+        }
+
+        // Toggle header visibility
+        if (pageHeader) {
+            pageHeader.style.display = showHeaderFooter ? 'flex' : 'none';
+        }
+    } else if (format === 'html') {
+        document.getElementById('html-preview')?.classList.remove('hidden');
+        const htmlContent = document.getElementById('html-preview-content');
+        const theme = document.getElementById('export-html-theme')?.value || 'light';
+
+        if (htmlContent) {
+            // Apply theme to preview
+            htmlContent.className = 'browser-content';
+            if (theme === 'dark') {
+                htmlContent.style.backgroundColor = '#1e1e1e';
+                htmlContent.style.color = '#d4d4d4';
+            } else {
+                htmlContent.style.backgroundColor = '#ffffff';
+                htmlContent.style.color = '#24292f';
+            }
+            htmlContent.innerHTML = `<div class="markdown-body">${content}</div>`;
+        }
+    } else if (format === 'txt') {
+        document.getElementById('txt-preview')?.classList.remove('hidden');
+        const txtContent = document.getElementById('txt-preview-content');
+        const wordWrap = document.getElementById('export-word-wrap')?.checked ?? true;
+        const includeFrontmatter = document.getElementById('export-frontmatter')?.checked ?? false;
+
+        if (txtContent) {
+            // Convert to plain text
+            let plainText = editor.getValue()
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/\*\*(.+?)\*\*/g, '$1')
+                .replace(/\*(.+?)\*/g, '$1')
+                .replace(/~~(.+?)~~/g, '$1')
+                .replace(/`{3}[\s\S]*?`{3}/g, '')
+                .replace(/`(.+?)`/g, '$1')
+                .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+                .replace(/!\[.*?\]\(.+?\)/g, '')
+                .replace(/^[-*+]\s+/gm, '• ')
+                .replace(/^\d+\.\s+/gm, '')
+                .replace(/^>\s+/gm, '')
+                .trim();
+
+            // Add frontmatter if enabled
+            if (includeFrontmatter) {
+                const frontmatter = `---\ntitle: ${title}\ndate: ${today}\n---\n\n`;
+                plainText = frontmatter + plainText;
+            }
+
+            txtContent.textContent = plainText;
+            txtContent.style.whiteSpace = wordWrap ? 'pre-wrap' : 'pre';
+        }
+    } else if (format === 'png') {
+        document.getElementById('png-preview')?.classList.remove('hidden');
+        const pngContent = document.getElementById('png-preview-content');
+        const pngContainer = document.getElementById('png-container');
+        const transparentBg = document.getElementById('export-transparent-bg')?.checked ?? false;
+        const includeShadow = document.getElementById('export-include-shadow')?.checked ?? true;
+
+        if (pngContent) {
+            pngContent.innerHTML = `<div class="markdown-body">${content}</div>`;
+        }
+
+        // Apply styling to preview based on options
+        if (pngContainer) {
+            if (transparentBg) {
+                pngContainer.style.background = 'repeating-conic-gradient(#e0e0e0 0% 25%, #ffffff 0% 50%) 50% / 20px 20px';
+            } else {
+                pngContainer.style.background = '#ffffff';
+            }
+
+            if (includeShadow) {
+                pngContainer.style.boxShadow = '0 10px 40px rgba(0,0,0,0.15)';
+            } else {
+                pngContainer.style.boxShadow = 'none';
+            }
+        }
+    } else if (format === 'markdown' || format === 'docx') {
+        // Show PDF preview as placeholder
+        document.getElementById('pdf-preview')?.classList.remove('hidden');
+        const pageContent = document.getElementById('export-page-content');
+        const pageFooter = document.querySelector('.page-footer');
+        const pageHeader = document.querySelector('.page-header');
+
+        if (pageContent) {
+            pageContent.innerHTML = `<div class="markdown-body">${content}</div>`;
+        }
+
+        // Hide header/footer for markdown/docx preview
+        if (pageFooter) pageFooter.style.display = 'none';
+        if (pageHeader) pageHeader.style.display = 'none';
+    }
+};
+
+let estimateFileSize = (format) => {
+    const content = editor.getValue();
+    const htmlContent = document.getElementById('output').innerHTML;
+    let estimatedSize = 0;
+
+    switch (format) {
+        case 'markdown':
+            estimatedSize = new Blob([content]).size;
+            break;
+        case 'txt':
+            estimatedSize = new Blob([content]).size * 0.7;
+            break;
+        case 'html':
+            estimatedSize = new Blob([htmlContent]).size + 5000; // CSS overhead
+            break;
+        case 'pdf':
+            estimatedSize = new Blob([htmlContent]).size * 3; // PDF is larger
+            break;
+        case 'docx':
+            estimatedSize = new Blob([htmlContent]).size * 1.5;
+            break;
+        case 'png':
+            estimatedSize = new Blob([htmlContent]).size * 10; // Images are larger
+            break;
+        case 'print':
+            estimatedSize = 0; // N/A for print
+            break;
+    }
+
+    const sizeEl = document.getElementById('export-file-size');
+    if (sizeEl) {
+        if (format === 'print') {
+            sizeEl.textContent = 'N/A';
+        } else if (estimatedSize < 1024) {
+            sizeEl.textContent = `${estimatedSize} B`;
+        } else if (estimatedSize < 1024 * 1024) {
+            sizeEl.textContent = `${(estimatedSize / 1024).toFixed(1)} KB`;
+        } else {
+            sizeEl.textContent = `${(estimatedSize / (1024 * 1024)).toFixed(1)} MB`;
+        }
+    }
+};
+
+let showExportLoading = (text = 'Generating your file...', progress = 30) => {
+    const overlay = document.getElementById('export-loading-overlay');
+    const textEl = document.getElementById('export-loading-text');
+    const progressEl = document.getElementById('export-loading-progress-bar');
+
+    if (overlay) overlay.classList.remove('hidden');
+    if (textEl) textEl.textContent = text;
+    if (progressEl) progressEl.style.width = `${progress}%`;
+};
+
+let updateExportProgress = (progress, text) => {
+    const progressEl = document.getElementById('export-loading-progress-bar');
+    const textEl = document.getElementById('export-loading-text');
+
+    if (progressEl) progressEl.style.width = `${progress}%`;
+    if (textEl && text) textEl.textContent = text;
+};
+
+let hideExportLoading = () => {
+    const overlay = document.getElementById('export-loading-overlay');
+    if (overlay) {
+        // Small delay to show 100% progress
+        updateExportProgress(100, 'Complete!');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 500);
+    }
+};
+
+let executeExport = (format) => {
+    switch (format) {
+        case 'pdf':
+            exportToPDFWithOptions();
+            break;
+        case 'html':
+            exportToHTMLWithOptions();
+            break;
+        case 'markdown':
+            downloadMarkdownWithOptions();
+            break;
+        case 'docx':
+            exportToDOCXWithOptions();
+            break;
+        case 'txt':
+            exportToTXTWithOptions();
+            break;
+        case 'png':
+            exportToPNGWithOptions();
+            break;
+        case 'print':
+            printDocumentWithOptions();
+            break;
+    }
+};
+
+// Enhanced export functions with options
+let exportToPDFWithOptions = () => {
+    const paperSize = document.getElementById('export-paper-size')?.value || 'letter';
+    const orientation = document.getElementById('export-orientation')?.value || 'portrait';
+    const pageNumbers = document.getElementById('export-page-numbers')?.checked ?? true;
+    const headerFooter = document.getElementById('export-header-footer')?.checked ?? false;
+
+    showExportLoading('Preparing PDF document...', 20);
+    const element = document.querySelector('#output');
+    const filename = getExportFilename('pdf');
+    const title = getActiveDocTitle();
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    const formatMap = {
+        'a4': 'a4',
+        'letter': 'letter',
+        'legal': 'legal',
+        'tabloid': [11, 17]
+    };
+
+    // Create a wrapper with header/footer if enabled
+    const wrapper = document.createElement('div');
+    wrapper.className = 'pdf-export-wrapper';
+
+    if (headerFooter) {
+        wrapper.innerHTML = `
+            <style>
+                .pdf-header { 
+                    position: running(header);
+                    font-size: 10pt;
+                    color: #666;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 8px;
+                    margin-bottom: 16px;
+                }
+                .pdf-footer {
+                    position: running(footer);
+                    font-size: 9pt;
+                    color: #888;
+                    text-align: center;
+                    border-top: 1px solid #ddd;
+                    padding-top: 8px;
+                    margin-top: 16px;
+                }
+                @page {
+                    @top-center { content: element(header); }
+                    @bottom-center { content: element(footer); }
+                }
+            </style>
+            <div class="pdf-header">${title}</div>
+            ${element.innerHTML}
+            <div class="pdf-footer">${today}</div>
+        `;
+    } else {
+        wrapper.innerHTML = element.innerHTML;
+    }
+
+    const options = {
+        margin: headerFooter ? [0.75, 0.5, 0.75, 0.5] : [0.5, 0.5, 0.5, 0.5],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            letterRendering: true,
+            backgroundColor: '#ffffff'
+        },
+        jsPDF: {
+            unit: 'in',
+            format: formatMap[paperSize] || 'letter',
+            orientation: orientation
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    // Add page numbers if enabled
+    if (pageNumbers) {
+        updateExportProgress(50, 'Rendering pages...');
+        html2pdf().set(options).from(headerFooter ? wrapper : element).toPdf().get('pdf').then((pdf) => {
+            updateExportProgress(80, 'Adding page numbers...');
+            const totalPages = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(9);
+                pdf.setTextColor(128);
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                pdf.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 0.3, { align: 'center' });
+            }
+        }).save().then(() => {
+            hideExportLoading();
+            showToast(`PDF exported: ${filename}`, 'success');
+        }).catch((err) => {
+            console.error('PDF export error:', err);
+            hideExportLoading();
+            showToast('Failed to export PDF', 'error');
+        });
+    } else {
+        updateExportProgress(60, 'Generating PDF file...');
+        html2pdf().set(options).from(headerFooter ? wrapper : element).save().then(() => {
+            hideExportLoading();
+            showToast(`PDF exported: ${filename}`, 'success');
+        }).catch((err) => {
+            console.error('PDF export error:', err);
+            hideExportLoading();
+            showToast('Failed to export PDF', 'error');
+        });
+    }
+};
+
+let exportToHTMLWithOptions = () => {
+    const theme = document.getElementById('export-html-theme')?.value || 'light';
+    const includeCSS = document.getElementById('export-include-css')?.checked ?? true;
+    const minify = document.getElementById('export-minify-html')?.checked ?? false;
+
+    showExportLoading('Generating HTML file...', 40);
+    const title = getActiveDocTitle();
+    const filename = getExportFilename('html');
+    const content = document.getElementById('output').innerHTML;
+
+    let themeStyles = '';
+    if (theme === 'dark') {
+        themeStyles = `
+            body { background: #0d1117; color: #c9d1d9; }
+            .markdown-body { color: #c9d1d9; }
+            .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: #c9d1d9; border-color: #30363d; }
+            .markdown-body code { background: #161b22; }
+            .markdown-body pre { background: #161b22; }
+        `;
+    } else if (theme === 'system') {
+        themeStyles = `
+            @media (prefers-color-scheme: dark) {
+                body { background: #0d1117; color: #c9d1d9; }
+                .markdown-body { color: #c9d1d9; }
+                .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: #c9d1d9; border-color: #30363d; }
+            }
+        `;
+    }
+
+    let html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
+${includeCSS ? `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">` : ''}
+<style>
+body { background: #ffffff; color: #24292e; }
+.markdown-body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
+@media (max-width: 767px) { .markdown-body { padding: 15px; } }
+${themeStyles}
+</style>
+</head>
+<body class="markdown-body">
+${content}
+</body>
+</html>`;
+
+    if (minify) {
+        html = html.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim();
+    }
+
+    updateExportProgress(80, 'Preparing download...');
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideExportLoading();
+    showToast(`HTML exported: ${filename}`, 'success');
+};
+
+let exportToPNGWithOptions = () => {
+    const widthInput = document.getElementById('export-image-width')?.value || '1200 px';
+    const resolution = parseInt(document.getElementById('export-resolution')?.value || '2');
+    const transparentBg = document.getElementById('export-transparent-bg')?.checked ?? false;
+    const includeShadow = document.getElementById('export-include-shadow')?.checked ?? true;
+
+    // Parse width value
+    const width = parseInt(widthInput.replace(/[^0-9]/g, '')) || 1200;
+
+    showExportLoading('Capturing document as image...', 30);
+    const element = document.querySelector('#output');
+    const filename = getExportFilename('png');
+
+    // Create a wrapper for shadow effect if needed
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+        display: inline-block;
+        background: ${transparentBg ? 'transparent' : '#ffffff'};
+        ${includeShadow ? 'padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);' : ''}
+        border-radius: ${includeShadow ? '8px' : '0'};
+        width: ${width}px;
+        overflow: hidden;
+    `;
+
+    // Clone content
+    const clone = element.cloneNode(true);
+    clone.style.width = '100%';
+    clone.style.maxWidth = 'none';
+    wrapper.appendChild(clone);
+
+    // Append to body temporarily
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '-9999px';
+    document.body.appendChild(wrapper);
+
+    updateExportProgress(60, 'Rendering image canvas...');
+    html2canvas(wrapper, {
+        scale: resolution,
+        useCORS: true,
+        logging: false,
+        backgroundColor: transparentBg ? null : (includeShadow ? '#f5f5f5' : '#ffffff'),
+        width: includeShadow ? width + 80 : width,
+        windowWidth: width + (includeShadow ? 80 : 0)
+    }).then(canvas => {
+        updateExportProgress(90, 'Finalizing image...');
+        // Remove wrapper
+        document.body.removeChild(wrapper);
+
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        hideExportLoading();
+        showToast(`Image exported: ${filename}`, 'success');
+    }).catch((err) => {
+        document.body.removeChild(wrapper);
+        console.error('PNG export error:', err);
+        hideExportLoading();
+        showToast('Failed to export image', 'error');
+    });
+};
+
+let printDocumentWithOptions = () => {
+    const paperSize = document.getElementById('print-paper-size')?.value || 'a4';
+    const orientation = document.getElementById('print-orientation')?.value || 'portrait';
+    const margins = document.getElementById('print-margins')?.value || 'default';
+    const scale = document.getElementById('print-scale')?.value || '100';
+
+    showExportLoading('Preparing print dialog...', 50);
+    const content = document.getElementById('output').innerHTML;
+    const title = getActiveDocTitle();
+
+    const marginMap = {
+        'default': '20mm',
+        'none': '0',
+        'narrow': '10mm',
+        'moderate': '15mm'
+    };
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${title}</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+            <style>
+                @page {
+                    size: ${paperSize} ${orientation};
+                    margin: ${marginMap[margins]};
+                }
+                body { 
+                    padding: 20px; 
+                    transform: scale(${parseInt(scale) / 100});
+                    transform-origin: top left;
+                }
+                .markdown-body { max-width: 800px; margin: 0 auto; }
+                @media print {
+                    body { padding: 0; transform: none; }
+                    .markdown-body { max-width: none; }
+                }
+                pre, code { background: #f6f8fa; }
+                pre { padding: 16px; border-radius: 6px; overflow-x: auto; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #d0d7de; padding: 8px 12px; }
+                th { background: #f6f8fa; }
+                blockquote { border-left: 4px solid #d0d7de; padding-left: 16px; margin-left: 0; color: #656d76; }
+                img { max-width: 100%; height: auto; }
+            </style>
+        </head>
+        <body class="markdown-body">
+            ${content}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+        hideExportLoading();
+    }, 500);
+    showToast('Print dialog opened', 'info');
+};
+
+// Download Markdown with options
+let downloadMarkdownWithOptions = () => {
+    showExportLoading('Preparing Markdown file...', 50);
+    const content = editor.getValue();
+    const filename = getExportFilename('md');
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideExportLoading();
+    showToast(`Markdown downloaded: ${filename}`, 'success');
+};
+
+// Export DOCX with options
+let exportToDOCXWithOptions = () => {
+    const title = getActiveDocTitle();
+    const filename = getExportFilename('doc');
+    const content = document.getElementById('output').innerHTML;
+
+    showExportLoading('Generating Word document...', 40);
+
+    const html = `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>${title}</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+    @page { 
+        size: letter;
+        margin: 1in;
+    }
+    body { 
+        font-family: 'Calibri', 'Arial', sans-serif; 
+        font-size: 11pt; 
+        line-height: 1.6; 
+        color: #333;
+    }
+    h1 { font-size: 26pt; color: #1a1a1a; margin-top: 24pt; margin-bottom: 12pt; font-weight: 600; }
+    h2 { font-size: 20pt; color: #333; margin-top: 20pt; margin-bottom: 10pt; font-weight: 600; }
+    h3 { font-size: 14pt; color: #444; margin-top: 16pt; margin-bottom: 8pt; font-weight: 600; }
+    h4, h5, h6 { font-size: 12pt; color: #555; margin-top: 12pt; margin-bottom: 6pt; font-weight: 600; }
+    p { margin: 0 0 12pt 0; }
+    pre, code { 
+        font-family: 'Consolas', 'Courier New', monospace; 
+        background: #f5f5f5; 
+        padding: 2pt 4pt;
+        font-size: 10pt;
+    }
+    pre { 
+        padding: 10pt; 
+        border: 1pt solid #ddd; 
+        border-radius: 4pt;
+        white-space: pre-wrap;
+        margin: 12pt 0;
+    }
+    table { 
+        border-collapse: collapse; 
+        width: 100%; 
+        margin: 12pt 0;
+    }
+    th, td { 
+        border: 1pt solid #bbb; 
+        padding: 8pt 10pt; 
+        text-align: left;
+    }
+    th { background: #f0f0f0; font-weight: 600; }
+    blockquote { 
+        border-left: 3pt solid #ccc; 
+        padding-left: 12pt; 
+        margin: 12pt 0 12pt 0;
+        color: #666; 
+        font-style: italic;
+    }
+    ul, ol { margin: 6pt 0 12pt 24pt; padding: 0; }
+    li { margin: 4pt 0; }
+    a { color: #0366d6; text-decoration: underline; }
+    hr { border: none; border-top: 1pt solid #ddd; margin: 24pt 0; }
+    img { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+${content}
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'application/msword' });
+    updateExportProgress(80, 'Preparing download...');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideExportLoading();
+    showToast(`DOCX exported: ${filename}`, 'success');
+};
+
+// Export TXT with options
+let exportToTXTWithOptions = () => {
+    const wordWrap = document.getElementById('export-word-wrap')?.checked ?? true;
+    const includeFrontmatter = document.getElementById('export-frontmatter')?.checked ?? false;
+
+    showExportLoading('Converting to plain text...', 40);
+    const content = editor.getValue();
+    const title = getActiveDocTitle();
+    const today = new Date().toISOString().split('T')[0];
+
+    // Strip markdown syntax for plain text
+    let plainText = content
+        .replace(/^#{1,6}\s+(.+)/gm, (match, p1) => p1.toUpperCase())  // Convert headings to uppercase
+        .replace(/\*\*(.+?)\*\*/g, '$1')  // Remove bold
+        .replace(/\*(.+?)\*/g, '$1')  // Remove italic
+        .replace(/~~(.+?)~~/g, '$1')  // Remove strikethrough
+        .replace(/`{3}(\w*)\n([\s\S]*?)`{3}/g, (match, lang, code) => `[CODE${lang ? `: ${lang}` : ''}]\n${code}\n[/CODE]`)  // Mark code blocks
+        .replace(/`(.+?)`/g, '"$1"')  // Convert inline code to quotes
+        .replace(/\[(.+?)\]\((.+?)\)/g, '$1 ($2)')  // Convert links to text (URL)
+        .replace(/!\[(.+?)\]\(.+?\)/g, '[Image: $1]')  // Convert images to placeholder
+        .replace(/^[-*+]\s+/gm, '  • ')  // Convert bullets with indent
+        .replace(/^\d+\.\s+/gm, '  ')  // Convert numbered lists
+        .replace(/^>\s+/gm, '    ')  // Convert blockquotes to indent
+        .replace(/^---+$/gm, '\n' + '─'.repeat(50) + '\n')  // Convert horizontal rules
+        .replace(/\|(.+)\|/g, (match) => {
+            // Convert table rows
+            return match.replace(/\|/g, ' | ').replace(/^\s*\|\s*/, '').replace(/\s*\|\s*$/, '');
+        })
+        .trim();
+
+    // Apply word wrap if enabled
+    if (wordWrap) {
+        const lines = plainText.split('\n');
+        plainText = lines.map(line => {
+            if (line.length <= 80) return line;
+            const words = line.split(' ');
+            let result = '';
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length > 80) {
+                    result += currentLine.trim() + '\n';
+                    currentLine = word;
+                } else {
+                    currentLine += ' ' + word;
+                }
+            });
+            result += currentLine.trim();
+            return result;
+        }).join('\n');
+    }
+
+    // Add frontmatter if enabled
+    if (includeFrontmatter) {
+        const wordCount = plainText.split(/\s+/).filter(w => w.length > 0).length;
+        const frontmatter = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Document: ${title}
+Date: ${today}
+Words: ${wordCount}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`;
+        plainText = frontmatter + plainText;
+    }
+
+    const filename = getExportFilename('txt');
+    updateExportProgress(80, 'Preparing download...');
+    const blob = new Blob([plainText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideExportLoading();
+    showToast(`Text exported: ${filename}`, 'success');
 };
 
 // ----- import utils -----
@@ -1662,76 +3101,428 @@ let applyDarkMode = (enabled) => {
 
 // ----- settings modal -----
 
+// Settings state storage
+const SETTINGS_STORAGE_KEY = 'markdown_editor_settings';
+
+let loadSettings = () => {
+    try {
+        const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : getDefaultSettings();
+    } catch {
+        return getDefaultSettings();
+    }
+};
+
+let getDefaultSettings = () => ({
+    general: {
+        darkMode: false,
+        autoSave: true,
+        scrollSync: true
+    },
+    editor: {
+        fontFamily: 'JetBrains Mono',
+        fontSize: 14,
+        lineHeight: 1.6,
+        tabSize: 2,
+        wordWrap: true,
+        lineNumbers: true,
+        minimap: false,
+        bracketMatching: true
+    },
+    preview: {
+        livePreview: true,
+        syntaxHighlight: true,
+        mathRendering: true,
+        mermaid: true
+    },
+    theme: 'vs-dark'
+});
+
+let saveSettings = (settings) => {
+    try {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch (e) {
+        console.error('Failed to save settings:', e);
+    }
+};
+
+let currentSettings = loadSettings();
+
 let setupSettingsModal = () => {
     const settingsBtn = document.querySelector('#settings-btn');
     const modal = document.querySelector('#settings-modal');
     const overlay = document.querySelector('#settings-modal-overlay');
     const closeBtn = document.querySelector('#settings-close');
+    const saveBtn = document.querySelector('#settings-save-btn');
+    const resetBtn = document.querySelector('#settings-reset-btn');
 
+    // Tab navigation
+    const navItems = document.querySelectorAll('.settings-nav-item');
+    const tabPanels = document.querySelectorAll('.settings-tab-panel');
+
+    // Panel titles and descriptions
+    const panelInfo = {
+        general: { title: 'General Settings', desc: 'Configure your general preferences and application behavior.' },
+        editor: { title: 'Editor Settings', desc: 'Customize the code editor appearance and behavior.' },
+        preview: { title: 'Preview Settings', desc: 'Configure the markdown preview options.' },
+        themes: { title: 'Themes', desc: 'Choose your preferred color theme for the editor.' },
+        keyboard: { title: 'Keyboard Shortcuts', desc: 'View and customize keyboard shortcuts.' },
+        about: { title: 'About', desc: 'Information about Markdown Live Preview.' }
+    };
+
+    // Open modal
     if (settingsBtn && modal) {
         settingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            modal.style.display = 'block';
-            if (overlay) overlay.style.display = 'block';
+            openSettingsModal();
         });
     }
 
+    let openSettingsModal = () => {
+        modal.classList.add('active');
+        overlay.classList.add('active');
+        loadSettingsUI();
+    };
+
+    let closeSettingsModal = () => {
+        modal.classList.remove('active');
+        overlay.classList.remove('active');
+    };
+
+    // Close handlers
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            if (overlay) overlay.style.display = 'none';
-        });
+        closeBtn.addEventListener('click', closeSettingsModal);
     }
 
-    // Close on overlay click
     if (overlay) {
-        overlay.addEventListener('click', () => {
-            modal.style.display = 'none';
-            overlay.style.display = 'none';
-        });
+        overlay.addEventListener('click', closeSettingsModal);
     }
 
-    // Close on clicking outside modal
-    window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-            if (overlay) overlay.style.display = 'none';
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeSettingsModal();
         }
     });
 
-    // Setup font size selector
-    const fontSizeDropdown = document.querySelector('#font-size-dropdown');
+    // Tab switching
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const tabName = item.dataset.tab;
+
+            // Update nav active state
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+
+            // Update panel visibility
+            tabPanels.forEach(panel => {
+                panel.classList.remove('active');
+                if (panel.id === `settings-tab-${tabName}`) {
+                    panel.classList.add('active');
+                }
+            });
+
+            // Update header
+            const titleEl = document.getElementById('settings-panel-title');
+            const descEl = document.getElementById('settings-panel-description');
+            if (titleEl && panelInfo[tabName]) {
+                titleEl.textContent = panelInfo[tabName].title;
+            }
+            if (descEl && panelInfo[tabName]) {
+                descEl.textContent = panelInfo[tabName].desc;
+            }
+        });
+    });
+
+    // Load settings into UI
+    let loadSettingsUI = () => {
+        // General
+        setCheckbox('dark-mode-checkbox', document.body.classList.contains('dark-mode'));
+        setCheckbox('auto-save-checkbox', currentSettings.general.autoSave);
+        setCheckbox('sync-scroll-checkbox', currentSettings.general.scrollSync);
+
+        // Editor
+        setDropdown('font-family-dropdown', currentSettings.editor.fontFamily);
+        setDropdown('font-size-dropdown', currentSettings.editor.fontSize);
+        setDropdown('line-height-dropdown', currentSettings.editor.lineHeight);
+        setDropdown('tab-size-dropdown', currentSettings.editor.tabSize);
+        setCheckbox('word-wrap-checkbox', currentSettings.editor.wordWrap);
+        setCheckbox('line-numbers-checkbox', currentSettings.editor.lineNumbers);
+        setCheckbox('minimap-checkbox', currentSettings.editor.minimap);
+        setCheckbox('bracket-matching-checkbox', currentSettings.editor.bracketMatching);
+
+        // Preview
+        setCheckbox('live-preview-checkbox', currentSettings.preview.livePreview);
+        setCheckbox('syntax-highlight-checkbox', currentSettings.preview.syntaxHighlight);
+        setCheckbox('math-rendering-checkbox', currentSettings.preview.mathRendering);
+        setCheckbox('mermaid-checkbox', currentSettings.preview.mermaid);
+
+        // Theme
+        const themeRadios = document.querySelectorAll('input[name="editor-theme"]');
+        themeRadios.forEach(radio => {
+            radio.checked = (radio.value === currentSettings.theme);
+        });
+    };
+
+    let setCheckbox = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = value;
+    };
+
+    let setDropdown = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    };
+
+    // Setup all settings event listeners
+    setupGeneralSettings();
+    setupEditorSettings();
+    setupPreviewSettings();
+    setupThemeSettings();
+    setupKeyboardSearch();
+
+    // Save button
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            saveSettings(currentSettings);
+            showToast('Settings saved successfully!', 'success', 2000);
+            closeSettingsModal();
+        });
+    }
+
+    // Reset button
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                currentSettings = getDefaultSettings();
+                applyAllSettings();
+                loadSettingsUI();
+                saveSettings(currentSettings);
+                showToast('Settings reset to defaults', 'info', 2000);
+            }
+        });
+    }
+};
+
+let setupGeneralSettings = () => {
+    // Dark mode toggle
+    const darkModeCheckbox = document.getElementById('dark-mode-checkbox');
+    if (darkModeCheckbox) {
+        darkModeCheckbox.addEventListener('change', (e) => {
+            currentSettings.general.darkMode = e.target.checked;
+            toggleDarkMode(e.target.checked);
+        });
+    }
+
+    // Auto save toggle
+    const autoSaveCheckbox = document.getElementById('auto-save-checkbox');
+    if (autoSaveCheckbox) {
+        autoSaveCheckbox.addEventListener('change', (e) => {
+            currentSettings.general.autoSave = e.target.checked;
+            showToast(e.target.checked ? 'Auto save enabled' : 'Auto save disabled', 'info', 1500);
+        });
+    }
+
+    // Scroll sync toggle
+    const syncScrollCheckbox = document.getElementById('sync-scroll-checkbox');
+    if (syncScrollCheckbox) {
+        syncScrollCheckbox.addEventListener('change', (e) => {
+            currentSettings.general.scrollSync = e.target.checked;
+            showToast(e.target.checked ? 'Scroll sync enabled' : 'Scroll sync disabled', 'info', 1500);
+        });
+    }
+};
+
+let setupEditorSettings = () => {
+    // Font family
+    const fontFamilyDropdown = document.getElementById('font-family-dropdown');
+    if (fontFamilyDropdown) {
+        fontFamilyDropdown.addEventListener('change', (e) => {
+            currentSettings.editor.fontFamily = e.target.value;
+            editor.updateOptions({ fontFamily: e.target.value });
+            showToast(`Font: ${e.target.value}`, 'info', 1500);
+        });
+    }
+
+    // Font size
+    const fontSizeDropdown = document.getElementById('font-size-dropdown');
     if (fontSizeDropdown) {
         fontSizeDropdown.addEventListener('change', (e) => {
             const size = parseInt(e.target.value);
+            currentSettings.editor.fontSize = size;
             editor.updateOptions({ fontSize: size });
             showToast(`Font size: ${size}px`, 'info', 1500);
         });
     }
 
-    // Setup line numbers toggle
-    const lineNumbersCheckbox = document.querySelector('#line-numbers-checkbox');
+    // Line height
+    const lineHeightDropdown = document.getElementById('line-height-dropdown');
+    if (lineHeightDropdown) {
+        lineHeightDropdown.addEventListener('change', (e) => {
+            const height = parseFloat(e.target.value);
+            currentSettings.editor.lineHeight = height;
+            editor.updateOptions({ lineHeight: height * 14 }); // Monaco uses pixels
+            showToast(`Line height: ${height}`, 'info', 1500);
+        });
+    }
+
+    // Tab size
+    const tabSizeDropdown = document.getElementById('tab-size-dropdown');
+    if (tabSizeDropdown) {
+        tabSizeDropdown.addEventListener('change', (e) => {
+            const size = parseInt(e.target.value);
+            currentSettings.editor.tabSize = size;
+            editor.updateOptions({ tabSize: size });
+            showToast(`Tab size: ${size} spaces`, 'info', 1500);
+        });
+    }
+
+    // Word wrap
+    const wordWrapCheckbox = document.getElementById('word-wrap-checkbox');
+    if (wordWrapCheckbox) {
+        wordWrapCheckbox.addEventListener('change', (e) => {
+            currentSettings.editor.wordWrap = e.target.checked;
+            editor.updateOptions({ wordWrap: e.target.checked ? 'on' : 'off' });
+            showToast(e.target.checked ? 'Word wrap enabled' : 'Word wrap disabled', 'info', 1500);
+        });
+    }
+
+    // Line numbers
+    const lineNumbersCheckbox = document.getElementById('line-numbers-checkbox');
     if (lineNumbersCheckbox) {
         lineNumbersCheckbox.addEventListener('change', (e) => {
+            currentSettings.editor.lineNumbers = e.target.checked;
             editor.updateOptions({ lineNumbers: e.target.checked ? 'on' : 'off' });
             showToast(e.target.checked ? 'Line numbers enabled' : 'Line numbers disabled', 'info', 1500);
         });
     }
 
-    // Setup word wrap toggle
-    const wordWrapCheckbox = document.querySelector('#word-wrap-checkbox');
-    if (wordWrapCheckbox) {
-        wordWrapCheckbox.addEventListener('change', (e) => {
-            editor.updateOptions({ wordWrap: e.target.checked ? 'on' : 'off' });
-            showToast(e.target.checked ? 'Word wrap enabled' : 'Word wrap disabled', 'info', 1500);
+    // Minimap
+    const minimapCheckbox = document.getElementById('minimap-checkbox');
+    if (minimapCheckbox) {
+        minimapCheckbox.addEventListener('change', (e) => {
+            currentSettings.editor.minimap = e.target.checked;
+            editor.updateOptions({ minimap: { enabled: e.target.checked } });
+            showToast(e.target.checked ? 'Minimap enabled' : 'Minimap disabled', 'info', 1500);
         });
     }
+
+    // Bracket matching
+    const bracketMatchingCheckbox = document.getElementById('bracket-matching-checkbox');
+    if (bracketMatchingCheckbox) {
+        bracketMatchingCheckbox.addEventListener('change', (e) => {
+            currentSettings.editor.bracketMatching = e.target.checked;
+            editor.updateOptions({ matchBrackets: e.target.checked ? 'always' : 'never' });
+            showToast(e.target.checked ? 'Bracket matching enabled' : 'Bracket matching disabled', 'info', 1500);
+        });
+    }
+};
+
+let setupPreviewSettings = () => {
+    // Live preview
+    const livePreviewCheckbox = document.getElementById('live-preview-checkbox');
+    if (livePreviewCheckbox) {
+        livePreviewCheckbox.addEventListener('change', (e) => {
+            currentSettings.preview.livePreview = e.target.checked;
+            showToast(e.target.checked ? 'Live preview enabled' : 'Live preview disabled', 'info', 1500);
+        });
+    }
+
+    // Syntax highlighting
+    const syntaxHighlightCheckbox = document.getElementById('syntax-highlight-checkbox');
+    if (syntaxHighlightCheckbox) {
+        syntaxHighlightCheckbox.addEventListener('change', (e) => {
+            currentSettings.preview.syntaxHighlight = e.target.checked;
+            updatePreview();
+            showToast(e.target.checked ? 'Syntax highlighting enabled' : 'Syntax highlighting disabled', 'info', 1500);
+        });
+    }
+
+    // Math rendering
+    const mathRenderingCheckbox = document.getElementById('math-rendering-checkbox');
+    if (mathRenderingCheckbox) {
+        mathRenderingCheckbox.addEventListener('change', (e) => {
+            currentSettings.preview.mathRendering = e.target.checked;
+            updatePreview();
+            showToast(e.target.checked ? 'Math rendering enabled' : 'Math rendering disabled', 'info', 1500);
+        });
+    }
+
+    // Mermaid diagrams
+    const mermaidCheckbox = document.getElementById('mermaid-checkbox');
+    if (mermaidCheckbox) {
+        mermaidCheckbox.addEventListener('change', (e) => {
+            currentSettings.preview.mermaid = e.target.checked;
+            updatePreview();
+            showToast(e.target.checked ? 'Mermaid diagrams enabled' : 'Mermaid diagrams disabled', 'info', 1500);
+        });
+    }
+};
+
+let setupThemeSettings = () => {
+    const themeRadios = document.querySelectorAll('input[name="editor-theme"]');
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                const theme = e.target.value;
+                currentSettings.theme = theme;
+                currentTheme = theme;
+                applyTheme(theme);
+                saveThemeSettings(theme);
+                showToast(`Theme: ${getThemeName(theme)}`, 'success', 2000);
+            }
+        });
+    });
+};
+
+let setupKeyboardSearch = () => {
+    const searchInput = document.getElementById('shortcuts-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const shortcutItems = document.querySelectorAll('.shortcut-item');
+
+            shortcutItems.forEach(item => {
+                const action = item.querySelector('.shortcut-action');
+                if (action) {
+                    const text = action.textContent.toLowerCase();
+                    item.style.display = text.includes(query) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+};
+
+let applyAllSettings = () => {
+    // Apply dark mode
+    toggleDarkMode(currentSettings.general.darkMode);
+
+    // Apply editor settings
+    if (editor) {
+        editor.updateOptions({
+            fontFamily: currentSettings.editor.fontFamily,
+            fontSize: currentSettings.editor.fontSize,
+            lineHeight: currentSettings.editor.lineHeight * 14,
+            tabSize: currentSettings.editor.tabSize,
+            wordWrap: currentSettings.editor.wordWrap ? 'on' : 'off',
+            lineNumbers: currentSettings.editor.lineNumbers ? 'on' : 'off',
+            minimap: { enabled: currentSettings.editor.minimap },
+            matchBrackets: currentSettings.editor.bracketMatching ? 'always' : 'never'
+        });
+    }
+
+    // Apply theme
+    currentTheme = currentSettings.theme;
+    applyTheme(currentSettings.theme);
+
+    // Update preview
+    updatePreview();
 };
 
 // ----- theme switching -----
 
 let initThemeSelector = (savedTheme) => {
-    const themeDropdown = document.querySelector('#theme-dropdown');
+    const themeRadios = document.querySelectorAll('input[name="editor-theme"]');
 
     // Check for system preference if no saved theme
     if (!savedTheme) {
@@ -1740,16 +3531,14 @@ let initThemeSelector = (savedTheme) => {
     }
 
     currentTheme = savedTheme;
-    themeDropdown.value = currentTheme;
-    applyTheme(currentTheme);
+    currentSettings.theme = savedTheme;
 
-    themeDropdown.addEventListener('change', (event) => {
-        const theme = event.target.value;
-        currentTheme = theme;
-        applyTheme(theme);
-        saveThemeSettings(theme);
-        showToast(`Theme changed to ${getThemeName(theme)}`, 'success', 2000);
+    // Set the correct radio button
+    themeRadios.forEach(radio => {
+        radio.checked = (radio.value === currentTheme);
     });
+
+    applyTheme(currentTheme);
 
     // Listen for system theme changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
@@ -1758,7 +3547,10 @@ let initThemeSelector = (savedTheme) => {
         if (!userTheme) {
             const newTheme = e.matches ? 'vs-dark' : 'vs';
             currentTheme = newTheme;
-            themeDropdown.value = newTheme;
+            currentSettings.theme = newTheme;
+            themeRadios.forEach(radio => {
+                radio.checked = (radio.value === newTheme);
+            });
             applyTheme(newTheme);
             showToast(`Theme auto-switched to ${getThemeName(newTheme)}`, 'info', 2000);
         }
@@ -1843,72 +3635,113 @@ let saveThemeSettings = (theme) => {
 
 // setup navigation actions
 let setupResetButton = () => {
-    document.querySelector("#reset-button").addEventListener('click', (event) => {
-        event.preventDefault();
-        reset();
-    });
+    const btn = document.querySelector("#reset-button");
+    if (btn) {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            reset();
+        });
+    }
 };
 
 let setupCopyButton = (editor) => {
-    document.querySelector("#copy-button").addEventListener('click', (event) => {
-        event.preventDefault();
-        let value = editor.getValue();
-        copyToClipboard(value, () => {
-            notifyCopied();
-        },
-            () => {
-                // nothing to do
-            });
-    });
+    const btn = document.querySelector("#copy-button");
+    if (btn) {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            let value = editor.getValue();
+            copyToClipboard(value, () => {
+                notifyCopied();
+            },
+                () => {
+                    // nothing to do
+                });
+        });
+    }
 };
 
 let setupCopyHTMLButton = () => {
-    document.querySelector("#copy-html-button").addEventListener('click', (event) => {
-        event.preventDefault();
-        copyHTMLToClipboard();
-    });
+    const btn = document.querySelector("#copy-html-button");
+    if (btn) {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            copyHTMLToClipboard();
+        });
+    }
 };
 
 let setupDownloadButton = () => {
-    document.querySelector("#download-md-button").addEventListener('click', (event) => {
-        event.preventDefault();
-        downloadMarkdown();
-    });
+    const btn = document.querySelector("#download-md-button");
+    if (btn) {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            downloadMarkdown();
+        });
+    }
 };
 
 let setupExportPDFButton = () => {
-    document.querySelector("#export-pdf-button").addEventListener('click', (event) => {
-        event.preventDefault();
-        exportToPDF();
-    });
+    const btn = document.querySelector("#export-pdf-button");
+    if (btn) {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            exportToPDF();
+        });
+    }
 };
 
 let setupImportButton = () => {
-    document.querySelector("#import-button").addEventListener('click', (event) => {
-        event.preventDefault();
-        importFile();
-    });
+    const btn = document.querySelector("#import-button");
+    if (btn) {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            importFile();
+        });
+    }
 
-    document.querySelector("#file-input").addEventListener('change', handleFileImport);
+    const fileInput = document.querySelector("#file-input");
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileImport);
+    }
 };
 
 let setupHelpButton = () => {
     const modal = document.querySelector("#help-modal");
+    const overlay = document.querySelector("#help-modal-overlay");
     const helpBtn = document.querySelector("#help-button");
-    const closeBtn = document.querySelector(".close-modal");
+    const closeBtns = modal?.querySelectorAll(".close-modal");
 
-    helpBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        modal.style.display = "block";
+    const openModal = () => {
+        if (modal) modal.style.display = "block";
+        if (overlay) overlay.style.display = "block";
+    };
+
+    const closeModal = () => {
+        if (modal) modal.style.display = "none";
+        if (overlay) overlay.style.display = "none";
+    };
+
+    if (helpBtn) {
+        helpBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            openModal();
+        });
+    }
+
+    // All close buttons in modal
+    closeBtns?.forEach(closeBtn => {
+        closeBtn.addEventListener('click', closeModal);
     });
 
-    closeBtn.addEventListener('click', () => {
-        modal.style.display = "none";
-    });
+    // Click overlay to close
+    if (overlay) {
+        overlay.addEventListener('click', closeModal);
+    }
 
+    // Click outside modal to close
     window.addEventListener('click', (event) => {
         if (event.target === modal) {
-            modal.style.display = "none";
+            closeModal();
         }
     });
 };
@@ -1918,12 +3751,22 @@ let setupTOCButton = () => {
     const tocBtn = document.querySelector("#toc-button");
     const docOutline = document.querySelector("#doc-outline");
     const outlineClose = document.querySelector("#outline-close");
+    const tocSidebar = document.querySelector("#toc-sidebar");
 
     if (tocBtn && docOutline) {
         tocBtn.addEventListener('click', (event) => {
             event.preventDefault();
             docOutline.classList.toggle('visible');
             tocBtn.classList.toggle('active');
+
+            // Also toggle right TOC sidebar visibility
+            if (tocSidebar) {
+                if (docOutline.classList.contains('visible')) {
+                    // When showing outline, also show right sidebar if it was hidden
+                    tocSidebar.classList.remove('hidden');
+                }
+            }
+
             showToast(docOutline.classList.contains('visible') ? 'Outline shown' : 'Outline hidden', 'info', 1500);
         });
     }
@@ -1933,6 +3776,49 @@ let setupTOCButton = () => {
         outlineClose.addEventListener('click', () => {
             docOutline.classList.remove('visible');
             tocBtn?.classList.remove('active');
+        });
+    }
+
+    // Close button for right TOC sidebar
+    const tocCloseBtn = document.querySelector("#toc-close-btn");
+
+    if (tocCloseBtn && tocSidebar) {
+        tocCloseBtn.addEventListener('click', () => {
+            tocSidebar.classList.remove('visible');
+            tocSidebar.classList.add('hidden');
+            // Also hide mobile overlay
+            const mobileOverlay = document.querySelector('#mobile-toc-overlay');
+            if (mobileOverlay) mobileOverlay.classList.remove('active');
+            showToast('Table of contents hidden. Click Toggle Outline to show again.', 'info', 2500);
+        });
+    }
+
+    // Floating TOC button for mobile
+    const floatingTocBtn = document.querySelector('#floating-toc-btn');
+    const mobileOverlay = document.querySelector('#mobile-toc-overlay');
+
+    if (floatingTocBtn && tocSidebar) {
+        floatingTocBtn.addEventListener('click', () => {
+            const isVisible = tocSidebar.classList.contains('visible');
+
+            if (isVisible) {
+                tocSidebar.classList.remove('visible');
+                tocSidebar.classList.add('hidden');
+                if (mobileOverlay) mobileOverlay.classList.remove('active');
+            } else {
+                tocSidebar.classList.add('visible');
+                tocSidebar.classList.remove('hidden');
+                if (mobileOverlay) mobileOverlay.classList.add('active');
+            }
+        });
+    }
+
+    // Close TOC when clicking overlay
+    if (mobileOverlay && tocSidebar) {
+        mobileOverlay.addEventListener('click', () => {
+            tocSidebar.classList.remove('visible');
+            tocSidebar.classList.add('hidden');
+            mobileOverlay.classList.remove('active');
         });
     }
 };
@@ -1969,9 +3855,11 @@ let setupScrollSyncButton = () => {
 // ----- View Mode -----
 
 let setViewMode = (mode) => {
-    const leftPane = document.getElementById('editor-wrapper');
-    const rightPane = document.getElementById('preview-wrapper');
+    // Use the actual pane elements (same IDs as setupDivider uses)
+    const leftPane = document.getElementById('edit');      // .editor-pane
+    const rightPane = document.getElementById('preview');  // .preview-pane
     const divider = document.getElementById('split-divider');
+    const tocSidebar = document.querySelector('.right-toc-sidebar');
     const btns = {
         code: document.getElementById('view-code'),
         split: document.getElementById('view-split'),
@@ -1984,23 +3872,38 @@ let setViewMode = (mode) => {
     });
     if (btns[mode]) btns[mode].classList.add('active');
 
-    // Reset display default
-    leftPane.style.display = 'flex';
-    rightPane.style.display = 'block';
-    divider.style.display = 'block';
+    // Update body class for CSS styling
+    document.body.classList.remove('view-editor', 'view-split', 'view-preview');
+
+    // Reset ALL inline styles first (including flex from divider resizing)
+    if (leftPane) {
+        leftPane.style.display = '';
+        leftPane.style.width = '';
+        leftPane.style.flex = '';
+    }
+    if (rightPane) {
+        rightPane.style.display = '';
+        rightPane.style.width = '';
+        rightPane.style.flex = '';
+    }
+    if (divider) divider.style.display = '';
+    if (tocSidebar) tocSidebar.style.display = '';
 
     if (mode === 'code') {
-        rightPane.style.display = 'none';
-        divider.style.display = 'none';
-        leftPane.style.width = '100%';
+        document.body.classList.add('view-editor');
+        // Editor only - full width, hide preview and divider
+        if (rightPane) rightPane.style.display = 'none';
+        if (divider) divider.style.display = 'none';
+        if (tocSidebar) tocSidebar.style.display = 'none';
     } else if (mode === 'preview') {
-        leftPane.style.display = 'none';
-        divider.style.display = 'none';
-        rightPane.style.width = '100%';
+        document.body.classList.add('view-preview');
+        // Preview only - full width, hide editor and divider
+        if (leftPane) leftPane.style.display = 'none';
+        if (divider) divider.style.display = 'none';
+        // TOC sidebar stays visible in preview mode
     } else {
-        // Split
-        leftPane.style.width = '50%';
-        rightPane.style.width = '50%';
+        document.body.classList.add('view-split');
+        // Split view - let CSS handle 50/50 with flex: 1
     }
 
     // Trigger resize for Monaco
@@ -2013,10 +3916,18 @@ let setupViewButtons = () => {
     const btnCode = document.getElementById('view-code');
     const btnSplit = document.getElementById('view-split');
     const btnPreview = document.getElementById('view-preview');
+    const floatingEditBtn = document.getElementById('floating-edit-btn');
 
     if (btnCode) btnCode.addEventListener('click', () => setViewMode('code'));
     if (btnSplit) btnSplit.addEventListener('click', () => setViewMode('split'));
     if (btnPreview) btnPreview.addEventListener('click', () => setViewMode('preview'));
+
+    // Floating edit button - switches to split mode
+    if (floatingEditBtn) {
+        floatingEditBtn.addEventListener('click', () => {
+            setViewMode('split');
+        });
+    }
 };
 
 // ----- Focus Mode -----
@@ -2154,6 +4065,11 @@ let setupKeyboardShortcuts = () => {
             event.preventDefault();
             downloadMarkdown();
         }
+        // Ctrl/Cmd + Shift + P: Print document
+        else if (ctrlKey && event.shiftKey && event.key === 'p') {
+            event.preventDefault();
+            printDocument();
+        }
         // Ctrl/Cmd + P: Export PDF
         else if (ctrlKey && event.key === 'p') {
             event.preventDefault();
@@ -2163,6 +4079,11 @@ let setupKeyboardShortcuts = () => {
         else if (ctrlKey && event.key === 'o') {
             event.preventDefault();
             importFile();
+        }
+        // Ctrl/Cmd + Shift + E: Open Export Modal
+        else if (ctrlKey && event.shiftKey && event.key === 'E') {
+            event.preventDefault();
+            openExportModal();
         }
         // Ctrl/Cmd + H: Show/Hide help
         else if (ctrlKey && event.key === 'h') {
@@ -2622,8 +4543,24 @@ let setupDivider = () => {
     const leftPane = document.getElementById('edit');
     const rightPane = document.getElementById('preview');
     const container = document.getElementById('container');
+    const outline = document.getElementById('doc-outline');
+
+    if (!divider || !leftPane || !rightPane || !container) return;
 
     let isDragging = false;
+
+    // Helper to calculate available width (excluding outline sidebar)
+    const getAvailableWidth = () => {
+        const containerRect = container.getBoundingClientRect();
+        const outlineWidth = outline && outline.classList.contains('visible') ? outline.offsetWidth : 0;
+        const dividerWidth = divider.offsetWidth || 8;
+        return containerRect.width - outlineWidth - dividerWidth;
+    };
+
+    // Helper to get outline offset
+    const getOutlineOffset = () => {
+        return outline && outline.classList.contains('visible') ? outline.offsetWidth : 0;
+    };
 
     divider.addEventListener('mouseenter', () => {
         divider.classList.add('hover');
@@ -2635,37 +4572,51 @@ let setupDivider = () => {
         }
     });
 
-    divider.addEventListener('mousedown', () => {
+    divider.addEventListener('mousedown', (e) => {
+        e.preventDefault();
         isDragging = true;
         divider.classList.add('active');
         document.body.style.cursor = 'col-resize';
+        document.body.classList.add('resizing');
     });
 
     divider.addEventListener('dblclick', () => {
-        const containerRect = container.getBoundingClientRect();
-        const totalWidth = containerRect.width;
-        const dividerWidth = divider.offsetWidth;
-        const halfWidth = (totalWidth - dividerWidth) / 2;
-
+        // Reset to 50/50 split
+        const availableWidth = getAvailableWidth();
+        const halfWidth = availableWidth / 2;
+        leftPane.style.flex = 'none';
+        rightPane.style.flex = 'none';
         leftPane.style.width = halfWidth + 'px';
         rightPane.style.width = halfWidth + 'px';
+        lastLeftRatio = 0.5;
     });
 
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        document.body.style.userSelect = 'none';
-        const containerRect = container.getBoundingClientRect();
-        const totalWidth = containerRect.width;
-        const offsetX = e.clientX - containerRect.left;
-        const dividerWidth = divider.offsetWidth;
+        e.preventDefault();
 
-        // Prevent overlap or out-of-bounds
-        const minWidth = 100;
-        const maxWidth = totalWidth - minWidth - dividerWidth;
-        const leftWidth = Math.max(minWidth, Math.min(offsetX, maxWidth));
+        const containerRect = container.getBoundingClientRect();
+        const outlineOffset = getOutlineOffset();
+        const dividerWidth = divider.offsetWidth || 8;
+
+        // Calculate mouse position relative to available space
+        const offsetX = e.clientX - containerRect.left - outlineOffset;
+        const availableWidth = getAvailableWidth();
+
+        // Set min/max widths
+        const minWidth = 200;
+        const maxWidth = availableWidth - minWidth;
+
+        let leftWidth = Math.max(minWidth, Math.min(offsetX, maxWidth));
+        let rightWidth = availableWidth - leftWidth;
+
+        // Set flex to none and use explicit widths
+        leftPane.style.flex = 'none';
+        rightPane.style.flex = 'none';
         leftPane.style.width = leftWidth + 'px';
-        rightPane.style.width = (totalWidth - leftWidth - dividerWidth) + 'px';
-        lastLeftRatio = leftWidth / (totalWidth - dividerWidth);
+        rightPane.style.width = rightWidth + 'px';
+
+        lastLeftRatio = leftWidth / availableWidth;
     });
 
     document.addEventListener('mouseup', () => {
@@ -2674,73 +4625,165 @@ let setupDivider = () => {
             divider.classList.remove('active');
             divider.classList.remove('hover');
             document.body.style.cursor = 'default';
-            document.body.style.userSelect = '';
+            document.body.classList.remove('resizing');
         }
     });
 
     window.addEventListener('resize', () => {
-        const containerRect = container.getBoundingClientRect();
-        const totalWidth = containerRect.width;
-        const dividerWidth = divider.offsetWidth;
-        const availableWidth = totalWidth - dividerWidth;
+        if (isDragging) return; // Don't resize during drag
+        // Only resize in split mode
+        if (!document.body.classList.contains('view-split')) return;
+
+        const availableWidth = getAvailableWidth();
+        if (availableWidth <= 0) return;
 
         const newLeft = availableWidth * lastLeftRatio;
         const newRight = availableWidth * (1 - lastLeftRatio);
 
+        leftPane.style.flex = 'none';
+        rightPane.style.flex = 'none';
         leftPane.style.width = newLeft + 'px';
         rightPane.style.width = newRight + 'px';
+    });
+
+    // Initialize with 50/50 split - only if in split mode
+    setTimeout(() => {
+        // Only set dimensions if in split mode
+        if (!document.body.classList.contains('view-split')) return;
+
+        const availableWidth = getAvailableWidth();
+        if (availableWidth > 0) {
+            const halfWidth = availableWidth / 2;
+            leftPane.style.flex = 'none';
+            rightPane.style.flex = 'none';
+            leftPane.style.width = halfWidth + 'px';
+            rightPane.style.width = halfWidth + 'px';
+        }
+    }, 100);
+};
+
+// ----- Global Escape Key Handler -----
+let setupGlobalEscapeKey = () => {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            let closed = false;
+
+            // Close all modals
+            const modals = [
+                { modal: '#stats-modal', overlay: '#stats-modal-overlay' },
+                { modal: '#help-modal', overlay: '#help-modal-overlay' },
+                { modal: '#goals-modal', overlay: '#goals-modal-overlay' },
+                { modal: '#templates-modal', overlay: '#templates-modal-overlay' },
+                { modal: '#settings-modal', overlay: '#settings-modal-overlay' }
+            ];
+
+            modals.forEach(({ modal, overlay }) => {
+                const modalEl = document.querySelector(modal);
+                const overlayEl = document.querySelector(overlay);
+                if (modalEl && modalEl.style.display === 'block') {
+                    modalEl.style.display = 'none';
+                    if (overlayEl) overlayEl.style.display = 'none';
+                    closed = true;
+                }
+            });
+
+            // Close floating panels
+            const panels = ['#lint-panel', '#toc-panel', '#snippets-dropdown'];
+            panels.forEach(panelId => {
+                const panel = document.querySelector(panelId);
+                if (panel && !panel.classList.contains('hidden')) {
+                    panel.classList.add('hidden');
+                    // Also update button active state
+                    if (panelId === '#lint-panel') {
+                        document.querySelector('#lint-button')?.classList.remove('active');
+                    }
+                    closed = true;
+                }
+            });
+
+            // Close search overlay
+            const searchOverlay = document.querySelector('#search-overlay');
+            if (searchOverlay && !searchOverlay.classList.contains('hidden')) {
+                searchOverlay.classList.add('hidden');
+                closed = true;
+            }
+
+            // Close mobile drawer
+            const mobileDrawer = document.querySelector('#mobile-nav-drawer');
+            const mobileOverlay = document.querySelector('#mobile-nav-overlay');
+            if (mobileDrawer && mobileDrawer.classList.contains('open')) {
+                mobileDrawer.classList.remove('open');
+                mobileOverlay?.classList.remove('active');
+                closed = true;
+            }
+
+            // Close export dropdown
+            const exportDropdown = document.querySelector('#export-dropdown-wrapper');
+            if (exportDropdown?.classList.contains('open')) {
+                exportDropdown.classList.remove('open');
+                closed = true;
+            }
+
+            if (closed) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
     });
 };
 
 // ----- entry point -----
-// Define custom Monaco themes first
-defineCustomThemes();
+const initializeApp = () => {
+    // Define custom Monaco themes first
+    defineCustomThemes();
 
-let lastContent = loadLastContent();
-let editor = setupEditor();
-if (lastContent) {
-    presetValue(lastContent);
-} else {
-    presetValue(defaultInput);
-}
+    let lastContent = loadLastContent();
+    editor = setupEditor();
+    if (lastContent) {
+        presetValue(lastContent);
+    } else {
+        presetValue(defaultInput);
+    }
 
-// Initialize UI components
-setupToolbar();
-setupResetButton();
-setupCopyButton(editor);
-setupCopyHTMLButton();
-setupDownloadButton();
-setupExportPDFButton();
-setupAdditionalExportButtons();
-setupImportButton();
-setupImageUpload();
-setupHelpButton();
-setupStatsButton();
-setupTemplatesButton();
-setupSnippetsButton();
-setupTOCButton();
-setupScrollSyncButton();
-setupFocusMode();
-setupTypewriterButton();
-setupFullscreenButton();
-setupViewButtons(); initTabs(); setupSearch(); setupLinter(); setupGoals();
-setupKeyboardShortcuts();
+    // Initialize UI components
+    setupToolbar();
+    setupResetButton();
+    setupCopyButton(editor);
+    setupCopyHTMLButton();
+    setupDownloadButton();
+    setupExportPDFButton();
+    setupAdditionalExportButtons();
+    setupImportButton();
+    setupImageUpload();
+    setupHelpButton();
+    setupStatsButton();
+    setupTemplatesButton();
+    setupSnippetsButton();
+    setupTOCButton();
+    setupScrollSyncButton();
+    setupFocusMode();
+    setupTypewriterButton();
+    setupFullscreenButton();
+    setupViewButtons(); initTabs(); setupSearch(); setupLinter(); setupGoals();
+    setupKeyboardShortcuts();
+    setupGlobalEscapeKey();
 
-let scrollBarSettings = loadScrollBarSettings() || false;
-initScrollBarSync(scrollBarSettings);
+    let scrollBarSettings = loadScrollBarSettings() || false;
+    initScrollBarSync(scrollBarSettings);
 
-let themeSettings = loadThemeSettings() || 'vs';
-initThemeSelector(themeSettings);
+    let themeSettings = loadThemeSettings() || 'vs';
+    initThemeSelector(themeSettings);
 
-let darkModeSettings = loadDarkModeSettings() || false;
-initDarkMode(darkModeSettings);
+    let darkModeSettings = loadDarkModeSettings() || false;
+    initDarkMode(darkModeSettings);
 
-setupSettingsModal();
-setupDivider();
-setupMobileUI();
+    setupSettingsModal();
+    setupDivider();
+    setupMobileUI();
+    setupExportModal();
 
-// Initialize stats with current content
-updateStats(editor.getValue());
+    // Initialize stats with current content
+    updateStats(editor.getValue());
 };
 
 // ----- PWA Support -----
@@ -2780,5 +4823,5 @@ if ('serviceWorker' in navigator) {
 }
 
 window.addEventListener("load", () => {
-    init();
+    initializeApp();
 });

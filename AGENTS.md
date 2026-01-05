@@ -1,39 +1,101 @@
 # AGENTS.md
 
+> Configuration file for AI coding agents working on this project.
+
 ## Commands
-- **Dev server**: `npm run dev` (Vite dev server)
-- **Build**: `npm run build` (production build to dist/)
-- **Preview**: `npm run preview` (preview production build)
-- **Tests**: No test framework configured
+
+| Command | Description |
+|---------|-------------|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start Vite dev server (http://localhost:5173) |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Preview production build |
 
 ## Architecture
-- **Frontend-only** Vite + vanilla JavaScript application
-- **Entry point**: `src/main.js` or `src/main.modular.js` (new modular architecture)
-- **App orchestrator**: `src/app.js` - coordinates all modules
-- **Key libraries**: Monaco Editor (code editor), Marked (markdown parser), Mermaid (diagrams), KaTeX (math), Prism.js (syntax highlighting), DOMPurify (sanitization)
-- **Storage**: localStorage via custom StorageService for document persistence
-- **Styling**: GitHub Markdown CSS, custom styles in `public/`
 
-## Modular Structure
+**Frontend-only** Vite + vanilla JavaScript application.
+
+### Entry Points
+- `index.html` — Main HTML file
+- `src/main.js` — Primary JavaScript entry point
+
+### Key Libraries
+| Library | Purpose |
+|---------|---------|
+| Monaco Editor | Code editor (VS Code's editor) |
+| Marked | Markdown parser |
+| Mermaid | Diagram rendering |
+| KaTeX | Math equation rendering |
+| Prism.js | Syntax highlighting |
+| DOMPurify | XSS sanitization |
+| html2pdf.js | PDF export |
+
+### Storage
+- LocalStorage for document persistence
+- Settings stored under `markdown_editor_settings` key
+
+## Project Structure
+
 ```
 src/
-├── app.js              # App orchestrator
-├── main.modular.js     # New modular entry point
+├── main.js             # Main entry point
 ├── config/             # Configuration files
-├── utils/              # Utility functions (EventBus, debounce, DOM helpers)
-├── core/               # Core services (editor, markdown, storage)
-├── ui/                 # UI components (toast, modal, theme)
-├── features/           # Feature modules (tabs, goals, stats, linter, toc, search, templates, snippets, toolbar, modes)
-└── services/           # Services (export, shortcuts)
+│   ├── app.config.js   # App settings & feature flags
+│   ├── default-content.js
+│   ├── snippets.js
+│   └── templates.js
+├── core/               # Core services
+│   ├── editor/         # Monaco editor setup
+│   ├── markdown/       # Markdown parser config
+│   └── storage/        # LocalStorage service
+├── features/           # Feature modules
+│   ├── tabs/           # Multi-tab support
+│   ├── toc/            # Table of contents
+│   ├── goals/          # Writing goals
+│   ├── stats/          # Word/char statistics
+│   ├── linter/         # Markdown linting
+│   ├── search/         # Search in preview
+│   ├── templates/      # Document templates
+│   ├── snippets/       # Text snippets
+│   ├── toolbar/        # Formatting toolbar
+│   ├── modes/          # Editor modes
+│   ├── focus/          # Focus mode
+│   ├── typewriter/     # Typewriter mode
+│   ├── fullscreen/     # Fullscreen mode
+│   ├── divider/        # Resizable divider
+│   ├── image-upload/   # Image handling
+│   ├── import/         # File import
+│   └── mobile/         # Mobile optimizations
+├── services/           # Application services
+│   ├── export/         # Export (PDF, HTML, MD, DOCX)
+│   ├── pwa/            # PWA service worker
+│   └── shortcuts/      # Keyboard shortcuts
+├── ui/                 # UI components
+│   ├── toast/          # Notifications
+│   ├── modal/          # Modal dialogs
+│   ├── theme/          # Theme management
+│   └── autosave/       # Autosave indicator
+└── utils/              # Utility functions
+    ├── eventBus.js     # Event system
+    ├── debounce.js     # Debounce utility
+    ├── dom.js          # DOM helpers
+    ├── clipboard.js    # Clipboard helpers
+    ├── file.js         # File utilities
+    └── scroll-sync.js  # Scroll synchronization
 ```
 
 ## Code Style
-- Vanilla JavaScript (no TypeScript)
-- ES modules with named imports
-- Singleton pattern for services and managers
-- Event-driven communication via EventBus
-- DOM manipulation via `document.querySelector`
-- LocalStorage keys namespaced under `com.markdownlivepreview`
-- Config centralized in `src/config/` directory
-- Feature flags in `src/config/app.config.js`
-- Prefer semicolons for consistency
+
+- **Language**: Vanilla JavaScript (ES6+)
+- **Modules**: ES modules with named imports
+- **Pattern**: Singleton services, event-driven communication
+- **DOM**: `document.querySelector` for DOM access
+- **Formatting**: Semicolons required, consistent indentation
+
+## Deployment
+
+Optimized for **Vercel** deployment:
+- `vercel.json` — Deployment configuration
+- Framework: Vite
+- Build: `npm run build`
+- Output: `dist/`

@@ -1,33 +1,44 @@
 {
   "name": "markdown-live-preview",
-  "version": "1.0.0",
-  "description": "[Markdown Live Preview](https://markdownlivepreview.com/) is a tiny web tool to preview Markdown formatted text.",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "A powerful, feature-rich markdown editor with live preview, Monaco editor, and premium UI",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "http-server public",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "echo 'No linter configured'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tanabe/markdown-live-preview.git"
+    "url": "git+https://github.com/Nir-Bhay/markdown-live-preview.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "markdown",
+    "editor",
+    "live-preview",
+    "monaco-editor",
+    "mermaid",
+    "katex",
+    "gfm",
+    "github-flavored-markdown"
+  ],
+  "author": "Nir-Bhay",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tanabe/markdown-live-preview/issues"
+    "url": "https://github.com/Nir-Bhay/markdown-live-preview/issues"
   },
-  "homepage": "https://github.com/tanabe/markdown-live-preview#readme",
+  "homepage": "https://markdownlivepreview.com",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
-    "http-server": "^14.1.1",
     "vite": "^6.3.6"
   },
   "dependencies": {
     "dompurify": "^3.2.5",
     "github-markdown-css": "^5.8.1",
+    "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.12.1",
     "katex": "^0.16.27",
     "markdownlint": "^0.40.0",

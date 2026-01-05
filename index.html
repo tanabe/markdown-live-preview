@@ -18,6 +18,9 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+    <!-- Material Symbols for Export Modal -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
 
     <!-- Styles -->
     <link rel="stylesheet" href="/css/premium-ui.css">
@@ -60,30 +63,35 @@
         <!-- Actions -->
         <div class="header-actions">
             <!-- Search -->
-            <button class="header-btn icon-only" id="search-btn" title="Search (Ctrl+F)">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
+            <button class="header-btn icon-with-label" id="search-btn" title="Search (Ctrl+F)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
+                <span class="btn-label">Search</span>
             </button>
 
             <!-- Import -->
-            <button class="header-btn icon-only" id="import-button" title="Import File">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z" />
-                    <path
-                        d="M7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z" />
+            <button class="header-btn icon-with-label" id="import-button" title="Import File">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
+                <span class="btn-label">Upload</span>
             </button>
 
             <!-- Help -->
-            <button class="header-btn icon-only" id="help-button" title="Help (Ctrl+H)">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z" />
-                    <path
-                        d="M5.255 5.786a.237.237 0 00.241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 00.25.246h.811a.25.25 0 00.25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z" />
+            <button class="header-btn icon-with-label" id="help-button" title="Help (Ctrl+H)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
+                <span class="btn-label">Help</span>
             </button>
 
             <!-- View Mode Toggle -->
@@ -95,100 +103,48 @@
             </div>
 
             <!-- Theme Toggle -->
-            <button class="header-btn icon-only" id="dark-mode-toggle" title="Toggle theme">
-                <svg class="icon-sun" width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M8 11a3 3 0 100-6 3 3 0 000 6zm0 1a4 4 0 110-8 4 4 0 010 8zM8 0a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2A.5.5 0 018 0zm0 13a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2A.5.5 0 018 13zm8-5a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM3 8a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2A.5.5 0 013 8zm10.657-5.657a.5.5 0 010 .707l-1.414 1.415a.5.5 0 11-.707-.708l1.414-1.414a.5.5 0 01.707 0zm-9.193 9.193a.5.5 0 010 .707L3.05 13.657a.5.5 0 01-.707-.707l1.414-1.414a.5.5 0 01.707 0zm9.193 2.121a.5.5 0 01-.707 0l-1.414-1.414a.5.5 0 01.707-.707l1.414 1.414a.5.5 0 010 .707zM4.464 4.465a.5.5 0 01-.707 0L2.343 3.05a.5.5 0 11.707-.707l1.414 1.414a.5.5 0 010 .708z" />
+            <button class="header-btn icon-with-label" id="dark-mode-toggle" title="Toggle theme">
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
-                <svg class="icon-moon" width="18" height="18" viewBox="0 0 16 16" fill="currentColor"
-                    style="display:none;">
-                    <path
-                        d="M6 .278a.768.768 0 01.08.858 7.208 7.208 0 00-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 01.81.316.733.733 0 01-.031.893A8.349 8.349 0 018.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 016 .278z" />
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
+                <span class="btn-label">Theme</span>
             </button>
 
             <!-- Settings -->
-            <button class="header-btn icon-only" id="settings-btn" title="Settings">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <button class="header-btn icon-with-label" id="settings-btn" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
                     <path
-                        d="M8 4.754a3.246 3.246 0 100 6.492 3.246 3.246 0 000-6.492zM5.754 8a2.246 2.246 0 114.492 0 2.246 2.246 0 01-4.492 0z" />
-                    <path
-                        d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 01-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 01-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 01.52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 011.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 011.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 01.52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 01-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 01-1.255-.52l-.094-.319z" />
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
                 </svg>
+                <span class="btn-label">Settings</span>
             </button>
 
             <!-- Export -->
-            <div class="dropdown" id="export-dropdown-wrapper">
-                <button class="header-btn primary" id="export-btn">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path
-                            d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z" />
-                        <path
-                            d="M7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z" />
-                    </svg>
-                    <span>Export</span>
-                </button>
-                <div class="dropdown-menu" id="export-dropdown">
-                    <button class="dropdown-item" id="download-md-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5z" />
-                        </svg>
-                        Download Markdown
-                    </button>
-                    <button class="dropdown-item" id="export-pdf-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M14 14V4.5L9.5 0H4a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2z" />
-                        </svg>
-                        Export as PDF
-                    </button>
-                    <button class="dropdown-item" id="export-html-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M5.854 4.854a.5.5 0 10-.708-.708l-3.5 3.5a.5.5 0 000 .708l3.5 3.5a.5.5 0 00.708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 01.708-.708l3.5 3.5a.5.5 0 010 .708l-3.5 3.5a.5.5 0 01-.708-.708L13.293 8l-3.147-3.146z" />
-                        </svg>
-                        Export as HTML
-                    </button>
-                    <button class="dropdown-item" id="export-docx-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z" />
-                        </svg>
-                        Export as DOCX
-                    </button>
-                    <div class="dropdown-divider"></div>
-                    <button class="dropdown-item" id="copy-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" />
-                            <path
-                                d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" />
-                        </svg>
-                        Copy Markdown
-                    </button>
-                    <button class="dropdown-item" id="copy-html-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" />
-                            <path
-                                d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" />
-                        </svg>
-                        Copy as HTML
-                    </button>
-                    <div class="dropdown-divider"></div>
-                    <button class="dropdown-item danger" id="reset-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M11.534 7h3.932a.25.25 0 01.192.41l-1.966 2.36a.25.25 0 01-.384 0l-1.966-2.36a.25.25 0 01.192-.41zm-11 2h3.932a.25.25 0 00.192-.41L2.692 6.23a.25.25 0 00-.384 0L.342 8.59A.25.25 0 00.534 9z" />
-                            <path fill-rule="evenodd"
-                                d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 11-.771-.636A6.002 6.002 0 0113.917 7H12.9A5.002 5.002 0 008 3zM3.1 9a5.002 5.002 0 008.757 2.182.5.5 0 11.771.636A6.002 6.002 0 012.083 9H3.1z" />
-                        </svg>
-                        Reset Document
-                    </button>
-                </div>
-            </div>
-
-            <!-- User Avatar -->
-            <div class="header-avatar" id="user-avatar"></div>
+            <button class="header-btn primary icon-with-label" id="export-btn" title="Export Document (Ctrl+Shift+E)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span class="btn-label">Export</span>
+            </button>
         </div>
     </header>
 
@@ -319,39 +275,52 @@
 
         <!-- Tools -->
         <div class="toolbar-group">
+            <!-- Emoji -->
             <button class="toolbar-btn" id="toolbar-emoji" title="Insert Emoji" aria-label="Insert Emoji">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z" />
-                    <path
-                        d="M4.285 9.567a.5.5 0 01.683.183A3.498 3.498 0 008 11.5a3.498 3.498 0 003.032-1.75.5.5 0 11.866.5A4.498 4.498 0 018 12.5a4.498 4.498 0 01-3.898-2.25.5.5 0 01.183-.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
                 </svg>
             </button>
-            <button class="toolbar-btn" id="toc-button" title="Toggle Outline (Table of Contents)"
-                aria-label="Toggle Outline">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M2 2.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2 2a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm0 2a.5.5 0 01.5-.5h6a.5.5 0 010 1h-6a.5.5 0 01-.5-.5zm0 2a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5zm-2 2a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2 2a.5.5 0 01.5-.5h6a.5.5 0 010 1h-6a.5.5 0 01-.5-.5z" />
+            <!-- Table of Contents -->
+            <button class="toolbar-btn" id="toc-button" title="Table of Contents" aria-label="Toggle Outline">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
                 </svg>
             </button>
-            <button class="toolbar-btn" id="scroll-sync-button" title="Toggle Scroll Sync"
-                aria-label="Toggle Scroll Sync">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M11.534 7h3.932a.25.25 0 01.192.41l-1.966 2.36a.25.25 0 01-.384 0l-1.966-2.36a.25.25 0 01.192-.41zm-11 2h3.932a.25.25 0 00.192-.41L2.692 6.23a.25.25 0 00-.384 0L.342 8.59A.25.25 0 00.534 9z" />
-                    <path fill-rule="evenodd"
-                        d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 11-.771-.636A6.002 6.002 0 0113.917 7H12.9A5.002 5.002 0 008 3zM3.1 9a5.002 5.002 0 008.757 2.182.5.5 0 11.771.636A6.002 6.002 0 012.083 9H3.1z" />
+            <!-- Scroll Sync -->
+            <button class="toolbar-btn" id="scroll-sync-button" title="Scroll Sync" aria-label="Toggle Scroll Sync">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                    <polyline points="7 23 3 19 7 15"></polyline>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
                 </svg>
             </button>
-            <button class="toolbar-btn" id="lint-button" title="Lint Document" aria-label="Lint Document">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M10.97 4.97a.75.75 0 011.07 1.05l-3.99 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z" />
+            <!-- Spell Check / Lint -->
+            <button class="toolbar-btn" id="lint-button" title="Check Spelling" aria-label="Lint Document">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
             </button>
+            <!-- Statistics -->
             <button class="toolbar-btn" id="stats-button" title="Statistics" aria-label="Statistics">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2zm-2-1a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1V2a1 1 0 00-1-1h-2zM6 7a1 1 0 011-1h2a1 1 0 011 1v7a1 1 0 01-1 1H7a1 1 0 01-1-1V7zm-5 4a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 01-1 1H2a1 1 0 01-1-1v-3z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
                 </svg>
             </button>
         </div>
@@ -360,21 +329,28 @@
 
         <!-- Mode Tools -->
         <div class="toolbar-group">
+            <!-- Focus Mode -->
             <button class="toolbar-btn" id="focus-button" title="Focus Mode" aria-label="Focus Mode">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M2 2v4.5H.5V1.5a.5.5 0 01.5-.5h5v1.5H2zm12 0h-4.5V.5h5.5a.5.5 0 01.5.5v5H14V2zM.5 10v5.5a.5.5 0 00.5.5h5v-1.5H2V10H.5zm13.5 4.5V10H15.5v5.5a.5.5 0 01-.5.5h-5v-1.5H14z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 3h4M3 5v4M19 3h-4M21 5v4M5 21h4M3 19v-4M19 21h-4M21 19v-4"></path>
                 </svg>
             </button>
+            <!-- Typewriter Mode -->
             <button class="toolbar-btn" id="typewriter-button" title="Typewriter Mode" aria-label="Typewriter Mode">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M0 10a1 1 0 011-1h14a1 1 0 110 2H1a1 1 0 01-1-1z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
                 </svg>
             </button>
+            <!-- Fullscreen -->
             <button class="toolbar-btn" id="fullscreen-button" title="Fullscreen" aria-label="Fullscreen">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M1.5 1a.5.5 0 00-.5.5v4a.5.5 0 01-1 0v-4A1.5 1.5 0 011.5 0h4a.5.5 0 010 1h-4zM10 .5a.5.5 0 01.5-.5h4A1.5 1.5 0 0116 1.5v4a.5.5 0 01-1 0v-4a.5.5 0 00-.5-.5h-4a.5.5 0 01-.5-.5zM.5 10a.5.5 0 01.5.5v4a.5.5 0 00.5.5h4a.5.5 0 010 1h-4A1.5 1.5 0 010 14.5v-4a.5.5 0 01.5-.5zm15 0a.5.5 0 01.5.5v4a1.5 1.5 0 01-1.5 1.5h-4a.5.5 0 010-1h4a.5.5 0 00.5-.5v-4a.5.5 0 01.5-.5z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
                 </svg>
             </button>
         </div>
@@ -383,18 +359,23 @@
 
         <!-- Templates & Snippets -->
         <div class="toolbar-group">
+            <!-- Templates -->
             <button class="toolbar-btn" id="templates-button" title="Templates" aria-label="Templates">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z" />
-                    <path
-                        d="M4.5 12.5A.5.5 0 015 12h3a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 10h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm1.639-3.708l1.33.886 1.854-1.855a.25.25 0 01.289-.047l1.888.974V7.5a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V7s1.54-1.274 1.639-1.208zM6.25 6a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
             </button>
+            <!-- Writing Goals -->
             <button class="toolbar-btn" id="goals-button" title="Writing Goals" aria-label="Writing Goals">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z" />
-                    <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
             </button>
         </div>
@@ -459,8 +440,16 @@
             </div>
 
             <!-- TOC Sidebar (Right) -->
-            <aside class="toc-sidebar hidden" id="toc-sidebar">
-                <div class="toc-section-title">ON THIS PAGE</div>
+            <aside class="toc-sidebar" id="toc-sidebar">
+                <div class="toc-header">
+                    <div class="toc-section-title">ON THIS PAGE</div>
+                    <button class="toc-close-btn" id="toc-close-btn" title="Hide table of contents">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <path
+                                d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+                        </svg>
+                    </button>
+                </div>
                 <nav id="toc-content">
                     <ul class="toc-list" id="toc-list">
                         <!-- Generated by JS -->
@@ -468,6 +457,26 @@
                 </nav>
             </aside>
         </section>
+
+        <!-- Floating Edit Button (visible in preview mode) -->
+        <button class="floating-edit-btn" id="floating-edit-btn" title="Switch to Edit mode">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M12.854.146a.5.5 0 00-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 000-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 016 13.5V13h-.5a.5.5 0 01-.5-.5V12h-.5a.5.5 0 01-.5-.5V11h-.5a.5.5 0 01-.5-.5V10h-.5a.499.499 0 01-.175-.032l-.179.178a.5.5 0 00-.11.168l-2 5a.5.5 0 00.65.65l5-2a.5.5 0 00.168-.11l.178-.178z" />
+            </svg>
+            <span>Edit</span>
+        </button>
+
+        <!-- Floating TOC Button (mobile only - visible in preview mode) -->
+        <button class="floating-toc-btn" id="floating-toc-btn" title="Table of Contents">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M2 2.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5V3a.5.5 0 00-.5-.5H2zM2 6.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5V7a.5.5 0 00-.5-.5H2zM1.5 11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5H2a.5.5 0 01-.5-.5v-1zM5 3a.5.5 0 000 1h9a.5.5 0 000-1H5zM5 7a.5.5 0 000 1h9a.5.5 0 000-1H5zM5 11a.5.5 0 000 1h9a.5.5 0 000-1H5z" />
+            </svg>
+        </button>
+
+        <!-- Mobile TOC Overlay -->
+        <div class="mobile-toc-overlay" id="mobile-toc-overlay"></div>
     </main>
 
     <!-- ==================== STATUS BAR ==================== -->
@@ -550,84 +559,511 @@
 
     <!-- ==================== MODALS ==================== -->
 
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settings-modal-overlay"></div>
-    <div class="modal" id="settings-modal">
-        <div class="modal-header">
-            <h2 class="modal-title">Settings</h2>
-            <button class="modal-close" id="settings-close" aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
-                </svg>
-            </button>
+    <!-- Premium Settings Modal -->
+    <div class="settings-modal-overlay" id="settings-modal-overlay"></div>
+    <div class="settings-modal" id="settings-modal">
+        <!-- Settings Sidebar -->
+        <div class="settings-sidebar">
+            <div class="settings-sidebar-header">
+                <div class="settings-app-icon"></div>
+                <div class="settings-app-info">
+                    <span class="settings-app-title">Settings</span>
+                    <span class="settings-app-subtitle">Markdown Pro</span>
+                </div>
+            </div>
+            <nav class="settings-nav">
+                <button class="settings-nav-item active" data-tab="general">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>General</span>
+                </button>
+                <button class="settings-nav-item" data-tab="editor">
+                    <span class="material-symbols-outlined">edit_note</span>
+                    <span>Editor</span>
+                </button>
+                <button class="settings-nav-item" data-tab="preview">
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span>Preview</span>
+                </button>
+                <button class="settings-nav-item" data-tab="themes">
+                    <span class="material-symbols-outlined">palette</span>
+                    <span>Themes</span>
+                </button>
+                <button class="settings-nav-item" data-tab="keyboard">
+                    <span class="material-symbols-outlined">keyboard</span>
+                    <span>Keyboard</span>
+                </button>
+                <button class="settings-nav-item" data-tab="about">
+                    <span class="material-symbols-outlined">info</span>
+                    <span>About</span>
+                </button>
+            </nav>
         </div>
-        <div class="modal-body">
-            <div class="settings-section">
-                <h3 class="settings-title">Appearance</h3>
-                <div class="settings-item">
-                    <label>Dark Mode</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="dark-mode-checkbox">
-                        <span class="toggle-slider"></span>
-                    </label>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+            <div class="settings-content-header">
+                <div class="settings-content-title">
+                    <h2 id="settings-panel-title">General Settings</h2>
+                    <p id="settings-panel-description">Configure your general preferences and application behavior.</p>
                 </div>
-                <div class="settings-item">
-                    <label for="theme-dropdown">Editor Theme</label>
-                    <select id="theme-dropdown" class="settings-select">
-                        <option value="vs">VS Light</option>
-                        <option value="vs-dark">VS Dark</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="github-light">GitHub Light</option>
-                        <option value="github-dark">GitHub Dark</option>
-                        <option value="solarized-light">Solarized Light</option>
-                        <option value="solarized-dark">Solarized Dark</option>
-                    </select>
+                <button class="settings-close-btn" id="settings-close" aria-label="Close settings">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="settings-content-body custom-scrollbar">
+                <!-- General Tab -->
+                <div class="settings-tab-panel active" id="settings-tab-general">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">dark_mode</span>
+                            Appearance
+                        </h3>
+                        <div class="settings-group">
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Dark Mode</span>
+                                    <span class="settings-toggle-desc">Switch between light and dark interface</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="dark-mode-checkbox">
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Auto Save</span>
+                                    <span class="settings-toggle-desc">Automatically save your work</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="auto-save-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Scroll Sync</span>
+                                    <span class="settings-toggle-desc">Synchronize editor and preview scroll</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="sync-scroll-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Editor Tab -->
+                <div class="settings-tab-panel" id="settings-tab-editor">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">text_fields</span>
+                            Typography
+                        </h3>
+                        <div class="settings-grid">
+                            <div class="settings-field">
+                                <label class="settings-field-label">Font Family</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="font-family-dropdown" class="settings-select">
+                                        <option value="JetBrains Mono" selected>JetBrains Mono</option>
+                                        <option value="Fira Code">Fira Code</option>
+                                        <option value="Consolas">Consolas</option>
+                                        <option value="Monaco">Monaco</option>
+                                        <option value="Source Code Pro">Source Code Pro</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="settings-field-label">Font Size</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="font-size-dropdown" class="settings-select">
+                                        <option value="12">12px</option>
+                                        <option value="14" selected>14px</option>
+                                        <option value="16">16px</option>
+                                        <option value="18">18px</option>
+                                        <option value="20">20px</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="settings-field-label">Line Height</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="line-height-dropdown" class="settings-select">
+                                        <option value="1.2">1.2 (Compact)</option>
+                                        <option value="1.4">1.4 (Standard)</option>
+                                        <option value="1.6" selected>1.6 (Relaxed)</option>
+                                        <option value="1.8">1.8 (Loose)</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="settings-field-label">Tab Size</label>
+                                <div class="settings-select-wrapper">
+                                    <select id="tab-size-dropdown" class="settings-select">
+                                        <option value="2" selected>2 Spaces</option>
+                                        <option value="4">4 Spaces</option>
+                                        <option value="8">8 Spaces</option>
+                                    </select>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">toggle_on</span>
+                            Behavior
+                        </h3>
+                        <div class="settings-group">
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Word Wrap</span>
+                                    <span class="settings-toggle-desc">Wrap long lines to fit the viewport</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="word-wrap-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Line Numbers</span>
+                                    <span class="settings-toggle-desc">Show line numbers in the gutter</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="line-numbers-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Minimap</span>
+                                    <span class="settings-toggle-desc">Display a miniature overview of the code</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="minimap-checkbox">
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Bracket Matching</span>
+                                    <span class="settings-toggle-desc">Highlight matching brackets when cursor is
+                                        near</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="bracket-matching-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Preview Tab -->
+                <div class="settings-tab-panel" id="settings-tab-preview">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">article</span>
+                            Preview Options
+                        </h3>
+                        <div class="settings-group">
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Live Preview</span>
+                                    <span class="settings-toggle-desc">Update preview as you type</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="live-preview-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Syntax Highlighting</span>
+                                    <span class="settings-toggle-desc">Highlight code blocks in preview</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="syntax-highlight-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Math Rendering (KaTeX)</span>
+                                    <span class="settings-toggle-desc">Render LaTeX math equations</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="math-rendering-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                            <label class="settings-toggle-item">
+                                <div class="settings-toggle-info">
+                                    <span class="settings-toggle-label">Mermaid Diagrams</span>
+                                    <span class="settings-toggle-desc">Render Mermaid diagram blocks</span>
+                                </div>
+                                <div class="settings-toggle">
+                                    <input type="checkbox" id="mermaid-checkbox" checked>
+                                    <span class="settings-toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Themes Tab -->
+                <div class="settings-tab-panel" id="settings-tab-themes">
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">light_mode</span>
+                            Light Themes
+                        </h3>
+                        <div class="theme-grid">
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="vs" class="theme-radio">
+                                <div class="theme-preview theme-preview-vs-light"></div>
+                                <span class="theme-name">VS Light</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="github-light" class="theme-radio">
+                                <div class="theme-preview theme-preview-github-light"></div>
+                                <span class="theme-name">GitHub Light</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="solarized-light" class="theme-radio">
+                                <div class="theme-preview theme-preview-solarized-light"></div>
+                                <span class="theme-name">Solarized Light</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">dark_mode</span>
+                            Dark Themes
+                        </h3>
+                        <div class="theme-grid">
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="vs-dark" class="theme-radio">
+                                <div class="theme-preview theme-preview-vs-dark"></div>
+                                <span class="theme-name">VS Dark</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="github-dark" class="theme-radio">
+                                <div class="theme-preview theme-preview-github-dark"></div>
+                                <span class="theme-name">GitHub Dark</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="dracula" class="theme-radio">
+                                <div class="theme-preview theme-preview-dracula"></div>
+                                <span class="theme-name">Dracula</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="editor-theme" value="solarized-dark" class="theme-radio">
+                                <div class="theme-preview theme-preview-solarized-dark"></div>
+                                <span class="theme-name">Solarized Dark</span>
+                                <span class="theme-check material-symbols-outlined">check_circle</span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Keyboard Tab -->
+                <div class="settings-tab-panel" id="settings-tab-keyboard">
+                    <div class="shortcuts-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="shortcuts-search-input" placeholder="Search shortcuts...">
+                    </div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">folder_open</span>
+                            File Operations
+                        </h3>
+                        <div class="shortcuts-list">
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Save Document</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>S</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Import File</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>O</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Export as PDF</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>P</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Open Export Modal</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>E</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">format_paint</span>
+                            Formatting
+                        </h3>
+                        <div class="shortcuts-list">
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Bold Text</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>B</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Italic Text</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>I</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Insert Link</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>K</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Heading 1</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>1</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Heading 2</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>2</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Heading 3</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>3</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="settings-divider"></div>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section-title">
+                            <span class="material-symbols-outlined">window</span>
+                            View & Navigation
+                        </h3>
+                        <div class="shortcuts-list">
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Toggle Split View</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>\</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Focus Mode</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>F</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Fullscreen</span>
+                                <div class="shortcut-keys">
+                                    <kbd>F11</kbd>
+                                </div>
+                            </div>
+                            <div class="shortcut-item">
+                                <span class="shortcut-action">Show Help</span>
+                                <div class="shortcut-keys">
+                                    <kbd>Ctrl</kbd><kbd>H</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- About Tab -->
+                <div class="settings-tab-panel" id="settings-tab-about">
+                    <div class="about-header">
+                        <div class="about-logo">
+                            <span class="material-symbols-outlined">description</span>
+                        </div>
+                        <h3 class="about-title">Markdown Live Preview</h3>
+                        <span class="about-version">Version 2.0.0</span>
+                    </div>
+
+                    <div class="about-cards">
+                        <a href="https://github.com" class="about-card" target="_blank">
+                            <div class="about-card-icon about-card-icon-blue">
+                                <span class="material-symbols-outlined">code</span>
+                            </div>
+                            <div class="about-card-content">
+                                <h4>GitHub Repository</h4>
+                                <p>View source code and contribute</p>
+                            </div>
+                        </a>
+                        <a href="#" class="about-card">
+                            <div class="about-card-icon about-card-icon-purple">
+                                <span class="material-symbols-outlined">menu_book</span>
+                            </div>
+                            <div class="about-card-content">
+                                <h4>Documentation</h4>
+                                <p>Learn how to use all features</p>
+                            </div>
+                        </a>
+                        <a href="#" class="about-card">
+                            <div class="about-card-icon about-card-icon-green">
+                                <span class="material-symbols-outlined">bug_report</span>
+                            </div>
+                            <div class="about-card-content">
+                                <h4>Report an Issue</h4>
+                                <p>Found a bug? Let us know</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="about-footer">
+                        <p class="about-credits">Built with ❤️ using Monaco Editor, Marked, and Prism.js</p>
+                        <p class="about-license">MIT License © 2024</p>
+                    </div>
                 </div>
             </div>
-            <div class="settings-section">
-                <h3 class="settings-title">Editor</h3>
-                <div class="settings-item">
-                    <label>Font Size</label>
-                    <select id="font-size-dropdown" class="settings-select">
-                        <option value="12">12px</option>
-                        <option value="14" selected>14px</option>
-                        <option value="16">16px</option>
-                        <option value="18">18px</option>
-                        <option value="20">20px</option>
-                    </select>
-                </div>
-                <div class="settings-item">
-                    <label>Line Numbers</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="line-numbers-checkbox" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <label>Word Wrap</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="word-wrap-checkbox" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="settings-section">
-                <h3 class="settings-title">Sync & Save</h3>
-                <div class="settings-item">
-                    <label>Scroll Sync</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="sync-scroll-checkbox" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <label>Auto Save</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="auto-save-checkbox" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+
+            <!-- Footer -->
+            <div class="settings-footer">
+                <button class="settings-btn settings-btn-secondary" id="settings-reset-btn">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Reset to Defaults
+                </button>
+                <button class="settings-btn settings-btn-primary" id="settings-save-btn">
+                    <span class="material-symbols-outlined">check</span>
+                    Save Changes
+                </button>
             </div>
         </div>
     </div>
@@ -636,76 +1072,180 @@
     <div class="modal-overlay" id="stats-modal-overlay"></div>
     <div class="modal" id="stats-modal">
         <div class="modal-header">
-            <h2 class="modal-title">Document Statistics</h2>
-            <button class="modal-close" id="stats-close" aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <h2 class="modal-title">Document Statistics</h2>
+            </div>
+            <button class="modal-close" id="stats-close" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         </div>
         <div class="modal-body">
             <div class="stats-grid">
                 <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 7V4h16v3"></path>
+                            <path d="M9 20h6"></path>
+                            <path d="M12 4v16"></path>
+                        </svg>
+                    </div>
                     <div class="stat-value" id="stat-words">0</div>
                     <div class="stat-label">Words</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                            <line x1="9" y1="20" x2="15" y2="20"></line>
+                            <line x1="12" y1="4" x2="12" y2="20"></line>
+                        </svg>
+                    </div>
                     <div class="stat-value" id="stat-chars">0</div>
                     <div class="stat-label">Characters</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="17" y1="10" x2="3" y2="10"></line>
+                            <line x1="21" y1="6" x2="3" y2="6"></line>
+                            <line x1="21" y1="14" x2="3" y2="14"></line>
+                            <line x1="17" y1="18" x2="3" y2="18"></line>
+                        </svg>
+                    </div>
                     <div class="stat-value" id="stat-paragraphs">0</div>
                     <div class="stat-label">Paragraphs</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                    </div>
                     <div class="stat-value" id="stat-sentences">0</div>
                     <div class="stat-label">Sentences</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 12h8"></path>
+                            <path d="M4 18h12"></path>
+                            <path d="M4 6h16"></path>
+                        </svg>
+                    </div>
                     <div class="stat-value" id="stat-headings">0</div>
                     <div class="stat-label">Headings</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
                     <div class="stat-value" id="stat-reading-time">0m</div>
                     <div class="stat-label">Reading Time</div>
                 </div>
             </div>
         </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary" id="stats-close-btn">Close</button>
+        </div>
     </div>
 
     <!-- Help Modal -->
     <div class="modal-overlay" id="help-modal-overlay"></div>
-    <div class="modal" id="help-modal">
+    <div class="modal modal-lg" id="help-modal">
         <div class="modal-header">
-            <h2 class="modal-title">Keyboard Shortcuts</h2>
-            <button class="modal-close close-modal" id="help-close" aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                    <path d="M6 8h.001"></path>
+                    <path d="M10 8h.001"></path>
+                    <path d="M14 8h.001"></path>
+                    <path d="M18 8h.001"></path>
+                    <path d="M8 12h.001"></path>
+                    <path d="M12 12h.001"></path>
+                    <path d="M16 12h.001"></path>
+                    <path d="M7 16h10"></path>
+                </svg>
+                <h2 class="modal-title">Keyboard Shortcuts</h2>
+            </div>
+            <button class="modal-close close-modal" id="help-close" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         </div>
         <div class="modal-body">
-            <div class="shortcuts-section">
-                <h4>File</h4>
-                <div class="shortcut-item"><span>Save</span><kbd>Ctrl+S</kbd></div>
-                <div class="shortcut-item"><span>Open</span><kbd>Ctrl+O</kbd></div>
-                <div class="shortcut-item"><span>Export PDF</span><kbd>Ctrl+P</kbd></div>
+            <div class="shortcuts-grid">
+                <div class="shortcuts-section">
+                    <h4>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        File & Export
+                    </h4>
+                    <div class="shortcut-item"><span>Save Markdown</span><kbd>Ctrl+S</kbd></div>
+                    <div class="shortcut-item"><span>Open File</span><kbd>Ctrl+O</kbd></div>
+                    <div class="shortcut-item"><span>Export PDF</span><kbd>Ctrl+P</kbd></div>
+                    <div class="shortcut-item"><span>Export HTML</span><kbd>Ctrl+Shift+E</kbd></div>
+                    <div class="shortcut-item"><span>Print</span><kbd>Ctrl+Shift+P</kbd></div>
+                </div>
+                <div class="shortcuts-section">
+                    <h4>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit
+                    </h4>
+                    <div class="shortcut-item"><span>Bold</span><kbd>Ctrl+B</kbd></div>
+                    <div class="shortcut-item"><span>Italic</span><kbd>Ctrl+I</kbd></div>
+                    <div class="shortcut-item"><span>Link</span><kbd>Ctrl+K</kbd></div>
+                    <div class="shortcut-item"><span>Find</span><kbd>Ctrl+F</kbd></div>
+                </div>
+                <div class="shortcuts-section">
+                    <h4>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        View
+                    </h4>
+                    <div class="shortcut-item"><span>Toggle Theme</span><kbd>Ctrl+D</kbd></div>
+                    <div class="shortcut-item"><span>Focus Mode</span><kbd>Ctrl+Shift+F</kbd></div>
+                    <div class="shortcut-item"><span>Help</span><kbd>Ctrl+H</kbd></div>
+                </div>
             </div>
-            <div class="shortcuts-section">
-                <h4>Edit</h4>
-                <div class="shortcut-item"><span>Bold</span><kbd>Ctrl+B</kbd></div>
-                <div class="shortcut-item"><span>Italic</span><kbd>Ctrl+I</kbd></div>
-                <div class="shortcut-item"><span>Link</span><kbd>Ctrl+K</kbd></div>
-                <div class="shortcut-item"><span>Find</span><kbd>Ctrl+F</kbd></div>
-            </div>
-            <div class="shortcuts-section">
-                <h4>View</h4>
-                <div class="shortcut-item"><span>Toggle Dark Mode</span><kbd>Ctrl+D</kbd></div>
-                <div class="shortcut-item"><span>Focus Mode</span><kbd>Ctrl+Shift+F</kbd></div>
-                <div class="shortcut-item"><span>Help</span><kbd>Ctrl+H</kbd></div>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary close-modal">Close</button>
         </div>
     </div>
 
@@ -713,29 +1253,62 @@
     <div class="modal-overlay" id="goals-modal-overlay"></div>
     <div class="modal" id="goals-modal">
         <div class="modal-header">
-            <h2 class="modal-title">Writing Goals</h2>
-            <button class="modal-close close-goals" aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                </svg>
+                <h2 class="modal-title">Writing Goals</h2>
+            </div>
+            <button class="modal-close close-goals" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         </div>
         <div class="modal-body">
-            <div class="settings-item">
-                <label for="daily-goal-input">Daily Word Goal</label>
+            <div class="goal-input-group">
+                <label for="daily-goal-input">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20V10"></path>
+                        <path d="M18 20V4"></path>
+                        <path d="M6 20v-4"></path>
+                    </svg>
+                    Daily Word Goal
+                </label>
                 <input type="number" id="daily-goal-input" class="settings-input" min="0" value="500" placeholder="500">
             </div>
             <div class="goal-progress-section">
+                <div class="progress-info">
+                    <span class="progress-label">Today's Progress</span>
+                    <span class="progress-percent" id="goal-percent">0%</span>
+                </div>
                 <div class="progress-bar-container">
                     <div class="progress-bar" id="goal-progress-bar" style="width: 0%"></div>
                 </div>
                 <div class="goal-text" id="goal-text">0 / 500 words</div>
             </div>
-            <div class="streak-section">
-                <span class="streak-label">Current Streak:</span>
-                <span class="streak-count" id="streak-count">0 days</span>
+            <div class="streak-card">
+                <div class="streak-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                </div>
+                <div class="streak-info">
+                    <span class="streak-label">Current Streak</span>
+                    <span class="streak-count" id="streak-count">0 days</span>
+                </div>
             </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary close-goals">Cancel</button>
+            <button class="modal-btn primary" id="save-goals-btn">Save Goal</button>
         </div>
     </div>
 
@@ -743,18 +1316,33 @@
     <div class="modal-overlay" id="templates-modal-overlay"></div>
     <div class="modal modal-lg" id="templates-modal">
         <div class="modal-header">
-            <h2 class="modal-title">Templates</h2>
-            <button class="modal-close close-templates" aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                        d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+            <div class="modal-title-group">
+                <svg class="modal-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <h2 class="modal-title">Templates</h2>
+            </div>
+            <button class="modal-close close-templates" aria-label="Close" title="Close (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         </div>
         <div class="modal-body">
+            <p class="modal-description">Choose a template to quickly start your document</p>
             <div class="templates-grid" id="templates-grid">
                 <!-- Templates rendered by JS -->
             </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn secondary close-templates">Cancel</button>
         </div>
     </div>
 
@@ -777,6 +1365,319 @@
         </div>
         <div class="panel-body">
             <ul class="toc-list" id="toc-list-panel"></ul>
+        </div>
+    </div>
+
+    <!-- ==================== EXPORT MODAL ==================== -->
+    <div class="export-modal-overlay" id="export-modal-overlay"></div>
+    <div class="export-modal" id="export-modal">
+        <!-- Header -->
+        <div class="export-modal-header">
+            <h2 class="export-modal-title">Export Document</h2>
+            <button class="export-modal-close" id="export-modal-close" aria-label="Close">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="export-loading-overlay hidden" id="export-loading-overlay">
+            <div class="export-loading-content">
+                <div class="export-loading-spinner"></div>
+                <div class="export-loading-text" id="export-loading-text">Generating your file...</div>
+                <div class="export-loading-progress-container">
+                    <div class="export-loading-progress-bar" id="export-loading-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="export-modal-content">
+            <!-- Sidebar - Format Selection -->
+            <div class="export-sidebar">
+                <p class="export-section-label">File Formats</p>
+                <button class="export-format-btn" data-format="markdown">
+                    <span class="material-symbols-outlined">download</span>
+                    <span class="btn-text">Markdown</span>
+                </button>
+                <button class="export-format-btn active" data-format="pdf">
+                    <span class="material-symbols-outlined filled">picture_as_pdf</span>
+                    <span class="btn-text">PDF</span>
+                </button>
+                <button class="export-format-btn" data-format="html">
+                    <span class="material-symbols-outlined">html</span>
+                    <span class="btn-text">HTML</span>
+                </button>
+                <button class="export-format-btn" data-format="docx">
+                    <span class="material-symbols-outlined">description</span>
+                    <span class="btn-text">DOCX</span>
+                </button>
+                <button class="export-format-btn" data-format="txt">
+                    <span class="material-symbols-outlined">text_snippet</span>
+                    <span class="btn-text">Text</span>
+                </button>
+                <button class="export-format-btn" data-format="png">
+                    <span class="material-symbols-outlined">image</span>
+                    <span class="btn-text">Image</span>
+                </button>
+
+                <hr class="export-divider">
+
+                <p class="export-section-label">Actions</p>
+                <button class="export-format-btn" data-format="print">
+                    <span class="material-symbols-outlined">print</span>
+                    <span class="btn-text">Print</span>
+                </button>
+                <button class="export-format-btn" data-format="copy-md">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">Copy MD</span>
+                </button>
+                <button class="export-format-btn" data-format="copy-html">
+                    <span class="material-symbols-outlined">code</span>
+                    <span class="btn-text">Copy HTML</span>
+                </button>
+
+                <div class="export-sidebar-footer">
+                    <button class="export-format-btn danger" data-format="reset">
+                        <span class="material-symbols-outlined">restart_alt</span>
+                        <span class="btn-text">Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Preview Area -->
+            <div class="export-preview-area">
+                <!-- Options Toolbar -->
+                <div class="export-options-bar">
+                    <!-- PDF Options -->
+                    <div class="export-options pdf-options" id="pdf-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Paper Size</label>
+                            <select class="export-select" id="export-paper-size">
+                                <option value="a4">A4 (210 x 297 mm)</option>
+                                <option value="letter" selected>US Letter</option>
+                                <option value="legal">Legal</option>
+                                <option value="tabloid">Tabloid</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Orientation</label>
+                            <select class="export-select" id="export-orientation">
+                                <option value="portrait" selected>Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-page-numbers" checked>
+                            <label for="export-page-numbers">Page Numbers</label>
+                        </div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-header-footer">
+                            <label for="export-header-footer">Header & Footer</label>
+                        </div>
+                    </div>
+
+                    <!-- HTML Options -->
+                    <div class="export-options html-options hidden" id="html-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Theme</label>
+                            <select class="export-select" id="export-html-theme">
+                                <option value="light" selected>Default (Light)</option>
+                                <option value="dark">Dark Mode</option>
+                                <option value="system">System Preference</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-include-css" checked>
+                            <label for="export-include-css">Include CSS</label>
+                        </div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-minify-html">
+                            <label for="export-minify-html">Minify HTML</label>
+                        </div>
+                    </div>
+
+                    <!-- Text Options -->
+                    <div class="export-options txt-options hidden" id="txt-options">
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-word-wrap" checked>
+                            <label for="export-word-wrap">Word Wrap</label>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-frontmatter">
+                            <label for="export-frontmatter">Include Frontmatter</label>
+                        </div>
+                    </div>
+
+                    <!-- PNG Options -->
+                    <div class="export-options png-options hidden" id="png-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Image Width</label>
+                            <input type="text" class="export-input" id="export-image-width" value="1200 px">
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Resolution</label>
+                            <select class="export-select" id="export-resolution">
+                                <option value="1">@1x (Standard)</option>
+                                <option value="2" selected>@2x (Retina)</option>
+                                <option value="3">@3x (High Res)</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-transparent-bg">
+                            <label for="export-transparent-bg">Transparent Background</label>
+                        </div>
+                        <div class="export-option-group checkbox-group">
+                            <input type="checkbox" id="export-include-shadow" checked>
+                            <label for="export-include-shadow">Include Shadow</label>
+                        </div>
+                    </div>
+
+                    <!-- Print Options -->
+                    <div class="export-options print-options hidden" id="print-options">
+                        <div class="export-option-group">
+                            <label class="export-option-label">Paper Size</label>
+                            <select class="export-select" id="print-paper-size">
+                                <option value="letter">Letter</option>
+                                <option value="a4" selected>A4</option>
+                                <option value="legal">Legal</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Orientation</label>
+                            <select class="export-select" id="print-orientation">
+                                <option value="portrait" selected>Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Margins</label>
+                            <select class="export-select" id="print-margins">
+                                <option value="default" selected>Default</option>
+                                <option value="none">None</option>
+                                <option value="narrow">Narrow</option>
+                                <option value="moderate">Moderate</option>
+                            </select>
+                        </div>
+                        <div class="export-option-divider"></div>
+                        <div class="export-option-group">
+                            <label class="export-option-label">Scale</label>
+                            <select class="export-select" id="print-scale">
+                                <option value="fit" selected>Fit to page</option>
+                                <option value="actual">Actual size</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Markdown/DOCX Options (minimal) -->
+                    <div class="export-options markdown-options hidden" id="markdown-options">
+                        <div class="export-option-info">
+                            <span class="material-symbols-outlined">info</span>
+                            Markdown will be downloaded as-is with no modifications.
+                        </div>
+                    </div>
+
+                    <div class="export-options docx-options hidden" id="docx-options">
+                        <div class="export-option-info">
+                            <span class="material-symbols-outlined">info</span>
+                            Document will be exported in Microsoft Word compatible format.
+                        </div>
+                    </div>
+
+                    <div class="export-preview-label-container">
+                        <div class="export-preview-label" id="preview-label">Previewing 1 of 1 pages</div>
+                        <button class="export-refresh-btn" id="export-refresh-btn" title="Refresh Preview">
+                            <span class="material-symbols-outlined">refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Container -->
+                <div class="export-preview-container">
+                    <!-- PDF/Print Preview -->
+                    <div class="export-preview pdf-preview" id="pdf-preview">
+                        <div class="export-page" id="export-page">
+                            <div class="page-header">
+                                <span class="page-filename" id="page-filename">Untitled.md</span>
+                                <span class="page-date" id="page-date"></span>
+                            </div>
+                            <div class="page-content" id="export-page-content">
+                                <!-- Content rendered here -->
+                            </div>
+                            <div class="page-footer">
+                                <span class="page-number">Page 1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HTML Preview -->
+                    <div class="export-preview html-preview hidden" id="html-preview">
+                        <div class="browser-chrome">
+                            <div class="browser-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <div class="browser-url">
+                                <span class="material-symbols-outlined">lock</span>
+                                <span id="browser-url-text">file:///Documents/Untitled.html</span>
+                            </div>
+                        </div>
+                        <div class="browser-content" id="html-preview-content">
+                            <!-- Content rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Text Preview -->
+                    <div class="export-preview txt-preview hidden" id="txt-preview">
+                        <div class="txt-content" id="txt-preview-content">
+                            <!-- Plain text content here -->
+                        </div>
+                    </div>
+
+                    <!-- PNG Preview -->
+                    <div class="export-preview png-preview hidden" id="png-preview">
+                        <div class="png-container" id="png-container">
+                            <div class="png-content" id="png-preview-content">
+                                <!-- Image preview content here -->
+                            </div>
+                        </div>
+                        <div class="png-zoom-controls">
+                            <button class="zoom-btn" id="zoom-in-btn" title="Zoom In">
+                                <span class="material-symbols-outlined">zoom_in</span>
+                            </button>
+                            <button class="zoom-btn" id="zoom-out-btn" title="Zoom Out">
+                                <span class="material-symbols-outlined">zoom_out</span>
+                            </button>
+                            <button class="zoom-btn" id="zoom-fit-btn" title="Fit to Screen">
+                                <span class="material-symbols-outlined">fit_screen</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="export-modal-footer">
+            <div class="export-file-info">
+                Estimated file size: <span class="export-file-size" id="export-file-size">--</span>
+            </div>
+            <div class="export-actions">
+                <button class="export-btn secondary" id="export-cancel-btn">Cancel</button>
+                <button class="export-btn primary" id="export-confirm-btn">
+                    <span class="material-symbols-outlined" id="export-btn-icon">download</span>
+                    <span id="export-btn-text">Export PDF</span>
+                </button>
+            </div>
         </div>
     </div>
 
