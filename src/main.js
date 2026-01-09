@@ -143,30 +143,54 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
   // Render markdown text as html
   let convert = (markdown) => {
+    // Ignore everything inside $$ ... $$
+    const mathExtension = {
+      name: "blockMath",
+      level: "block",
+      start(src) {
+        return src.match(/\$\$/)?.index;
+      },
+      tokenizer(src) {
+        const rule = /^\$\$([\s\S]+?)\$\$/;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: "blockMath",
+            raw: match[0],
+            text: match[1].trim(),
+          };
+        }
+      },
+      renderer(token) {
+        // Return the raw $$math$$ string so KaTeX can find it later
+        return `<p>$$${token.text}$$</p>`;
+      },
+    };
+
+    marked.use({ extensions: [mathExtension] });
+
     let options = {
       headerIds: false,
       mangle: false,
     };
 
-    // Markdown → HTML
+    // Parse and Sanitize
     let html = marked.parse(markdown, options);
-
-    // Sanitize HTML
     let sanitized = DOMPurify.sanitize(html);
 
     const outputEl = document.querySelector("#output");
     outputEl.innerHTML = sanitized;
 
-    // Render LaTeX (KaTeX)
-    renderMathInElement(outputEl, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-        { left: "\\(", right: "\\)", display: false },
-        { left: "\\[", right: "\\]", display: true },
-      ],
-      throwOnError: false,
-    });
+    // Render with KaTeX
+    if (typeof renderMathInElement === "function") {
+      renderMathInElement(outputEl, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+        ],
+        throwOnError: false,
+      });
+    }
   };
 
   // Reset input text
