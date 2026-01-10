@@ -12,6 +12,7 @@ const init = () => {
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
+    const localStorageThemeKey = 'theme_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -53,7 +54,7 @@ _You **can** combine them_
 
 ## Images
 
-![This is an alt text.](/image/sample.webp "This is a sample image.")
+![This is an alt text.](/image/Markdown-mark.svg "This is a sample image.")
 
 ## Links
 
@@ -186,6 +187,58 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    // ----- preview CSS loader (switch github-markdown css) -----
+    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=1.11.0';
+    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=1.11.0';
+
+    let setPreviewCss = (useDark) => {
+        const link = document.getElementById('gh-markdown-link');
+        if (!link) {
+            // fallback: create link element
+            const newLink = document.createElement('link');
+            newLink.id = 'gh-markdown-link';
+            newLink.rel = 'stylesheet';
+            newLink.href = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
+            document.head.appendChild(newLink);
+            return;
+        }
+
+        // Only update if href differs to avoid unnecessary reload
+        const desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
+        if (link.getAttribute('href') !== desired) {
+            link.setAttribute('href', desired);
+        }
+    };
+
+    // ----- theme toggle (dark/light) -----
+    let setTheme = (enabled) => {
+        document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
+    };
+
+    let initThemeToggle = (settings) => {
+        let checkbox = document.querySelector('#theme-checkbox');
+        if (!checkbox) return;
+        checkbox.checked = settings;
+        setTheme(settings);
+
+        // set Monaco editor theme to match page theme
+        if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
+            monaco.editor.setTheme(settings ? 'vs-dark' : 'vs');
+        }
+        // set preview css to match theme
+        setPreviewCss(settings);
+
+        checkbox.addEventListener('change', (event) => {
+            let checked = event.currentTarget.checked;
+            setTheme(checked);
+            saveThemeSettings(checked);
+            setPreviewCss(checked);
+            if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
+                monaco.editor.setTheme(checked ? 'vs-dark' : 'vs');
+            }
+        });
+    };
+
     let enableScrollBarSync = () => {
         scrollBarSync = true;
     };
@@ -256,9 +309,34 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         return lastContent;
     };
 
+    let loadThemeSettings = () => {
+        let last = Storehouse.getItem(localStorageNamespace, localStorageThemeKey);
+        if (last === null || last === undefined) {
+            try {
+                // fallback to raw localStorage boot key used by inline script
+                const raw = localStorage.getItem('com.markdownlivepreview_theme');
+                if (raw === 'dark') return true;
+                if (raw === 'light') return false;
+            } catch (e) {
+                // ignore
+            }
+        }
+        return last;
+    };
+
     let saveScrollBarSettings = (settings) => {
         let expiredAt = new Date(2099, 1, 1);
         Storehouse.setItem(localStorageNamespace, localStorageScrollBarKey, settings, expiredAt);
+    };
+
+    let saveThemeSettings = (settings) => {
+        let expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageThemeKey, settings, expiredAt);
+        try {
+            localStorage.setItem('com.markdownlivepreview_theme', settings ? 'dark' : 'light');
+        } catch (e) {
+            // ignore storage errors
+        }
     };
 
     let setupDivider = () => {
@@ -410,6 +488,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
+
+    // initialize theme (dark/light)
+    let themeSettings = loadThemeSettings();
+    // normalize to boolean (Storehouse may return string or boolean)
+    if (themeSettings === 'true' || themeSettings === true) {
+        themeSettings = true;
+    } else {
+        themeSettings = false;
+    }
+    initThemeToggle(themeSettings);
 
     setupDivider();
 };
