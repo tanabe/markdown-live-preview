@@ -2,6 +2,8 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import 'github-markdown-css/github-markdown-light.css';
+import { getDocumentTitleFromMarkdown, exportAsHTML, exportAsPDF } from './export.js';
 
 const init = () => {
     let hasEdited = false;
@@ -423,6 +425,66 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     setupResetButton();
     setupCopyButton(editor);
+
+    // ----- download menu -----
+    let setupDownloadMenu = (editor) => {
+        const downloadButton = document.getElementById('download-button');
+        const downloadMenu = document.getElementById('download-menu');
+        const dropdownContent = downloadMenu.querySelector('.dropdown-content');
+
+        // Toggle dropdown visibility
+        downloadButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close the dropdown if the user clicks outside of it
+        window.addEventListener('click', (event) => {
+            if (!downloadMenu.contains(event.target)) {
+                dropdownContent.style.display = 'none';
+            }
+        });
+
+        // Download PDF
+        document.getElementById('export-pdf').addEventListener('click', (event) => {
+            event.preventDefault();
+            const outputElement = document.getElementById('output');
+            const content = outputElement.innerHTML;
+            const title = getDocumentTitleFromMarkdown(editor.getValue());
+            exportAsPDF({ bodyHtml: content, title: title });
+            dropdownContent.style.display = 'none'; // Close dropdown after action
+        });
+
+        // Download DOC
+        document.getElementById('export-doc').addEventListener('click', (event) => {
+            event.preventDefault();
+            const outputElement = document.getElementById('output');
+            const content = outputElement.innerHTML;
+            const filename = 'markdown-preview.doc';
+            const blob = new Blob(['<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Document</title></head><body>' + content + '</body></html>'], {
+                type: 'application/msword'
+            });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            dropdownContent.style.display = 'none';
+        });
+
+        // Download HTML
+        document.getElementById('export-html').addEventListener('click', (event) => {
+            event.preventDefault();
+            const outputElement = document.getElementById('output');
+            const content = outputElement.innerHTML;
+            const title = getDocumentTitleFromMarkdown(editor.getValue());
+            exportAsHTML({ bodyHtml: content, title: title });
+            dropdownContent.style.display = 'none'; // Close dropdown after action
+        });
+    };
+
+    setupDownloadMenu(editor);
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
