@@ -69,6 +69,10 @@ header a:hover {
     margin-left: 16px;
 }
 
+#export-button {
+    margin-left: 16px;
+}
+
 #sync-button {
     margin-left: 16px;
     -webkit-user-select: none;
