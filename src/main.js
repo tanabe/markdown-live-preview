@@ -2,16 +2,39 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import mermaid from 'mermaid';
 
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
+    let mermaidIdCounter = 0;
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageThemeKey = 'theme_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
+
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'strict',
+    });
+
+    const mermaidExtension = {
+        renderer: {
+            code({ text, lang }) {
+                if (lang === 'mermaid') {
+                    const id = `mermaid-block-${mermaidIdCounter++}`;
+                    const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `<div class="mermaid-container"><pre class="mermaid-source" data-mermaid-id="${id}">${escaped}</pre></div>`;
+                }
+                return false;
+            }
+        }
+    };
+    marked.use(mermaidExtension);
+
     // default template
     const defaultInput = `# Markdown syntax guide
 
@@ -82,6 +105,16 @@ ${"`"}${"`"}${"`"}
 ## Inline code
 
 This web site is using ${"`"}markedjs/marked${"`"}.
+
+## Mermaid Diagrams
+
+${"`"}${"`"}${"`"}mermaid
+graph TD
+    A[Start] --> B{Is it working?}
+    B -->|Yes| C[Great!]
+    B -->|No| D[Debug]
+    D --> B
+${"`"}${"`"}${"`"}
 `;
 
     self.MonacoEnvironment = {
@@ -138,15 +171,42 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         return editor;
     };
 
-    // Render markdown text as html
-    let convert = (markdown) => {
+    // Render markdown text as html, then render any mermaid diagrams
+    let convert = async (markdown) => {
+        mermaidIdCounter = 0;
         let options = {
             headerIds: false,
             mangle: false
         };
         let html = marked.parse(markdown, options);
-        let sanitized = DOMPurify.sanitize(html);
-        document.querySelector('#output').innerHTML = sanitized;
+        let sanitized = DOMPurify.sanitize(html, {
+            ADD_TAGS: ['pre', 'div'],
+            ADD_ATTR: ['data-mermaid-id', 'class'],
+        });
+        const output = document.querySelector('#output');
+        output.innerHTML = sanitized;
+
+        await renderMermaidBlocks(output);
+    };
+
+    let renderMermaidBlocks = async (container) => {
+        const blocks = container.querySelectorAll('.mermaid-source[data-mermaid-id]');
+        for (const block of blocks) {
+            const id = block.getAttribute('data-mermaid-id');
+            const source = block.textContent;
+            const wrapper = block.closest('.mermaid-container');
+            try {
+                const { svg } = await mermaid.render(id, source);
+                if (wrapper) {
+                    wrapper.innerHTML = svg;
+                    wrapper.classList.add('mermaid-rendered');
+                }
+            } catch {
+                if (wrapper) {
+                    wrapper.classList.add('mermaid-error');
+                }
+            }
+        }
     };
 
     // Reset input text
@@ -208,6 +268,14 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
     };
 
+    let setMermaidTheme = (useDark) => {
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: useDark ? 'dark' : 'default',
+            securityLevel: 'strict',
+        });
+    };
+
     // ----- theme toggle (dark/light) -----
     let setTheme = (enabled) => {
         document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
@@ -218,6 +286,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         if (!checkbox) return;
         checkbox.checked = settings;
         setTheme(settings);
+        setMermaidTheme(settings);
 
         // set Monaco editor theme to match page theme
         if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
@@ -231,8 +300,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             setTheme(checked);
             saveThemeSettings(checked);
             setPreviewCss(checked);
+            setMermaidTheme(checked);
             if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
                 monaco.editor.setTheme(checked ? 'vs-dark' : 'vs');
+            }
+            // Re-render mermaid diagrams with the new theme
+            if (editor) {
+                convert(editor.getValue());
             }
         });
     };

@@ -209,3 +209,42 @@ footer {
 [data-theme="dark"] footer {
   background-color: #333;
 }
+
+/* Mermaid diagram containers — match GitHub's centered rendering */
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  padding: 16px;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-error {
+  border: 1px solid #d1242f;
+}
+
+.mermaid-error pre {
+  color: #d1242f;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+[data-theme="dark"] .mermaid-container {
+  background-color: #161b22;
+}
+
+[data-theme="dark"] .mermaid-error {
+  border-color: #f85149;
+}
+
+[data-theme="dark"] .mermaid-error pre {
+  color: #f85149;
+}
