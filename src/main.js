@@ -66,11 +66,11 @@ You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
 
 ## Tables
 
-| Left columns  | Right columns |
-| ------------- |:-------------:|
-| left foo      | right foo     |
-| left bar      | right bar     |
-| left baz      | right baz     |
+| Left Columns  | Center Columns | Right Columns |
+| ------------- |:--------------:| -------------:|
+| left foo      | center foo     | right foo     |
+| left bar      | center bar     | right bar     |
+| left baz      | center baz     | right baz     |
 
 ## Blocks of code
 
