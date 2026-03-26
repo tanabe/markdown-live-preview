@@ -11,6 +11,7 @@ const init = () => {
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageThemeKey = 'theme_settings';
+    const localStorageEditorVisibilityKey = 'editor_visibility';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     // default template
     const defaultInput = `# Markdown syntax guide
@@ -442,7 +443,17 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
     };
 
-    let setupDivider = () => {
+    let loadEditorVisibilitySettings = () => {
+        let last = Storehouse.getItem(localStorageNamespace, localStorageEditorVisibilityKey);
+        return last;
+    };
+
+    let saveEditorVisibilitySettings = (settings) => {
+        let expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageEditorVisibilityKey, settings, expiredAt);
+    };
+
+    let setupDivider = (editor) => {
         let lastLeftRatio = 0.5;
         const divider = document.getElementById('split-divider');
         const leftPane = document.getElementById('edit');
@@ -451,7 +462,49 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
         let isDragging = false;
 
+        let applyPaneWidths = () => {
+            const containerRect = container.getBoundingClientRect();
+            const totalWidth = containerRect.width;
+            const dividerWidth = divider.offsetWidth;
+            const availableWidth = totalWidth - dividerWidth;
+
+            const newLeft = availableWidth * lastLeftRatio;
+            const newRight = availableWidth * (1 - lastLeftRatio);
+
+            leftPane.style.width = newLeft + 'px';
+            rightPane.style.width = newRight + 'px';
+        };
+
+        let cacheCurrentRatio = () => {
+            const containerRect = container.getBoundingClientRect();
+            const totalWidth = containerRect.width;
+            const dividerWidth = divider.offsetWidth;
+            const availableWidth = totalWidth - dividerWidth;
+            const leftWidth = leftPane.getBoundingClientRect().width;
+
+            if (availableWidth > 0) {
+                lastLeftRatio = leftWidth / availableWidth;
+            }
+        };
+
+        let setEditorHidden = (hidden) => {
+            if (hidden) {
+                cacheCurrentRatio();
+                container.classList.add('editor-hidden');
+                rightPane.style.width = '100%';
+            } else {
+                container.classList.remove('editor-hidden');
+                applyPaneWidths();
+                window.requestAnimationFrame(() => {
+                    editor.layout();
+                });
+            }
+        };
+
         divider.addEventListener('mouseenter', () => {
+            if (container.classList.contains('editor-hidden')) {
+                return;
+            }
             divider.classList.add('hover');
         });
 
@@ -462,12 +515,18 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
 
         divider.addEventListener('mousedown', () => {
+            if (container.classList.contains('editor-hidden')) {
+                return;
+            }
             isDragging = true;
             divider.classList.add('active');
             document.body.style.cursor = 'col-resize';
         });
 
         divider.addEventListener('dblclick', () => {
+            if (container.classList.contains('editor-hidden')) {
+                return;
+            }
             const containerRect = container.getBoundingClientRect();
             const totalWidth = containerRect.width;
             const dividerWidth = divider.offsetWidth;
@@ -475,6 +534,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
             leftPane.style.width = halfWidth + 'px';
             rightPane.style.width = halfWidth + 'px';
+            lastLeftRatio = 0.5;
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -505,17 +565,50 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
 
         window.addEventListener('resize', () => {
-            const containerRect = container.getBoundingClientRect();
-            const totalWidth = containerRect.width;
-            const dividerWidth = divider.offsetWidth;
-            const availableWidth = totalWidth - dividerWidth;
-
-            const newLeft = availableWidth * lastLeftRatio;
-            const newRight = availableWidth * (1 - lastLeftRatio);
-
-            leftPane.style.width = newLeft + 'px';
-            rightPane.style.width = newRight + 'px';
+            if (container.classList.contains('editor-hidden')) {
+                rightPane.style.width = '100%';
+                return;
+            }
+            applyPaneWidths();
         });
+
+        applyPaneWidths();
+
+        return {
+            setEditorHidden
+        };
+    };
+
+    let setupEditorToggle = (editor, dividerControls, hidden) => {
+        const toggleButton = document.querySelector('#toggle-editor-button a');
+
+        if (!toggleButton) {
+            return;
+        }
+
+        let updateLabel = (isHidden) => {
+            toggleButton.textContent = isHidden ? 'Show editor' : 'Hide editor';
+            toggleButton.setAttribute('aria-expanded', String(!isHidden));
+        };
+
+        let setEditorHidden = (isHidden) => {
+            dividerControls.setEditorHidden(isHidden);
+            saveEditorVisibilitySettings(isHidden);
+            updateLabel(isHidden);
+        };
+
+        toggleButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const isHidden = document.querySelector('#container').classList.contains('editor-hidden');
+            setEditorHidden(!isHidden);
+            if (isHidden) {
+                window.requestAnimationFrame(() => {
+                    editor.focus();
+                });
+            }
+        });
+
+        setEditorHidden(hidden);
     };
 
     // ----- entry point -----
@@ -543,7 +636,15 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     }
     initThemeToggle(themeSettings);
 
-    setupDivider();
+    let editorVisibilitySettings = loadEditorVisibilitySettings();
+    if (editorVisibilitySettings === 'true' || editorVisibilitySettings === true) {
+        editorVisibilitySettings = true;
+    } else {
+        editorVisibilitySettings = false;
+    }
+
+    let dividerControls = setupDivider(editor);
+    setupEditorToggle(editor, dividerControls, editorVisibilitySettings);
 };
 
 window.addEventListener("load", () => {

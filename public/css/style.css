@@ -59,6 +59,7 @@ header a:hover {
 
 #menu-items {
     display: flex;
+    flex-wrap: wrap;
 }
 
 #reset-button {
@@ -70,6 +71,10 @@ header a:hover {
 }
 
 #export-button {
+    margin-left: 16px;
+}
+
+#toggle-editor-button {
     margin-left: 16px;
 }
 
@@ -137,10 +142,12 @@ footer {
 
 .column {
   width: 50%;
+  min-width: 0;
   padding: 0;
   margin: 0;
   white-space: nowrap;
   vertical-align: top;
+  flex: 0 0 auto;
 }
 
 #preview.column {
@@ -172,6 +179,16 @@ footer {
 
 .split-divider.active {
   background: #666;
+}
+
+#container.editor-hidden #edit,
+#container.editor-hidden #split-divider {
+  display: none;
+}
+
+#container.editor-hidden #preview {
+  width: 100%;
+  flex: 1 1 auto;
 }
 
 /* Dark theme overrides */
@@ -208,4 +225,14 @@ footer {
 
 [data-theme="dark"] footer {
   background-color: #333;
+}
+
+@media (max-width: 720px) {
+  header {
+    gap: 8px;
+  }
+
+  #github {
+    padding-right: 16px;
+  }
 }
