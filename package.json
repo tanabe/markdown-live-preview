@@ -27,7 +27,7 @@
     "vite": "^6.4.1"
   },
   "dependencies": {
-    "dompurify": "^3.2.5",
+    "dompurify": "^3.3.2",
     "github-markdown-css": "^5.8.1",
     "marked": "^15.0.7",
     "monaco-editor": "^0.52.2",
