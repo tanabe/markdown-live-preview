@@ -24,6 +24,7 @@
   "homepage": "https://github.com/tanabe/markdown-live-preview#readme",
   "devDependencies": {
     "http-server": "^14.1.1",
+    "markdownlint": "^0.40.0",
     "vite": "^6.4.1"
   },
   "dependencies": {
