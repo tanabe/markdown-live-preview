@@ -2,6 +2,7 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import {lint as linter} from 'markdownlint/sync';
 
 const init = () => {
     let hasEdited = false;
@@ -102,7 +103,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 horizontal: 'visible'
             },
             wordWrap: 'on',
-            hover: { enabled: false },
+            hover: { enabled: true },
             quickSuggestions: false,
             suggestOnTriggerCharacters: false,
             folding: false
@@ -114,6 +115,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 hasEdited = true;
             }
             let value = editor.getValue();
+            parseByLinter(value);
             convert(value);
             saveLastContent(value);
         });
@@ -147,6 +149,58 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         let html = marked.parse(markdown, options);
         let sanitized = DOMPurify.sanitize(html);
         document.querySelector('#output').innerHTML = sanitized;
+    };
+
+    // Render error or warning in the editor using linter
+    let parseByLinter = (value) => {
+        let linterOptions = {
+            "strings": {
+                "editorMarkdown": value
+            }
+        };
+        
+        const linterParseResult = linter(linterOptions);
+
+        let markers = [];
+
+        linterParseResult.editorMarkdown.forEach((element) => {
+            let errorDetails = formatLinterErrors(element);
+
+            let marker = {
+                startLineNumber: element.lineNumber,
+                endLineNumber: element.lineNumber,
+                message: errorDetails,
+                severity: monaco.MarkerSeverity.Warning;
+            }
+
+            if(element.severity.toLocaleLowerCase() === "error"){
+                marker.severity = monaco.MarkerSeverity.Error;
+            }
+
+            if(element.errorRange){
+                marker.startColumn = element.errorRange[0];
+            }
+
+            if(element.ruleInformation){
+                marker.code = {
+                  value: element.ruleNames[0],
+                  target: monaco.Uri.parse(element.ruleInformation)
+                };
+            }
+
+            markers.push(marker);
+        });
+
+        monaco.editor.setModelMarkers(editor.getModel(), "lint", markers);
+    }
+
+    let formatLinterErrors = (error) => {
+        let errorDetails = `${error.ruleNames[0]}/${error.ruleNames[1]}: ${error.ruleDescription}`;
+
+        if(error.errorDetail)
+            errorDetails += ` [${error.errorDetail}]`
+
+        return errorDetails;
     };
 
     // Reset input text
