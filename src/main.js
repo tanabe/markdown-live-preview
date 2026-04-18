@@ -170,13 +170,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 startLineNumber: element.lineNumber,
                 endLineNumber: element.lineNumber,
                 message: errorDetails,
+                severity: monaco.MarkerSeverity.Warning;
             }
 
             if(element.severity.toLocaleLowerCase() === "error"){
                 marker.severity = monaco.MarkerSeverity.Error;
-            }
-            else{
-                marker.severity = monaco.MarkerSeverity.Warning;
             }
 
             if(element.errorRange){
