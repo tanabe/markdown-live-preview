@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
+    let isScrolling = false;
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
@@ -119,9 +120,9 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
 
         editor.onDidScrollChange((e) => {
-            if (!scrollBarSync) {
-                return;
-            }
+            if (!scrollBarSync || isScrolling) return;
+    
+            isScrolling = true;
 
             const scrollTop = e.scrollTop;
             const scrollHeight = e.scrollHeight;
@@ -133,7 +134,39 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             let previewElement = document.querySelector('#preview');
             let targetY = (previewElement.scrollHeight - previewElement.clientHeight) * scrollRatio;
             previewElement.scrollTo(0, targetY);
+
+            requestAnimationFrame(() => { isScrolling = false; });
         });
+
+        let previewElement = document.querySelector('#preview');
+
+        previewElement.addEventListener('scroll', () => {
+            if (!scrollBarSync || isScrolling) return;
+
+            isScrolling = true;
+
+            const scrollTop = previewElement.scrollTop;
+            const scrollHeight = previewElement.scrollHeight;
+            const clientHeight = previewElement.clientHeight;
+
+            const maxScrollTop = scrollHeight - clientHeight;
+            const scrollRatio = scrollTop / maxScrollTop;
+
+            const editorScrollHeight = editor.getScrollHeight();
+            const editorHeight = editor.getLayoutInfo().height;
+            const editorMaxScroll = editorScrollHeight - editorHeight;
+
+            editor.setScrollTop(editorMaxScroll * scrollRatio);
+
+            requestAnimationFrame(() => { isScrolling = false; }); 
+        });
+
+        previewElement.addEventListener('wheel', (e) => {
+            if (!scrollBarSync) return;
+            
+            e.preventDefault();
+            previewElement.scrollTop += e.deltaY;
+        }, { passive: false }); 
 
         return editor;
     };
