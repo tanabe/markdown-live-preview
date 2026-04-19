@@ -20,5 +20,7 @@ $ make build
 $ make dev
 ```
 
+This app supports Mermaid diagrams in fenced code blocks using the `mermaid` language tag.
+
 ## License
 See the [LICENSE](https://github.com/tanabe/markdown-live-preview/blob/master/LICENSE) file in this repo.

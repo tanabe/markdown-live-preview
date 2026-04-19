@@ -2,6 +2,60 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import mermaid from 'mermaid';
+
+const escapeHtml = (unsafe) => {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+const encodeMermaidSource = (source) => encodeURIComponent(source);
+const decodeMermaidSource = (value) => decodeURIComponent(value || '');
+
+const replaceMermaidBlocks = (markdown) => {
+    return markdown.replace(/```mermaid\s*\n([\s\S]*?)```/g, (match, code) => {
+        return `<div class="mermaid" data-mermaid="${encodeMermaidSource(code)}">${escapeHtml(code)}</div>`;
+    });
+};
+
+const initializeMermaid = (dark) => {
+    mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        theme: dark ? 'dark' : 'default'
+    });
+};
+
+const renderMermaidDiagrams = (container) => {
+    if (!container) {
+        return;
+    }
+
+    container.querySelectorAll('.mermaid').forEach((element) => {
+        const source = element.dataset.mermaid;
+        if (!source) {
+            return;
+        }
+
+        const code = decodeMermaidSource(source);
+        const id = `mermaid-${Math.random().toString(36).slice(2, 10)}`;
+
+        mermaid
+            .render(id, code)
+            .then((result) => {
+                const svg = result?.svg ?? result;
+                element.innerHTML = svg;
+            })
+            .catch((error) => {
+                element.innerHTML = `<pre class="language-mermaid">${escapeHtml(code)}</pre>`;
+                console.error('Failed to render Mermaid diagram', error);
+            });
+    });
+};
 
 const init = () => {
     let hasEdited = false;
@@ -79,6 +133,15 @@ let message = 'Hello world';
 alert(message);
 ${"`"}${"`"}${"`"}
 
+## Mermaid diagrams
+
+${"`"}${"`"}${"`"}mermaid
+graph TD
+  A[Start] --> B{Decision}
+  B -->|Yes| C[Finish]
+  B -->|No| D[Alternate]
+${"`"}${"`"}${"`"}
+
 ## Inline code
 
 This web site is using ${"`"}markedjs/marked${"`"}.
@@ -89,6 +152,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             return new Proxy({}, { get: () => () => { } });
         }
     }
+
+    initializeMermaid(false);
 
     let setupEditor = () => {
         let editor = monaco.editor.create(document.querySelector('#editor'), {
@@ -144,9 +209,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             headerIds: false,
             mangle: false
         };
-        let html = marked.parse(markdown, options);
+        let html = marked.parse(replaceMermaidBlocks(markdown), options);
         let sanitized = DOMPurify.sanitize(html);
-        document.querySelector('#output').innerHTML = sanitized;
+        const output = document.querySelector('#output');
+        output.innerHTML = sanitized;
+        renderMermaidDiagrams(output);
     };
 
     // Reset input text
@@ -225,12 +292,15 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
         // set preview css to match theme
         setPreviewCss(settings);
+        initializeMermaid(settings);
 
         checkbox.addEventListener('change', (event) => {
             let checked = event.currentTarget.checked;
             setTheme(checked);
             saveThemeSettings(checked);
             setPreviewCss(checked);
+            initializeMermaid(checked);
+            renderMermaidDiagrams(document.querySelector('#output'));
             if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
                 monaco.editor.setTheme(checked ? 'vs-dark' : 'vs');
             }
