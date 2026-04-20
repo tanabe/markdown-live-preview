@@ -2,6 +2,30 @@ import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import mermaid from 'mermaid';
+
+// Escape for use inside HTML text content (so mermaid source is preserved in DOM)
+const escapeMermaidHtml = (text) => {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+};
+
+mermaid.initialize({ startOnLoad: false });
+
+marked.use({
+  renderer: {
+    code({ text, lang, escaped }) {
+      if (lang === 'mermaid') {
+        const safe = escaped ? text : escapeMermaidHtml(text);
+        return '<div class="mermaid">' + safe + "</div>\n";
+      }
+      return false;
+    },
+  },
+});
 
 const init = () => {
     let hasEdited = false;
@@ -82,6 +106,30 @@ ${"`"}${"`"}${"`"}
 ## Inline code
 
 This web site is using ${"`"}markedjs/marked${"`"}.
+
+## Mermaid flowcharts
+
+${"`"}${"`"}${"`"}mermaid
+flowchart TB
+    subgraph Input
+        A([Start])
+        B[/"Read data"/]
+    end
+
+    subgraph Process
+        C{"Valid?"}
+        D["Transform"]
+        E["Save"]
+    end
+
+    A --> B
+    B --> C
+    C -->|yes| D
+    C -->|no| F["Show error"]
+    D --> E
+    E --> G([End])
+    F --> B
+${"`"}${"`"}${"`"}
 `;
 
     self.MonacoEnvironment = {

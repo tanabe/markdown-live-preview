@@ -30,6 +30,7 @@
     "dompurify": "^3.4.0",
     "github-markdown-css": "^5.8.1",
     "marked": "^15.0.7",
+    "mermaid": "^11.12.2",
     "monaco-editor": "^0.52.2",
     "storehouse-js": "github:tanabe/Storehouse-js"
   }
