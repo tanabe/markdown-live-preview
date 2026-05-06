@@ -8,10 +8,11 @@ const init = () => {
     let scrollBarSync = false;
 
     const localStorageNamespace = 'com.markdownlivepreview';
-    const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageThemeKey = 'theme_settings';
+    const INDEX_KEY = 'docs_index';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
+    
     // default template
     const defaultInput = `# Markdown syntax guide
 
@@ -23,11 +24,9 @@ const init = () => {
 
 ## Emphasis
 
-*This text will be italic*  
-_This will also be italic_
+*This text will be italic* _This will also be italic_
 
-**This text will be bold**  
-__This will also be bold__
+**This text will be bold** __This will also be bold__
 
 _You **can** combine them_
 
@@ -90,6 +89,118 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
     }
 
+    // ----- History State Management -----
+    let currentDocId = null;
+
+    let getIndex = () => {
+        return Storehouse.getItem(localStorageNamespace, INDEX_KEY) || [];
+    };
+
+    let saveIndex = (index) => {
+        Storehouse.setItem(localStorageNamespace, INDEX_KEY, index, new Date(2099, 1, 1));
+    };
+
+    let generateId = () => Math.random().toString(36).substring(2, 10);
+
+    let getTitle = (content) => {
+        let lines = content.split('\n');
+        let titleLine = lines.find(l => l.trim().length > 0) || 'Untitled';
+        return titleLine.replace(/^#+\s*/, '').substring(0, 30);
+    };
+
+    let saveCurrentDoc = (content) => {
+        if (!currentDocId) return;
+        
+        Storehouse.setItem(localStorageNamespace, `doc_${currentDocId}`, content, new Date(2099, 1, 1));
+        
+        let index = getIndex();
+        let docMeta = index.find(d => d.id === currentDocId);
+        
+        if (!docMeta) {
+            docMeta = { id: currentDocId, createdAt: Date.now() };
+            index.push(docMeta);
+        }
+        
+        docMeta.title = getTitle(content);
+        docMeta.updatedAt = Date.now();
+        
+        index.sort((a, b) => b.updatedAt - a.updatedAt);
+        saveIndex(index);
+        renderSidebar();
+    };
+
+    let loadDoc = (id) => {
+        currentDocId = id;
+        window.location.hash = id;
+        let content = Storehouse.getItem(localStorageNamespace, `doc_${id}`) || defaultInput;
+        presetValue(content);
+        renderSidebar();
+    };
+
+    let createNewDoc = () => {
+        let id = generateId();
+        currentDocId = id;
+        window.location.hash = id;
+        presetValue(defaultInput);
+        // Force an initial save so it shows up in the sidebar immediately
+        saveCurrentDoc(defaultInput); 
+    };
+
+    let deleteDoc = (id, event) => {
+        event.stopPropagation();
+        if(!confirm("Delete this document?")) return;
+        
+        Storehouse.deleteItem(localStorageNamespace, `doc_${id}`);
+        let index = getIndex().filter(d => d.id !== id);
+        saveIndex(index);
+        
+        if (currentDocId === id) {
+            if (index.length > 0) loadDoc(index[0].id);
+            else createNewDoc();
+        } else {
+            renderSidebar();
+        }
+    };
+
+    let renderSidebar = () => {
+        let index = getIndex();
+        let list = document.getElementById('doc-list');
+        list.innerHTML = '';
+        
+        index.forEach(doc => {
+            let li = document.createElement('li');
+            if (doc.id === currentDocId) li.className = 'active';
+            
+            let title = document.createElement('div');
+            title.className = 'doc-title';
+            title.innerText = doc.title || 'Untitled';
+            
+            let delBtn = document.createElement('span');
+            delBtn.className = 'delete-btn';
+            delBtn.innerHTML = '&#10005;'; 
+            delBtn.onclick = (e) => deleteDoc(doc.id, e);
+            title.appendChild(delBtn);
+
+            let date = document.createElement('div');
+            date.className = 'doc-date';
+            date.innerText = new Date(doc.updatedAt).toLocaleString();
+
+            li.appendChild(title);
+            li.appendChild(date);
+            li.onclick = () => loadDoc(doc.id);
+            list.appendChild(li);
+        });
+    };
+
+    let setupSidebar = () => {
+        document.getElementById('toggle-sidebar').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+        document.getElementById('btn-new-doc').addEventListener('click', createNewDoc);
+    };
+
+    // ----- Editor Setup -----
     let setupEditor = () => {
         let editor = monaco.editor.create(document.querySelector('#editor'), {
             fontSize: 14,
@@ -115,7 +226,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             }
             let value = editor.getValue();
             convert(value);
-            saveLastContent(value);
+            saveCurrentDoc(value);
         });
 
         editor.onDidScrollChange((e) => {
@@ -172,7 +283,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- sync scroll position -----
-
     let initScrollBarSync = (settings) => {
         let checkbox = document.querySelector('#sync-scroll-checkbox');
         checkbox.checked = settings;
@@ -192,7 +302,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     let setPreviewCss = (useDark) => {
         const link = document.getElementById('gh-markdown-link');
         if (!link) {
-            // fallback: create link element
             const newLink = document.createElement('link');
             newLink.id = 'gh-markdown-link';
             newLink.rel = 'stylesheet';
@@ -201,7 +310,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             return;
         }
 
-        // Only update if href differs to avoid unnecessary reload
         const desired = useDark ? PREVIEW_CSS_DARK : PREVIEW_CSS_LIGHT;
         if (link.getAttribute('href') !== desired) {
             link.setAttribute('href', desired);
@@ -219,11 +327,9 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         checkbox.checked = settings;
         setTheme(settings);
 
-        // set Monaco editor theme to match page theme
         if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
             monaco.editor.setTheme(settings ? 'vs-dark' : 'vs');
         }
-        // set preview css to match theme
         setPreviewCss(settings);
 
         checkbox.addEventListener('change', (event) => {
@@ -237,25 +343,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
-    let enableScrollBarSync = () => {
-        scrollBarSync = true;
-    };
-
-    let disableScrollBarSync = () => {
-        scrollBarSync = false;
-    };
-
     // ----- clipboard utils -----
-
     let copyToClipboard = (text, successHandler, errorHandler) => {
         navigator.clipboard.writeText(text).then(
-            () => {
-                successHandler();
-            },
-
-            () => {
-                errorHandler();
-            }
+            () => { successHandler(); },
+            () => { errorHandler(); }
         );
     };
 
@@ -268,7 +360,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- export preview -----
-
     let exportLightCssPromise = null;
 
     let getLightMarkdownCss = () => {
@@ -284,7 +375,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 return response.text();
             })
             .catch((error) => {
-                // eslint-disable-next-line no-console
                 console.error('Failed to load light markdown CSS', error);
                 return '';
             });
@@ -294,9 +384,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let exportPreviewToPdf = () => {
         const previewElement = document.querySelector('#preview-wrapper');
-        if (!previewElement) {
-            return;
-        }
+        if (!previewElement) return;
 
         if (typeof window.html2pdf !== 'function') {
             window.alert('PDF export is not available yet. Please try again in a moment.');
@@ -322,11 +410,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                         if (lightCss) {
                             const style = clonedDoc.createElement('style');
                             style.id = 'export-light-css';
-                            style.textContent = `${lightCss}
-#preview-wrapper, #output, body {
-  background: #fff !important;
-  color: #24292f !important;
-}`;
+                            style.textContent = `${lightCss}\n#preview-wrapper, #output, body { background: #fff !important; color: #24292f !important; }`;
                             clonedDoc.head.appendChild(style);
                         }
 
@@ -355,15 +439,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 .from(previewElement)
                 .save()
                 .catch((error) => {
-                    // eslint-disable-next-line no-console
                     console.error('Failed to export PDF', error);
                 });
         });
     };
 
-    // ----- setup -----
-
-    // setup navigation actions
+    // ----- setup actions -----
     let setupResetButton = () => {
         document.querySelector("#reset-button").addEventListener('click', (event) => {
             event.preventDefault();
@@ -375,54 +456,32 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         document.querySelector("#copy-button").addEventListener('click', (event) => {
             event.preventDefault();
             let value = editor.getValue();
-            copyToClipboard(value, () => {
-                notifyCopied();
-            },
-                () => {
-                    // nothing to do
-                });
+            copyToClipboard(value, () => { notifyCopied(); }, () => {});
         });
     };
 
     let setupExportButton = () => {
         const exportButton = document.querySelector('#export-button');
-        if (!exportButton) {
-            return;
-        }
+        if (!exportButton) return;
         exportButton.addEventListener('click', (event) => {
             event.preventDefault();
             exportPreviewToPdf();
         });
     };
 
-    // ----- local state -----
-
-    let loadLastContent = () => {
-        let lastContent = Storehouse.getItem(localStorageNamespace, localStorageKey);
-        return lastContent;
-    };
-
-    let saveLastContent = (content) => {
-        let expiredAt = new Date(2099, 1, 1);
-        Storehouse.setItem(localStorageNamespace, localStorageKey, content, expiredAt);
-    };
-
+    // ----- App Preferences Loading -----
     let loadScrollBarSettings = () => {
-        let lastContent = Storehouse.getItem(localStorageNamespace, localStorageScrollBarKey);
-        return lastContent;
+        return Storehouse.getItem(localStorageNamespace, localStorageScrollBarKey);
     };
 
     let loadThemeSettings = () => {
         let last = Storehouse.getItem(localStorageNamespace, localStorageThemeKey);
         if (last === null || last === undefined) {
             try {
-                // fallback to raw localStorage boot key used by inline script
                 const raw = localStorage.getItem('com.markdownlivepreview_theme');
                 if (raw === 'dark') return true;
                 if (raw === 'light') return false;
-            } catch (e) {
-                // ignore
-            }
+            } catch (e) {}
         }
         return last;
     };
@@ -437,9 +496,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         Storehouse.setItem(localStorageNamespace, localStorageThemeKey, settings, expiredAt);
         try {
             localStorage.setItem('com.markdownlivepreview_theme', settings ? 'dark' : 'light');
-        } catch (e) {
-            // ignore storage errors
-        }
+        } catch (e) {}
     };
 
     let setupDivider = () => {
@@ -456,9 +513,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
 
         divider.addEventListener('mouseleave', () => {
-            if (!isDragging) {
-                divider.classList.remove('hover');
-            }
+            if (!isDragging) divider.classList.remove('hover');
         });
 
         divider.addEventListener('mousedown', () => {
@@ -485,7 +540,6 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             const offsetX = e.clientX - containerRect.left;
             const dividerWidth = divider.offsetWidth;
 
-            // Prevent overlap or out-of-bounds
             const minWidth = 100;
             const maxWidth = totalWidth - minWidth - dividerWidth;
             const leftWidth = Math.max(minWidth, Math.min(offsetX, maxWidth));
@@ -518,14 +572,26 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
-    // ----- entry point -----
-    let lastContent = loadLastContent();
+    // ----- Entry Point -----
     let editor = setupEditor();
-    if (lastContent) {
-        presetValue(lastContent);
+    
+    // Boot sequence: check URL hash -> check history index -> fallback to new
+    let initialId = window.location.hash.substring(1);
+    let index = getIndex();
+    
+    if (initialId) {
+        currentDocId = initialId;
+        let content = Storehouse.getItem(localStorageNamespace, `doc_${initialId}`);
+        presetValue(content || defaultInput);
+    } else if (index.length > 0) {
+        loadDoc(index[0].id);
     } else {
-        presetValue(defaultInput);
+        createNewDoc();
     }
+    
+    setupSidebar();
+    renderSidebar();
+
     setupResetButton();
     setupCopyButton(editor);
     setupExportButton();
@@ -533,9 +599,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
 
-    // initialize theme (dark/light)
     let themeSettings = loadThemeSettings();
-    // normalize to boolean (Storehouse may return string or boolean)
     if (themeSettings === 'true' || themeSettings === true) {
         themeSettings = true;
     } else {
@@ -544,6 +608,14 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     initThemeToggle(themeSettings);
 
     setupDivider();
+
+    // Seamless navigation between tabs/documents
+    window.addEventListener('hashchange', () => {
+        let newId = window.location.hash.substring(1);
+        if (newId && newId !== currentDocId) {
+            loadDoc(newId);
+        }
+    });
 };
 
 window.addEventListener("load", () => {
