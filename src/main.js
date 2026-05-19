@@ -1,7 +1,14 @@
 import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
+import markedKatex from 'https://cdn.jsdelivr.net/npm/marked-katex-extension@5.1.4/+esm';
 import DOMPurify from 'dompurify';
+
+const KATEX_CSS_URL = 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css';
+
+marked.use(markedKatex({
+    throwOnError: false,
+}));
 
 const init = () => {
     let hasEdited = false;
@@ -82,6 +89,16 @@ ${"`"}${"`"}${"`"}
 ## Inline code
 
 This web site is using ${"`"}markedjs/marked${"`"}.
+
+## Math
+
+Inline math: $x^2 + y^2 = z^2$
+
+Display math:
+
+$$
+\\int_0^1 x^2\\,dx = \\frac{1}{3}
+$$
 `;
 
     self.MonacoEnvironment = {
@@ -270,6 +287,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     // ----- export preview -----
 
     let exportLightCssPromise = null;
+    let exportKatexCssPromise = null;
 
     let getLightMarkdownCss = () => {
         if (exportLightCssPromise) {
@@ -292,6 +310,27 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         return exportLightCssPromise;
     };
 
+    let getKatexCss = () => {
+        if (exportKatexCssPromise) {
+            return exportKatexCssPromise;
+        }
+
+        exportKatexCssPromise = fetch(KATEX_CSS_URL)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load KaTeX CSS: ${response.status}`);
+                }
+                return response.text();
+            })
+            .catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error('Failed to load KaTeX CSS', error);
+                return '';
+            });
+
+        return exportKatexCssPromise;
+    };
+
     let exportPreviewToPdf = () => {
         const previewElement = document.querySelector('#preview-wrapper');
         if (!previewElement) {
@@ -303,7 +342,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             return;
         }
 
-        getLightMarkdownCss().then((lightCss) => {
+        Promise.all([getLightMarkdownCss(), getKatexCss()]).then(([lightCss, katexCss]) => {
             const options = {
                 margin: 10,
                 filename: 'markdown-preview.pdf',
@@ -328,6 +367,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
   color: #24292f !important;
 }`;
                             clonedDoc.head.appendChild(style);
+                        }
+
+                        if (katexCss) {
+                            const katexStyle = clonedDoc.createElement('style');
+                            katexStyle.id = 'export-katex-css';
+                            katexStyle.textContent = katexCss;
+                            clonedDoc.head.appendChild(katexStyle);
                         }
 
                         const clonedPreview = clonedDoc.getElementById('preview-wrapper');

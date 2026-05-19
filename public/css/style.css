@@ -148,6 +148,12 @@ footer {
   white-space: normal;
 }
 
+#output .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2em 0;
+}
+
 .split-container {
   display: flex;
   height: 100%;
