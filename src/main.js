@@ -10,26 +10,9 @@ const KATEX_BASE_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist`;
 const KATEX_CSS_URL = `${KATEX_BASE_URL}/katex.min.css`;
 const MARKED_KATEX_EXTENSION_URL = `${JSDELIVR_BASE_URL}/marked-katex-extension@${MARKED_KATEX_EXTENSION_VERSION}/+esm`;
 
-const ensureKatexStylesheet = () => {
-    const existing = document.getElementById('katex-css-link');
-    if (existing) {
-        return;
-    }
-
-    const katexLink = document.createElement('link');
-    katexLink.id = 'katex-css-link';
-    katexLink.rel = 'stylesheet';
-    katexLink.type = 'text/css';
-    katexLink.href = KATEX_CSS_URL;
-    katexLink.crossOrigin = 'anonymous';
-    katexLink.referrerPolicy = 'no-referrer';
-    document.head.appendChild(katexLink);
-};
-
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
-    ensureKatexStylesheet();
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
