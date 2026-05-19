@@ -179,7 +179,9 @@ $$
             mangle: false
         };
         let html = marked.parse(markdown, options);
-        let sanitized = DOMPurify.sanitize(html);
+        let sanitized = DOMPurify.sanitize(html, {
+            USE_PROFILES: { html: true }
+        });
         document.querySelector('#output').innerHTML = sanitized;
     };
 
