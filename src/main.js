@@ -26,23 +26,10 @@ const ensureKatexStylesheet = () => {
     document.head.appendChild(katexLink);
 };
 
-const init = async () => {
+const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
     ensureKatexStylesheet();
-    try {
-        const { default: markedKatex } = await import(MARKED_KATEX_EXTENSION_URL);
-        marked.use(markedKatex({
-            throwOnError: false,
-            katexOptions: {
-                throwOnError: false,
-                output: 'html',
-            },
-        }));
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to load KaTeX extension; continuing without math rendering.', error);
-    }
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
@@ -620,6 +607,22 @@ $$
     initThemeToggle(themeSettings);
 
     setupDivider();
+
+    import(MARKED_KATEX_EXTENSION_URL)
+        .then(({ default: markedKatex }) => {
+            marked.use(markedKatex({
+                throwOnError: false,
+                katexOptions: {
+                    throwOnError: false,
+                    output: 'html',
+                },
+            }));
+            convert(editor.getValue());
+        })
+        .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to load KaTeX extension; continuing without math rendering.', error);
+        });
 };
 
 window.addEventListener("load", () => {

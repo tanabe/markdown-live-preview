@@ -154,6 +154,10 @@ footer {
   padding: 0.2em 0;
 }
 
+#output .katex .katex-mathml {
+  display: none;
+}
+
 .split-container {
   display: flex;
   height: 100%;
