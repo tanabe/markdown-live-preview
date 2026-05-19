@@ -29,10 +29,17 @@ const ensureKatexStylesheet = () => {
 const init = async () => {
     let hasEdited = false;
     let scrollBarSync = false;
-    const { default: markedKatex } = await import(MARKED_KATEX_EXTENSION_URL);
-    marked.use(markedKatex({
-        throwOnError: false,
-    }));
+    ensureKatexStylesheet();
+    try {
+        const { default: markedKatex } = await import(MARKED_KATEX_EXTENSION_URL);
+        marked.use(markedKatex({
+            throwOnError: false,
+            output: 'html',
+        }));
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to load KaTeX extension; continuing without math rendering.', error);
+    }
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
@@ -586,7 +593,6 @@ $$
 
     // ----- entry point -----
     let lastContent = loadLastContent();
-    ensureKatexStylesheet();
     let editor = setupEditor();
     if (lastContent) {
         presetValue(lastContent);
