@@ -34,7 +34,10 @@ const init = async () => {
         const { default: markedKatex } = await import(MARKED_KATEX_EXTENSION_URL);
         marked.use(markedKatex({
             throwOnError: false,
-            output: 'html',
+            katexOptions: {
+                throwOnError: false,
+                output: 'html',
+            },
         }));
     } catch (error) {
         // eslint-disable-next-line no-console
