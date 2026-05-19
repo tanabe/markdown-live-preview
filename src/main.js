@@ -1,18 +1,38 @@
 import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
 import { marked } from 'marked';
-import markedKatex from 'https://cdn.jsdelivr.net/npm/marked-katex-extension@5.1.4/+esm';
 import DOMPurify from 'dompurify';
 
-const KATEX_CSS_URL = 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css';
+const JSDELIVR_BASE_URL = 'https://cdn.jsdelivr.net/npm';
+const KATEX_VERSION = '0.16.22';
+const MARKED_KATEX_EXTENSION_VERSION = '5.1.4';
+const KATEX_BASE_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist`;
+const KATEX_CSS_URL = `${KATEX_BASE_URL}/katex.min.css`;
+const MARKED_KATEX_EXTENSION_URL = `${JSDELIVR_BASE_URL}/marked-katex-extension@${MARKED_KATEX_EXTENSION_VERSION}/+esm`;
 
-marked.use(markedKatex({
-    throwOnError: false,
-}));
+const ensureKatexStylesheet = () => {
+    const existing = document.getElementById('katex-css-link');
+    if (existing) {
+        return;
+    }
 
-const init = () => {
+    const katexLink = document.createElement('link');
+    katexLink.id = 'katex-css-link';
+    katexLink.rel = 'stylesheet';
+    katexLink.type = 'text/css';
+    katexLink.href = KATEX_CSS_URL;
+    katexLink.crossOrigin = 'anonymous';
+    katexLink.referrerPolicy = 'no-referrer';
+    document.head.appendChild(katexLink);
+};
+
+const init = async () => {
     let hasEdited = false;
     let scrollBarSync = false;
+    const { default: markedKatex } = await import(MARKED_KATEX_EXTENSION_URL);
+    marked.use(markedKatex({
+        throwOnError: false,
+    }));
 
     const localStorageNamespace = 'com.markdownlivepreview';
     const localStorageKey = 'last_state';
@@ -372,7 +392,7 @@ $$
                         if (katexCss) {
                             const katexStyle = clonedDoc.createElement('style');
                             katexStyle.id = 'export-katex-css';
-                            katexStyle.textContent = katexCss;
+                            katexStyle.textContent = katexCss.replaceAll('url(fonts/', `url(${KATEX_BASE_URL}/fonts/`);
                             clonedDoc.head.appendChild(katexStyle);
                         }
 
@@ -566,6 +586,7 @@ $$
 
     // ----- entry point -----
     let lastContent = loadLastContent();
+    ensureKatexStylesheet();
     let editor = setupEditor();
     if (lastContent) {
         presetValue(lastContent);
