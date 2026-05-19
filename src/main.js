@@ -9,6 +9,11 @@ const MARKED_KATEX_EXTENSION_VERSION = '5.1.4';
 const KATEX_BASE_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist`;
 const KATEX_CSS_URL = `${KATEX_BASE_URL}/katex.min.css`;
 const MARKED_KATEX_EXTENSION_URL = `${JSDELIVR_BASE_URL}/marked-katex-extension@${MARKED_KATEX_EXTENSION_VERSION}/+esm`;
+// Keep this in sync with the KaTeX stylesheet link in index.html.
+
+const rewriteKatexFontUrls = (cssText) => {
+    return cssText.replace(/url\((['"]?)fonts\//g, `url($1${KATEX_BASE_URL}/fonts/`);
+};
 
 const init = () => {
     let hasEdited = false;
@@ -374,7 +379,7 @@ $$
                         if (katexCss) {
                             const katexStyle = clonedDoc.createElement('style');
                             katexStyle.id = 'export-katex-css';
-                            katexStyle.textContent = katexCss.replaceAll('url(fonts/', `url(${KATEX_BASE_URL}/fonts/`);
+                            katexStyle.textContent = rewriteKatexFontUrls(katexCss);
                             clonedDoc.head.appendChild(katexStyle);
                         }
 
