@@ -612,10 +612,6 @@ $$
         .then(({ default: markedKatex }) => {
             marked.use(markedKatex({
                 throwOnError: false,
-                katexOptions: {
-                    throwOnError: false,
-                    output: 'html',
-                },
             }));
             convert(editor.getValue());
         })
