@@ -29,7 +29,7 @@ p {
 
 a:link,
 a:visited,
-a:hover
+a:hover,
 a:active {
   text-decoration: none;
 }
@@ -149,7 +149,7 @@ footer {
 }
 
 #output .katex-display {
-  overflow-x: auto;
+  overflow-x: visible;
   overflow-y: visible;
   padding: 0.2em 0;
 }

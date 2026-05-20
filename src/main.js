@@ -1,15 +1,22 @@
 import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
-import { marked } from 'marked';
+import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 
 const JSDELIVR_BASE_URL = 'https://cdn.jsdelivr.net/npm';
 const KATEX_VERSION = '0.16.22';
 const MARKED_KATEX_EXTENSION_VERSION = '5.1.4';
-const KATEX_BASE_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist`;
-const KATEX_CSS_URL = `${KATEX_BASE_URL}/katex.min.css`;
+const FALLBACK_KATEX_CSS_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist/katex.min.css`;
+const getKatexCssUrl = () => {
+    if (typeof document === 'undefined') {
+        return FALLBACK_KATEX_CSS_URL;
+    }
+    const katexStylesheet = document.querySelector('link[rel="stylesheet"][href*="katex.min.css"]');
+    return katexStylesheet?.href || FALLBACK_KATEX_CSS_URL;
+};
+const KATEX_CSS_URL = getKatexCssUrl();
+const KATEX_BASE_URL = KATEX_CSS_URL.replace(/\/katex\.min\.css(?:\?.*)?$/, '');
 const MARKED_KATEX_EXTENSION_URL = `${JSDELIVR_BASE_URL}/marked-katex-extension@${MARKED_KATEX_EXTENSION_VERSION}/+esm`;
-// Keep this in sync with the KaTeX stylesheet link in index.html.
 
 const rewriteKatexFontUrls = (cssText) => {
     return cssText.replace(/url\((['"]?)fonts\//g, `url($1${KATEX_BASE_URL}/fonts/`);
@@ -167,10 +174,7 @@ $$
             mangle: false
         };
         let html = marked.parse(markdown, options);
-        let sanitized = DOMPurify.sanitize(html, {
-            USE_PROFILES: { html: true }
-        });
-        document.querySelector('#output').innerHTML = sanitized;
+        document.querySelector('#output').innerHTML = DOMPurify.sanitize(html);
     };
 
     // Reset input text

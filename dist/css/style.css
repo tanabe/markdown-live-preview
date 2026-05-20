@@ -149,7 +149,7 @@ footer {
 }
 
 #output .katex-display {
-  overflow-x: auto;
+  overflow-x: visible;
   overflow-y: visible;
   padding: 0.2em 0;
 }
