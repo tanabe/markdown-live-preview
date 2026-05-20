@@ -1,7 +1,26 @@
 import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
-import { marked } from 'marked';
+import {marked} from 'marked';
 import DOMPurify from 'dompurify';
+
+const JSDELIVR_BASE_URL = 'https://cdn.jsdelivr.net/npm';
+const KATEX_VERSION = '0.16.22';
+const MARKED_KATEX_EXTENSION_VERSION = '5.1.4';
+const FALLBACK_KATEX_CSS_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist/katex.min.css`;
+const getKatexCssUrl = () => {
+    if (typeof document === 'undefined') {
+        return FALLBACK_KATEX_CSS_URL;
+    }
+    const katexStylesheet = document.querySelector('link[rel="stylesheet"][href*="katex.min.css"]');
+    return katexStylesheet?.href || FALLBACK_KATEX_CSS_URL;
+};
+const KATEX_CSS_URL = getKatexCssUrl();
+const KATEX_BASE_URL = KATEX_CSS_URL.replace(/\/katex\.min\.css(?:\?.*)?$/, '');
+const MARKED_KATEX_EXTENSION_URL = `${JSDELIVR_BASE_URL}/marked-katex-extension@${MARKED_KATEX_EXTENSION_VERSION}/+esm`;
+
+const rewriteKatexFontUrls = (cssText) => {
+    return cssText.replace(/url\((['"]?)fonts\//g, `url($1${KATEX_BASE_URL}/fonts/`);
+};
 
 const init = () => {
     let hasEdited = false;
@@ -82,6 +101,16 @@ ${"`"}${"`"}${"`"}
 ## Inline code
 
 This web site is using ${"`"}markedjs/marked${"`"}.
+
+## Math
+
+Inline math: $x^2 + y^2 = z^2$
+
+Display math:
+
+$$
+\\int_0^1 x^2\\,dx = \\frac{1}{3}
+$$
 `;
 
     self.MonacoEnvironment = {
@@ -145,8 +174,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             mangle: false
         };
         let html = marked.parse(markdown, options);
-        let sanitized = DOMPurify.sanitize(html);
-        document.querySelector('#output').innerHTML = sanitized;
+        document.querySelector('#output').innerHTML = DOMPurify.sanitize(html);
     };
 
     // Reset input text
@@ -270,6 +298,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     // ----- export preview -----
 
     let exportLightCssPromise = null;
+    let exportKatexCssPromise = null;
 
     let getLightMarkdownCss = () => {
         if (exportLightCssPromise) {
@@ -292,6 +321,27 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         return exportLightCssPromise;
     };
 
+    let getKatexCss = () => {
+        if (exportKatexCssPromise) {
+            return exportKatexCssPromise;
+        }
+
+        exportKatexCssPromise = fetch(KATEX_CSS_URL)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load KaTeX CSS: ${response.status}`);
+                }
+                return response.text();
+            })
+            .catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error('Failed to load KaTeX CSS', error);
+                return '';
+            });
+
+        return exportKatexCssPromise;
+    };
+
     let exportPreviewToPdf = () => {
         const previewElement = document.querySelector('#preview-wrapper');
         if (!previewElement) {
@@ -303,7 +353,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             return;
         }
 
-        getLightMarkdownCss().then((lightCss) => {
+        Promise.all([getLightMarkdownCss(), getKatexCss()]).then(([lightCss, katexCss]) => {
             const options = {
                 margin: 10,
                 filename: 'markdown-preview.pdf',
@@ -328,6 +378,13 @@ This web site is using ${"`"}markedjs/marked${"`"}.
   color: #24292f !important;
 }`;
                             clonedDoc.head.appendChild(style);
+                        }
+
+                        if (katexCss) {
+                            const katexStyle = clonedDoc.createElement('style');
+                            katexStyle.id = 'export-katex-css';
+                            katexStyle.textContent = rewriteKatexFontUrls(katexCss);
+                            clonedDoc.head.appendChild(katexStyle);
                         }
 
                         const clonedPreview = clonedDoc.getElementById('preview-wrapper');
@@ -544,6 +601,18 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     initThemeToggle(themeSettings);
 
     setupDivider();
+
+    import(MARKED_KATEX_EXTENSION_URL)
+        .then(({ default: markedKatex }) => {
+            marked.use(markedKatex({
+                throwOnError: false,
+            }));
+            convert(editor.getValue());
+        })
+        .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to load KaTeX extension; continuing without math rendering.', error);
+        });
 };
 
 window.addEventListener("load", () => {

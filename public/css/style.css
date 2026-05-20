@@ -29,7 +29,7 @@ p {
 
 a:link,
 a:visited,
-a:hover
+a:hover,
 a:active {
   text-decoration: none;
 }
@@ -147,6 +147,13 @@ footer {
   overflow-y: scroll;
   white-space: normal;
 }
+
+#output .katex-display {
+  overflow-x: visible;
+  overflow-y: visible;
+  padding: 0.2em 0;
+}
+
 
 .split-container {
   display: flex;
