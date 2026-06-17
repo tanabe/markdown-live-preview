@@ -27,7 +27,7 @@
     "vite": "^6.4.2"
   },
   "dependencies": {
-    "dompurify": "^3.4.0",
+    "dompurify": "^3.4.10",
     "github-markdown-css": "^5.8.1",
     "marked": "^15.0.7",
     "mermaid": "^11.15.0",
