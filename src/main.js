@@ -4,6 +4,21 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 
+const MARKED_KATEX_EXTENSION_URL = 'https://cdn.jsdelivr.net/npm/marked-katex-extension@5.1.4/+esm';
+
+const getKatexStylesheet = (doc = document) => {
+    return doc.querySelector('link[rel="stylesheet"][href*="katex.min.css"]');
+};
+
+const copyKatexStylesheetAttributes = (sourceLink, targetLink) => {
+    ['href', 'integrity', 'crossorigin', 'referrerpolicy'].forEach((attribute) => {
+        const value = sourceLink?.getAttribute(attribute);
+        if (value) {
+            targetLink.setAttribute(attribute, value);
+        }
+    });
+};
+
 const init = () => {
     let hasEdited = false;
     let scrollBarSync = false;
@@ -93,6 +108,16 @@ ${"`"}${"`"}${"`"}
 ## Inline code
 
 This web site is using ${"`"}markedjs/marked${"`"}.
+
+## Math
+
+Inline math: $x^2 + y^2 = z^2$
+
+Display math:
+
+$$
+\\int_0^1 x^2\\,dx = \\frac{1}{3}
+$$
 `;
 
     self.MonacoEnvironment = {
@@ -446,6 +471,15 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                             clonedDoc.head.appendChild(style);
                         }
 
+                        const katexStylesheet = getKatexStylesheet(document);
+                        if (katexStylesheet) {
+                            const clonedKatexStylesheet = clonedDoc.createElement('link');
+                            clonedKatexStylesheet.rel = 'stylesheet';
+                            clonedKatexStylesheet.type = katexStylesheet.getAttribute('type') || 'text/css';
+                            copyKatexStylesheetAttributes(katexStylesheet, clonedKatexStylesheet);
+                            clonedDoc.head.appendChild(clonedKatexStylesheet);
+                        }
+
                         const clonedPreview = clonedDoc.getElementById('preview-wrapper');
                         if (clonedPreview) {
                             clonedPreview.style.background = '#fff';
@@ -665,6 +699,18 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     initThemeToggle(themeSettings);
 
     setupDivider();
+
+    import(MARKED_KATEX_EXTENSION_URL)
+        .then(({ default: markedKatex }) => {
+            marked.use(markedKatex({
+                throwOnError: false,
+            }));
+            convert(editor.getValue());
+        })
+        .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to load KaTeX extension; continuing without math rendering.', error);
+        });
 };
 
 window.addEventListener("load", () => {
