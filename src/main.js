@@ -1,25 +1,22 @@
 import Storehouse from 'storehouse-js';
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
-import {marked} from 'marked';
+import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import mermaid from 'mermaid';
 
-const JSDELIVR_BASE_URL = 'https://cdn.jsdelivr.net/npm';
-const KATEX_VERSION = '0.16.22';
-const MARKED_KATEX_EXTENSION_VERSION = '5.1.4';
-const FALLBACK_KATEX_CSS_URL = `${JSDELIVR_BASE_URL}/katex@${KATEX_VERSION}/dist/katex.min.css`;
-const getKatexCssUrl = () => {
-    if (typeof document === 'undefined') {
-        return FALLBACK_KATEX_CSS_URL;
-    }
-    const katexStylesheet = document.querySelector('link[rel="stylesheet"][href*="katex.min.css"]');
-    return katexStylesheet?.href || FALLBACK_KATEX_CSS_URL;
+const MARKED_KATEX_EXTENSION_URL = 'https://cdn.jsdelivr.net/npm/marked-katex-extension@5.1.4/+esm';
+
+const getKatexStylesheet = (doc = document) => {
+    return doc.querySelector('link[rel="stylesheet"][href*="katex.min.css"]');
 };
-const KATEX_CSS_URL = getKatexCssUrl();
-const KATEX_BASE_URL = KATEX_CSS_URL.replace(/\/katex\.min\.css(?:\?.*)?$/, '');
-const MARKED_KATEX_EXTENSION_URL = `${JSDELIVR_BASE_URL}/marked-katex-extension@${MARKED_KATEX_EXTENSION_VERSION}/+esm`;
 
-const rewriteKatexFontUrls = (cssText) => {
-    return cssText.replace(/url\((['"]?)fonts\//g, `url($1${KATEX_BASE_URL}/fonts/`);
+const copyKatexStylesheetAttributes = (sourceLink, targetLink) => {
+    ['href', 'integrity', 'crossorigin', 'referrerpolicy'].forEach((attribute) => {
+        const value = sourceLink?.getAttribute(attribute);
+        if (value) {
+            targetLink.setAttribute(attribute, value);
+        }
+    });
 };
 
 const init = () => {
@@ -31,6 +28,8 @@ const init = () => {
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageThemeKey = 'theme_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
+    let mermaidRenderTimer = null;
+    let mermaidRenderVersion = 0;
     // default template
     const defaultInput = `# Markdown syntax guide
 
@@ -96,6 +95,14 @@ You may be using [Markdown Live Preview](https://markdownlivepreview.com/).
 ${"`"}${"`"}${"`"}
 let message = 'Hello world';
 alert(message);
+${"`"}${"`"}${"`"}
+
+## Mermaid diagrams
+${"`"}${"`"}${"`"}mermaid
+graph TD
+  A[Start] --> B{Decision}
+  B -->|Yes| C[Finish]
+  B -->|No| D[Alternate]
 ${"`"}${"`"}${"`"}
 
 ## Inline code
@@ -167,14 +174,117 @@ $$
         return editor;
     };
 
+    let escapeHtml = (value) => {
+        return value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    let createMarkedRenderer = () => {
+        const renderer = new marked.Renderer();
+        const renderCode = renderer.code.bind(renderer);
+
+        renderer.code = (token) => {
+            const lang = (token.lang || '').match(/^\S*/)?.[0].toLowerCase();
+            if (lang !== 'mermaid') {
+                return renderCode(token);
+            }
+
+            return `<pre class="mermaid">${escapeHtml(token.text)}</pre>\n`;
+        };
+
+        return renderer;
+    };
+
+    let configureMermaid = (theme) => {
+        mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: 'strict',
+            theme
+        });
+    };
+
+    let showMermaidError = (element, error) => {
+        const message = error && error.message ? error.message : 'Unable to render Mermaid chart.';
+        element.classList.add('mermaid-error');
+        element.textContent = `Mermaid render error: ${message}`;
+    };
+
+    let getMermaidTheme = () => {
+        return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+    };
+
+    let renderMermaidDiagramsNow = async (theme = getMermaidTheme()) => {
+        const outputElement = document.querySelector('#output');
+        if (!outputElement) {
+            return;
+        }
+
+        const version = ++mermaidRenderVersion;
+        configureMermaid(theme);
+
+        const elements = Array.from(outputElement.querySelectorAll('.mermaid'));
+        for (const [index, element] of elements.entries()) {
+            if (version !== mermaidRenderVersion) {
+                return;
+            }
+
+            const source = element.dataset.mermaidSource || element.textContent;
+            element.dataset.mermaidSource = source;
+            element.classList.remove('mermaid-error');
+
+            try {
+                const renderId = `mermaid-${Date.now()}-${version}-${index}`;
+                const { svg, bindFunctions } = await mermaid.render(renderId, source);
+                if (version !== mermaidRenderVersion) {
+                    return;
+                }
+                element.innerHTML = svg;
+                if (typeof bindFunctions === 'function') {
+                    bindFunctions(element);
+                }
+            } catch (error) {
+                showMermaidError(element, error);
+            }
+        }
+    };
+
+    let scheduleMermaidRender = () => {
+        if (mermaidRenderTimer) {
+            clearTimeout(mermaidRenderTimer);
+        }
+
+        mermaidRenderTimer = setTimeout(() => {
+            mermaidRenderTimer = null;
+            renderMermaidDiagramsNow();
+        }, 150);
+    };
+
+    let renderMermaidDiagrams = (theme) => {
+        if (mermaidRenderTimer) {
+            clearTimeout(mermaidRenderTimer);
+            mermaidRenderTimer = null;
+        }
+
+        return renderMermaidDiagramsNow(theme);
+    };
+
+    let renderer = createMarkedRenderer();
+
     // Render markdown text as html
     let convert = (markdown) => {
         let options = {
             headerIds: false,
-            mangle: false
+            mangle: false,
+            renderer
         };
         let html = marked.parse(markdown, options);
-        document.querySelector('#output').innerHTML = DOMPurify.sanitize(html);
+        let sanitized = DOMPurify.sanitize(html);
+        document.querySelector('#output').innerHTML = sanitized;
+        scheduleMermaidRender();
     };
 
     // Reset input text
@@ -262,6 +372,7 @@ $$
             if (monaco && monaco.editor && typeof monaco.editor.setTheme === 'function') {
                 monaco.editor.setTheme(checked ? 'vs-dark' : 'vs');
             }
+            renderMermaidDiagrams();
         });
     };
 
@@ -298,7 +409,6 @@ $$
     // ----- export preview -----
 
     let exportLightCssPromise = null;
-    let exportKatexCssPromise = null;
 
     let getLightMarkdownCss = () => {
         if (exportLightCssPromise) {
@@ -321,27 +431,6 @@ $$
         return exportLightCssPromise;
     };
 
-    let getKatexCss = () => {
-        if (exportKatexCssPromise) {
-            return exportKatexCssPromise;
-        }
-
-        exportKatexCssPromise = fetch(KATEX_CSS_URL)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`Failed to load KaTeX CSS: ${response.status}`);
-                }
-                return response.text();
-            })
-            .catch((error) => {
-                // eslint-disable-next-line no-console
-                console.error('Failed to load KaTeX CSS', error);
-                return '';
-            });
-
-        return exportKatexCssPromise;
-    };
-
     let exportPreviewToPdf = () => {
         const previewElement = document.querySelector('#preview-wrapper');
         if (!previewElement) {
@@ -353,7 +442,9 @@ $$
             return;
         }
 
-        Promise.all([getLightMarkdownCss(), getKatexCss()]).then(([lightCss, katexCss]) => {
+        const restoreDarkMermaid = getMermaidTheme() === 'dark';
+
+        renderMermaidDiagrams('default').then(() => getLightMarkdownCss()).then((lightCss) => {
             const options = {
                 margin: 10,
                 filename: 'markdown-preview.pdf',
@@ -380,11 +471,13 @@ $$
                             clonedDoc.head.appendChild(style);
                         }
 
-                        if (katexCss) {
-                            const katexStyle = clonedDoc.createElement('style');
-                            katexStyle.id = 'export-katex-css';
-                            katexStyle.textContent = rewriteKatexFontUrls(katexCss);
-                            clonedDoc.head.appendChild(katexStyle);
+                        const katexStylesheet = getKatexStylesheet(document);
+                        if (katexStylesheet) {
+                            const clonedKatexStylesheet = clonedDoc.createElement('link');
+                            clonedKatexStylesheet.rel = 'stylesheet';
+                            clonedKatexStylesheet.type = katexStylesheet.getAttribute('type') || 'text/css';
+                            copyKatexStylesheetAttributes(katexStylesheet, clonedKatexStylesheet);
+                            clonedDoc.head.appendChild(clonedKatexStylesheet);
                         }
 
                         const clonedPreview = clonedDoc.getElementById('preview-wrapper');
@@ -414,6 +507,11 @@ $$
                 .catch((error) => {
                     // eslint-disable-next-line no-console
                     console.error('Failed to export PDF', error);
+                })
+                .finally(() => {
+                    if (restoreDarkMermaid) {
+                        renderMermaidDiagrams();
+                    }
                 });
         });
     };

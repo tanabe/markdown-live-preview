@@ -148,12 +148,28 @@ footer {
   white-space: normal;
 }
 
-#output .katex-display {
-  overflow-x: visible;
-  overflow-y: visible;
-  padding: 0.2em 0;
+.markdown-body .mermaid {
+  overflow-x: auto;
+  padding: 16px;
+  text-align: center;
 }
 
+.markdown-body .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.markdown-body .mermaid-error {
+  color: #cf222e;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+[data-theme="dark"] .markdown-body .mermaid-error {
+  color: #ff7b72;
+}
 
 .split-container {
   display: flex;
@@ -215,4 +231,14 @@ footer {
 
 [data-theme="dark"] footer {
   background-color: #333;
+}
+
+#output .katex-display {
+  overflow-x: auto;
+  padding: 0.4em 0.2em;
+  line-height: 1.4;
+}
+
+#output .katex {
+  line-height: 1.3;
 }
