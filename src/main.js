@@ -1,5 +1,6 @@
 import Storehouse from 'storehouse-js';
-import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/+esm';
+import * as monaco from 'monaco-editor/esm/vs/editor/edcore.main';
+import 'monaco-editor/esm/vs/basic-languages/markdown/markdown.contribution';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
@@ -299,8 +300,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- preview CSS loader (switch github-markdown css) -----
-    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=1.11.0';
-    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=1.11.0';
+    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=1.14.0';
+    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=1.14.0';
 
     let setPreviewCss = (useDark) => {
         const link = document.getElementById('gh-markdown-link');
