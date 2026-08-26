@@ -178,8 +178,22 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'strict',
+            // Without this, a failed render leaves mermaid's temporary `d<renderId>`
+            // container attached to <body>. While a diagram is being typed almost every
+            // keystroke fails, so those containers stack up until they cover the page.
+            suppressErrorRendering: true,
             theme
         });
+    };
+
+    // mermaid renders into a temporary container appended to <body>. It removes that
+    // container itself on success, and on failure only when suppressErrorRendering is on.
+    // Clean up defensively so a stray container can never accumulate.
+    let removeMermaidTempElement = (renderId) => {
+        const temp = document.getElementById(`d${renderId}`);
+        if (temp) {
+            temp.remove();
+        }
     };
 
     let showMermaidError = (element, error) => {
@@ -211,8 +225,10 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             element.dataset.mermaidSource = source;
             element.classList.remove('mermaid-error');
 
+            // Deterministic id: a Date.now() based one produces a fresh orphan per
+            // keystroke if mermaid ever fails to clean up after itself.
+            const renderId = `mermaid-${version}-${index}`;
             try {
-                const renderId = `mermaid-${Date.now()}-${version}-${index}`;
                 const { svg, bindFunctions } = await mermaid.render(renderId, source);
                 if (version !== mermaidRenderVersion) {
                     return;
@@ -223,6 +239,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 }
             } catch (error) {
                 showMermaidError(element, error);
+            } finally {
+                removeMermaidTempElement(renderId);
             }
         }
     };
