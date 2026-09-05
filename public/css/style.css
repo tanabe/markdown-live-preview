@@ -161,6 +161,113 @@ footer {
   margin: 0 auto;
 }
 
+/* Print/PDF export */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body,
+  #container,
+  #preview,
+  #preview-wrapper,
+  #output {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    overflow: visible;
+    background: #fff;
+    color: #24292f;
+  }
+
+  header,
+  footer,
+  #edit,
+  #split-divider {
+    display: none !important;
+  }
+
+  #container,
+  #preview {
+    display: block;
+    border: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .markdown-body {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .markdown-body img,
+  .markdown-body table {
+    max-width: 100%;
+  }
+
+  .markdown-body .mermaid {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    padding: 12px 0;
+    margin: 16px 0;
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .markdown-body .mermaid svg {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto;
+    color-scheme: light;
+    background: #fff;
+  }
+
+  /* Keep section titles with the opening content of their section. */
+  .markdown-body h1,
+  .markdown-body h2,
+  .markdown-body h3,
+  .markdown-body h4,
+  .markdown-body h5,
+  .markdown-body h6 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+
+  .markdown-body h1 + *,
+  .markdown-body h2 + *,
+  .markdown-body h3 + *,
+  .markdown-body h4 + *,
+  .markdown-body h5 + *,
+  .markdown-body h6 + * {
+    break-before: avoid-page;
+    page-break-before: avoid;
+  }
+
+  .markdown-body p,
+  .markdown-body li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .markdown-body pre,
+  .markdown-body blockquote,
+  .markdown-body table,
+  .markdown-body img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
 .markdown-body .mermaid-error {
   color: #cf222e;
   white-space: pre-wrap;
