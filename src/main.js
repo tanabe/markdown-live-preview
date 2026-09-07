@@ -15,6 +15,12 @@ const init = () => {
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     let mermaidRenderTimer = null;
     let mermaidRenderVersion = 0;
+    const mermaidSvgCache = new Map();
+    const mermaidSvgCacheLimit = 50;
+    const mermaidErrorGracePeriod = 700;
+    let mermaidLastGoodSvg = [];
+    let mermaidFailureSince = [];
+    let mermaidGraceTimer = null;
     // default template
     const defaultInput = `# Markdown syntax guide
 
@@ -178,14 +184,87 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'strict',
+            suppressErrorRendering: true,
             theme
         });
     };
 
+    let getMermaidErrorMessage = (error) => {
+        if (!error) {
+            return 'Unable to render Mermaid chart.';
+        }
+
+        return error.message || error.str || 'Unable to render Mermaid chart.';
+    };
+
     let showMermaidError = (element, error) => {
-        const message = error && error.message ? error.message : 'Unable to render Mermaid chart.';
         element.classList.add('mermaid-error');
-        element.textContent = `Mermaid render error: ${message}`;
+        element.textContent = `Mermaid render error: ${getMermaidErrorMessage(error)}`;
+    };
+
+    let showStaleMermaidDiagram = (element, svg, error) => {
+        element.innerHTML = svg;
+        element.classList.add('mermaid-stale');
+
+        if (!error) {
+            return;
+        }
+
+        const note = document.createElement('div');
+        note.className = 'mermaid-error-note';
+        note.textContent = `Mermaid render error: ${getMermaidErrorMessage(error)}`;
+        element.appendChild(note);
+    };
+
+    let scheduleMermaidGraceRefresh = (delay) => {
+        if (mermaidGraceTimer) {
+            clearTimeout(mermaidGraceTimer);
+        }
+
+        mermaidGraceTimer = setTimeout(() => {
+            mermaidGraceTimer = null;
+            renderMermaidDiagramsNow();
+        }, delay);
+    };
+
+    let showMermaidFailure = (element, index, error) => {
+        const previous = mermaidLastGoodSvg[index];
+        if (!previous) {
+            showMermaidError(element, error);
+            return;
+        }
+
+        const now = Date.now();
+        if (!mermaidFailureSince[index]) {
+            mermaidFailureSince[index] = now;
+        }
+
+        const elapsed = now - mermaidFailureSince[index];
+        if (elapsed < mermaidErrorGracePeriod) {
+            showStaleMermaidDiagram(element, previous, null);
+            scheduleMermaidGraceRefresh(mermaidErrorGracePeriod - elapsed);
+            return;
+        }
+
+        showStaleMermaidDiagram(element, previous, error);
+    };
+
+    let removeMermaidArtifacts = (renderId) => {
+        for (const id of [renderId, `d${renderId}`, `i${renderId}`]) {
+            const leftover = document.getElementById(id);
+            if (leftover) {
+                leftover.remove();
+            }
+        }
+    };
+
+    let cacheMermaidSvg = (key, svg) => {
+        if (mermaidSvgCache.size >= mermaidSvgCacheLimit) {
+            const oldest = mermaidSvgCache.keys().next().value;
+            mermaidSvgCache.delete(oldest);
+        }
+
+        mermaidSvgCache.set(key, svg);
     };
 
     let getMermaidTheme = () => {
@@ -196,6 +275,11 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         const outputElement = document.querySelector('#output');
         if (!outputElement) {
             return;
+        }
+
+        if (mermaidGraceTimer) {
+            clearTimeout(mermaidGraceTimer);
+            mermaidGraceTimer = null;
         }
 
         const version = ++mermaidRenderVersion;
@@ -210,9 +294,39 @@ This web site is using ${"`"}markedjs/marked${"`"}.
             const source = element.dataset.mermaidSource || element.textContent;
             element.dataset.mermaidSource = source;
             element.classList.remove('mermaid-error');
+            element.classList.remove('mermaid-stale');
+
+            const cacheKey = `${theme}\n${source}`;
+            const cached = mermaidSvgCache.get(cacheKey);
+            if (cached) {
+                element.innerHTML = cached;
+                mermaidLastGoodSvg[index] = cached;
+                mermaidFailureSince[index] = null;
+                continue;
+            }
+
+            const renderId = `mermaid-diagram-${index}`;
+            let parseError = null;
+            if (!source.trim()) {
+                parseError = new Error('Empty Mermaid chart.');
+            } else {
+                try {
+                    await mermaid.parse(source);
+                } catch (error) {
+                    parseError = error;
+                }
+            }
+
+            if (version !== mermaidRenderVersion) {
+                return;
+            }
+
+            if (parseError) {
+                showMermaidFailure(element, index, parseError);
+                continue;
+            }
 
             try {
-                const renderId = `mermaid-${Date.now()}-${version}-${index}`;
                 const { svg, bindFunctions } = await mermaid.render(renderId, source);
                 if (version !== mermaidRenderVersion) {
                     return;
@@ -221,10 +335,17 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 if (typeof bindFunctions === 'function') {
                     bindFunctions(element);
                 }
+                mermaidLastGoodSvg[index] = svg;
+                mermaidFailureSince[index] = null;
+                cacheMermaidSvg(cacheKey, svg);
             } catch (error) {
-                showMermaidError(element, error);
+                removeMermaidArtifacts(renderId);
+                showMermaidFailure(element, index, error);
             }
         }
+
+        mermaidLastGoodSvg.length = elements.length;
+        mermaidFailureSince.length = elements.length;
     };
 
     let scheduleMermaidRender = () => {

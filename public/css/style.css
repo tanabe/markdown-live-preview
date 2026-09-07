@@ -278,9 +278,34 @@ footer {
   color: #ff7b72;
 }
 
+.markdown-body .mermaid-stale svg {
+  opacity: 0.55;
+}
+
+.markdown-body .mermaid-error-note {
+  color: #cf222e;
+  white-space: pre-wrap;
+  text-align: left;
+  font-size: 0.85em;
+  margin-top: 8px;
+}
+
+[data-theme="dark"] .markdown-body .mermaid-error-note {
+  color: #ff7b72;
+}
+
+body > div[id^="dmermaid-diagram-"],
+body > iframe[id^="imermaid-diagram-"] {
+  position: absolute;
+  top: 0;
+  left: -99999px;
+  max-width: none;
+}
+
 .split-container {
   display: flex;
   height: 100%;
+  min-height: 0;
   width: 100%;
 }
 
