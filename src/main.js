@@ -471,6 +471,50 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         });
     };
 
+    let readMarkdownFile = (file) => {
+        if (!file) {
+            return Promise.reject(new Error('No file selected.'));
+        }
+
+        return file.text();
+    };
+
+    let setupImportButton = (editor) => {
+        const importButton = document.querySelector('#import-button');
+        if (!importButton) {
+            return;
+        }
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.md,.markdown,text/markdown,text/plain';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        importButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            fileInput.value = '';
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const selectedFile = event.currentTarget.files && event.currentTarget.files[0];
+            if (!selectedFile) {
+                return;
+            }
+
+            readMarkdownFile(selectedFile)
+                .then((content) => {
+                    presetValue(content);
+                    saveLastContent(content);
+                })
+                .catch((error) => {
+                    const message = error && error.message ? error.message : 'Unable to import Markdown file.';
+                    window.alert(`Import failed: ${message}`);
+                });
+        });
+    };
+
     // ----- local state -----
 
     let loadLastContent = () => {
@@ -605,6 +649,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     setupResetButton();
     setupCopyButton(editor);
     setupExportButton();
+    setupImportButton(editor);
 
     let scrollBarSettings = loadScrollBarSettings() || false;
     initScrollBarSync(scrollBarSettings);
