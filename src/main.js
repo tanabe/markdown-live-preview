@@ -299,8 +299,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- preview CSS loader (switch github-markdown css) -----
-    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=1.11.0';
-    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=1.11.0';
+    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=a1a198514565';
+    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=5d3f5d9d207c';
 
     let setPreviewCss = (useDark) => {
         const link = document.getElementById('gh-markdown-link');

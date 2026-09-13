@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "update:css-version": "node scripts/update-css-version.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
