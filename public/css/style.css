@@ -61,6 +61,25 @@ header a:hover {
     display: flex;
 }
 
+#open-button {
+    margin-left: 16px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+#open-button:hover {
+    text-decoration: underline;
+}
+
+#open-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 #reset-button {
     margin-left: 16px;
 }

@@ -440,6 +440,36 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     // ----- setup -----
 
     // setup navigation actions
+    let setupOpenButton = () => {
+        const button = document.querySelector('#open-button');
+        const input = document.querySelector('#open-file-input');
+
+        button.addEventListener('click', () => {
+            input.click();
+        });
+
+        input.addEventListener('change', async () => {
+            const file = input.files[0];
+            // Allow the same file to be selected again, including after a failed read.
+            input.value = '';
+            if (!file) return;
+
+            button.disabled = true;
+            let content;
+            try {
+                content = await file.text();
+            } catch (error) {
+                window.alert('Unable to read this file. Please try again.');
+                return;
+            } finally {
+                button.disabled = false;
+            }
+
+            presetValue(content);
+            document.querySelector('#preview').scrollTo({ top: 0 });
+        });
+    };
+
     let setupResetButton = () => {
         document.querySelector("#reset-button").addEventListener('click', (event) => {
             event.preventDefault();
@@ -597,11 +627,12 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     // ----- entry point -----
     let lastContent = loadLastContent();
     let editor = setupEditor();
-    if (lastContent) {
+    if (typeof lastContent === 'string') {
         presetValue(lastContent);
     } else {
         presetValue(defaultInput);
     }
+    setupOpenButton();
     setupResetButton();
     setupCopyButton(editor);
     setupExportButton();
