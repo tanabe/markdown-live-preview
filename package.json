@@ -30,6 +30,8 @@
   "dependencies": {
     "dompurify": "^3.4.13",
     "github-markdown-css": "^5.8.1",
+    "html2pdf.js": "^0.14.0",
+    "i": "^0.3.7",
     "marked": "^15.0.7",
     "mermaid": "^11.16.1",
     "monaco-editor": "^0.52.2",

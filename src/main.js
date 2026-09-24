@@ -3,6 +3,7 @@ import * as monaco from 'monaco-editor';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
+import html2pdf from 'html2pdf.js';
 
 const init = () => {
     let hasEdited = false;
@@ -174,15 +175,22 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         return renderer;
     };
 
+    let cleanStrayMermaidElements = () => {
+        document.querySelectorAll('body > svg[id^="dmermaid"], body > div[id^="dmermaid"], body > svg[id^="mermaid-"], body > div[id^="mermaid-"]').forEach((el) => el.remove());
+    };
+
     let configureMermaid = (theme) => {
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'strict',
-            theme
+            theme,
+            suppressErrorRendering: true
         });
+        mermaid.parseError = () => {};
     };
 
     let showMermaidError = (element, error) => {
+        cleanStrayMermaidElements();
         const message = error && error.message ? error.message : 'Unable to render Mermaid chart.';
         element.classList.add('mermaid-error');
         element.textContent = `Mermaid render error: ${message}`;
@@ -201,6 +209,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         const version = ++mermaidRenderVersion;
         configureMermaid(theme);
 
+        cleanStrayMermaidElements();
         const elements = Array.from(outputElement.querySelectorAll('.mermaid'));
         for (const [index, element] of elements.entries()) {
             if (version !== mermaidRenderVersion) {
@@ -225,6 +234,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 showMermaidError(element, error);
             }
         }
+        cleanStrayMermaidElements();
     };
 
     let scheduleMermaidRender = () => {
@@ -299,8 +309,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- preview CSS loader (switch github-markdown css) -----
-    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=a1a198514565';
-    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=5d3f5d9d207c';
+    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=e3dc51b8a261';
+    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=df221bf84b9d';
 
     let setPreviewCss = (useDark) => {
         const link = document.getElementById('gh-markdown-link');
@@ -388,53 +398,138 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }, 1000)
     };
 
-    // ----- export preview -----
-
-    let restoreMermaidThemeAfterPrint = (theme) => {
-        const printMedia = window.matchMedia('print');
-        let printSessionStarted = false;
-
-        const cleanup = () => {
-            printMedia.removeEventListener('change', handlePrintMediaChange);
-        };
-
-        const handlePrintMediaChange = (event) => {
-            if (event.matches) {
-                printSessionStarted = true;
-                return;
-            }
-
-            if (!printSessionStarted) {
-                return;
-            }
-
-            cleanup();
-            renderMermaidDiagrams(theme);
-        };
-
-        printMedia.addEventListener('change', handlePrintMediaChange);
-        return cleanup;
+    let notifyExporting = () => {
+        let labelElement = document.querySelector("#export-button a");
+        if (labelElement) {
+            labelElement.dataset.exporting = 'true';
+            labelElement.innerHTML = "Exporting...";
+        }
     };
 
-    let exportPreviewToPdf = () => {
-        const currentTheme = getMermaidTheme();
-        const printTheme = 'default';
+    let notifyExported = () => {
+        let labelElement = document.querySelector("#export-button a");
+        if (labelElement) {
+            labelElement.dataset.exporting = 'false';
+            labelElement.innerHTML = "Downloaded!";
+            setTimeout(() => {
+                labelElement.innerHTML = "Export PDF";
+            }, 1500);
+        }
+    };
 
-        const cleanupPrintThemeListener = currentTheme === 'dark'
-            ? restoreMermaidThemeAfterPrint(currentTheme)
-            : null;
+    let resetExportButton = () => {
+        let labelElement = document.querySelector("#export-button a");
+        if (labelElement) {
+            labelElement.dataset.exporting = 'false';
+            labelElement.innerHTML = "Export PDF";
+        }
+    };
 
-        renderMermaidDiagrams(printTheme).then(() => {
-            window.print();
-        }).catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error('Failed to prepare PDF export', error);
-            if (currentTheme === 'dark') {
-                cleanupPrintThemeListener();
-                renderMermaidDiagrams(currentTheme);
+    let getExportFilename = () => {
+        const heading = document.querySelector('#output h1, #output h2');
+        if (heading && heading.textContent.trim()) {
+            const clean = heading.textContent.trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9_-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            if (clean) {
+                return `${clean}.pdf`;
             }
-            window.alert('Unable to prepare the print preview. Please try again.');
-        });
+        }
+        return 'document.pdf';
+    };
+
+    let exportPreviewToPdf = async () => {
+        const exportButton = document.querySelector('#export-button a');
+        if (exportButton && exportButton.dataset.exporting === 'true') {
+            return;
+        }
+
+        notifyExporting();
+
+        const currentTheme = getMermaidTheme();
+        const wasDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const outputElement = document.querySelector('#output');
+
+        if (!outputElement) {
+            resetExportButton();
+            return;
+        }
+
+        try {
+            if (wasDark) {
+                setTheme(false);
+                await setPreviewCss(false);
+                await renderMermaidDiagrams('default');
+            }
+
+            const filename = getExportFilename();
+
+            // Store original SVG attributes and set pixel dimensions for accurate canvas rendering
+            const svgState = [];
+            outputElement.querySelectorAll('.mermaid svg').forEach((svg) => {
+                const bBox = svg.getBoundingClientRect();
+                svgState.push({
+                    el: svg,
+                    width: svg.getAttribute('width'),
+                    height: svg.getAttribute('height')
+                });
+                if (bBox.width > 0 && bBox.height > 0) {
+                    svg.setAttribute('width', Math.round(bBox.width));
+                    svg.setAttribute('height', Math.round(bBox.height));
+                }
+            });
+
+            const opt = {
+                margin: [12, 12, 12, 12],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy']
+                }
+            };
+
+            const html2pdfFn = html2pdf.default || html2pdf;
+            await html2pdfFn().set(opt).from(outputElement).save();
+
+            // Restore SVG attributes
+            svgState.forEach(({ el, width, height }) => {
+                if (width !== null) {
+                    el.setAttribute('width', width);
+                } else {
+                    el.removeAttribute('width');
+                }
+                if (height !== null) {
+                    el.setAttribute('height', height);
+                } else {
+                    el.removeAttribute('height');
+                }
+            });
+
+            notifyExported();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to export PDF', error);
+            window.alert('Unable to export PDF. Please try again.');
+            resetExportButton();
+        } finally {
+            if (wasDark) {
+                setTheme(true);
+                await setPreviewCss(true);
+                await renderMermaidDiagrams(currentTheme);
+            }
+        }
     };
 
     // ----- setup -----
