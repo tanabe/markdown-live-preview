@@ -176,9 +176,10 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let configureMermaid = (theme) => {
         mermaid.initialize({
-            startOnLoad: false,
-            securityLevel: 'strict',
-            theme
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme,
+          SuppressedErrors: true,
         });
     };
 
@@ -213,7 +214,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
             try {
                 const renderId = `mermaid-${Date.now()}-${version}-${index}`;
-                const { svg, bindFunctions } = await mermaid.render(renderId, source);
+                const { svg, bindFunctions } = await mermaid.render(renderId, source, element);
                 if (version !== mermaidRenderVersion) {
                     return;
                 }
