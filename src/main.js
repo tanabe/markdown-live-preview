@@ -176,10 +176,10 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
     let configureMermaid = (theme) => {
         mermaid.initialize({
-          startOnLoad: false,
-          securityLevel: 'strict',
-          theme,
-          SuppressedErrors: true,
+            startOnLoad: false,
+            securityLevel: 'strict',
+            theme,
+            suppressErrorRendering: true,
         });
     };
 
