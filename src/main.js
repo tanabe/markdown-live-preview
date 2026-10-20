@@ -178,7 +178,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'strict',
-            theme
+            theme,
+            suppressErrorRendering: true,
         });
     };
 
@@ -213,7 +214,7 @@ This web site is using ${"`"}markedjs/marked${"`"}.
 
             try {
                 const renderId = `mermaid-${Date.now()}-${version}-${index}`;
-                const { svg, bindFunctions } = await mermaid.render(renderId, source);
+                const { svg, bindFunctions } = await mermaid.render(renderId, source, element);
                 if (version !== mermaidRenderVersion) {
                     return;
                 }
