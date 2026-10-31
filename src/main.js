@@ -12,6 +12,7 @@ const init = () => {
     const localStorageKey = 'last_state';
     const localStorageScrollBarKey = 'scroll_bar_settings';
     const localStorageThemeKey = 'theme_settings';
+    const localStorageRtlKey = 'rtl_settings';
     const confirmationMessage = 'Are you sure you want to reset? Your changes will be lost.';
     let mermaidRenderTimer = null;
     let mermaidRenderVersion = 0;
@@ -300,8 +301,8 @@ This web site is using ${"`"}markedjs/marked${"`"}.
     };
 
     // ----- preview CSS loader (switch github-markdown css) -----
-    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=a1a198514565';
-    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=5d3f5d9d207c';
+    const PREVIEW_CSS_LIGHT = 'css/github-markdown-light.css?v=e3dc51b8a261';
+    const PREVIEW_CSS_DARK = 'css/github-markdown-dark_dimmed.css?v=df221bf84b9d';
 
     let setPreviewCss = (useDark) => {
         const link = document.getElementById('gh-markdown-link');
@@ -356,6 +357,27 @@ This web site is using ${"`"}markedjs/marked${"`"}.
                 monaco.editor.setTheme(checked ? 'vs-dark' : 'vs');
             }
             renderMermaidDiagrams();
+        });
+    };
+
+    // ----- preview direction toggle (RTL/LTR) -----
+    let setRtl = (enabled) => {
+        const wrapper = document.querySelector('#preview-wrapper');
+        if (wrapper) {
+            wrapper.classList.toggle('rtl', enabled);
+        }
+    };
+
+    let initRtlToggle = (settings) => {
+        let checkbox = document.querySelector('#rtl-checkbox');
+        if (!checkbox) return;
+        checkbox.checked = settings;
+        setRtl(settings);
+
+        checkbox.addEventListener('change', (event) => {
+            let checked = event.currentTarget.checked;
+            setRtl(checked);
+            saveRtlSettings(checked);
         });
     };
 
@@ -549,6 +571,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         }
     };
 
+    let loadRtlSettings = () => {
+        let last = Storehouse.getItem(localStorageNamespace, localStorageRtlKey);
+        return last;
+    };
+
+    let saveRtlSettings = (settings) => {
+        let expiredAt = new Date(2099, 1, 1);
+        Storehouse.setItem(localStorageNamespace, localStorageRtlKey, settings, expiredAt);
+    };
+
     let setupDivider = () => {
         let lastLeftRatio = 0.5;
         const divider = document.getElementById('split-divider');
@@ -650,6 +682,16 @@ This web site is using ${"`"}markedjs/marked${"`"}.
         themeSettings = false;
     }
     initThemeToggle(themeSettings);
+
+    // initialize preview direction (RTL/LTR)
+    let rtlSettings = loadRtlSettings();
+    // normalize to boolean (Storehouse may return string or boolean)
+    if (rtlSettings === 'true' || rtlSettings === true) {
+        rtlSettings = true;
+    } else {
+        rtlSettings = false;
+    }
+    initRtlToggle(rtlSettings);
 
     setupDivider();
 };
