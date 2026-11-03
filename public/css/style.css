@@ -154,6 +154,10 @@ footer {
   padding: 8px 16px 16px 16px;
 }
 
+#preview-wrapper.rtl {
+  direction: rtl;
+}
+
 .column {
   width: 50%;
   padding: 0;
