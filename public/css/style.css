@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'codicon';
+  src: url('https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/base/browser/ui/codicons/codicon/codicon.ttf') format('truetype');
+  font-display: block;
+}
+
 html, body {
   color: #333;
   overflow-x: hidden;
